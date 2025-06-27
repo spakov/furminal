@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<winex:WindowEx
+  x:Class="Terminal.Settings.SettingsWindow"
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:local="using:Terminal.Settings"
+  xmlns:winex="using:WinUIEx"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:wuxdata="using:Microsoft.UI.Xaml.Data"
+  mc:Ignorable="d"
+  Closed="Window_Closed">
+
+  <winex:WindowEx.SystemBackdrop>
+    <MicaBackdrop />
+  </winex:WindowEx.SystemBackdrop>
+
+  <Grid>
+    <Grid.Resources>
+      <Style
+        x:Key="SettingsItemsStackPanelStyle"
+        TargetType="StackPanel">
+        <Setter Property="Margin" Value="16,8,18,8"/>
+      </Style>
+      <Style
+        x:Key="SettingsItemsStackPanelCaptionStyle"
+        TargetType="StackPanel">
+        <Setter Property="Margin" Value="16,0,18,16"/>
+      </Style>
+      <Style
+        x:Key="SettingsItemsListViewCardStyle"
+        TargetType="ListView">
+        <Setter Property="SelectionMode" Value="None"/>
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}"/>
+        <Setter Property="Padding" Value="0"/>
+      </Style>
+    </Grid.Resources>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition/>
+    </Grid.ColumnDefinitions>
+    
+    <SemanticZoom
+      Grid.Row="0">
+
+      <SemanticZoom.Resources>
+
+        <local:ColorToSolidColorBrushConverter
+          x:Key="ColorToSolidBrushConverter"/>
+
+        <CollectionViewSource
+          x:Name="SettingsItems"
+          IsSourceGrouped="True"
+          ItemsPath="Items"
+          Source="{x:Bind ViewModel.Groups}">
+        </CollectionViewSource>
+
+        <DataTemplate
+          x:Key="ZoomedInGroupHeaderTemplate"
+          x:DataType="local:SettingsGroup">
+          <TextBlock
+            Text="{x:Bind Name}"
+            Style="{StaticResource SubtitleTextBlockStyle}"/>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="ZoomedOutTemplate"
+          x:DataType="wuxdata:ICollectionViewGroup">
+          <TextBlock
+            Text="{x:Bind ((local:SettingsGroup) Group).Name}"
+            Style="{StaticResource SubtitleTextBlockStyle}"/>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="BooleanSettingsItemTemplate"
+          x:DataType="local:BooleanSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <ToggleSwitch
+              Header="{x:Bind Name}"
+              IsOn="{x:Bind BoundValue, Mode=TwoWay}"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="ButtonSettingsItemTemplate"
+          x:DataType="local:ButtonSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <Button
+              Click="{x:Bind Click}"
+              HorizontalAlignment="Left">
+              <TextBlock
+                Text="{x:Bind Name}"/>
+            </Button>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="CaptionSettingsItemTemplate"
+          x:DataType="local:CaptionSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelCaptionStyle}">
+            <TextBlock
+              Text="{x:Bind Caption, Mode=OneWay}"
+              Style="{StaticResource CaptionTextBlockStyle}"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="ColorSettingsItemTemplate"
+          x:DataType="local:ColorSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <TextBlock
+              Text="{x:Bind Name}"
+              HorizontalAlignment="Left"
+              Margin="0,0,0,8"/>
+            <Button>
+              <Border
+                Background="{Binding BoundValue, Converter={StaticResource ColorToSolidBrushConverter}}"
+                Width="16"
+                Height="16"/>
+              <Button.Flyout>
+                <Flyout>
+                  <ColorPicker
+                    ColorSpectrumShape="Ring"
+                    IsMoreButtonVisible="True"
+                    IsColorSliderVisible="True"
+                    IsColorChannelTextInputVisible="True"
+                    IsHexInputVisible="True"
+                    IsAlphaEnabled="True"
+                    IsAlphaSliderVisible="True"
+                    IsAlphaTextInputVisible="True"
+                    Color="{x:Bind BoundValue, Mode=TwoWay}"
+                    HorizontalAlignment="Left"/>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="FontFamilyPickerSettingsItemTemplate"
+          x:DataType="local:FontFamilyPickerSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <TextBlock
+              Text="{x:Bind Name}"
+              HorizontalAlignment="Left"
+              Margin="0,0,0,8"/>
+            <ListView
+              Style="{StaticResource SettingsItemsListViewCardStyle}">
+              <StackPanel
+                Style="{StaticResource SettingsItemsStackPanelStyle}">
+                <ComboBox
+                  Header="Name"
+                  SelectedItem="{x:Bind BoundValue, Mode=TwoWay}"
+                  ItemsSource="{x:Bind Items}"
+                  Width="240"
+                  HorizontalAlignment="Left"/>
+              </StackPanel>
+              <StackPanel
+                Style="{StaticResource SettingsItemsStackPanelStyle}">
+                <ToggleSwitch
+                  Header="{x:Bind MonospaceOnlyName}"
+                  IsOn="{x:Bind MonospaceOnly, Mode=TwoWay}"/>
+              </StackPanel>
+            </ListView>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="GroupSettingsItemTemplate"
+          x:DataType="local:GroupSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <TextBlock
+              Text="{x:Bind Name}"
+              HorizontalAlignment="Left"
+              Margin="0,0,0,8"/>
+            <ListView
+              ItemsSource="{x:Bind Items}"
+              ItemTemplateSelector="{StaticResource SettingsItemTemplateSelector}"
+              Style="{StaticResource SettingsItemsListViewCardStyle}"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="IntegerSettingsItemTemplate"
+          x:DataType="local:IntegerSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <NumberBox
+              Header="{x:Bind Name}"
+              Value="{x:Bind BoundValue, Mode=TwoWay}"
+              SpinButtonPlacementMode="Inline"
+              SmallChange="{x:Bind SmallChange}"
+              LargeChange="{x:Bind LargeChange}"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="NumberSettingsItemTemplate"
+          x:DataType="local:NumberSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <NumberBox
+              Header="{x:Bind Name}"
+              Value="{x:Bind BoundValue, Mode=TwoWay}"
+              SpinButtonPlacementMode="Inline"
+              SmallChange="{x:Bind SmallChange}"
+              LargeChange="{x:Bind LargeChange}"
+              NumberFormatter="{x:Bind Formatter}"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="RadioCollectionSettingsItemTemplate"
+          x:DataType="local:RadioCollectionSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <RadioButtons
+              Header="{x:Bind Name}"
+              ItemsSource="{x:Bind Items}"
+              ItemTemplate="{StaticResource RadioSettingsItemTemplate}"
+              SelectedIndex="{x:Bind BoundValue, Mode=TwoWay}"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="RadioSettingsItemTemplate"
+          x:DataType="local:RadioSettingsItem">
+          <RadioButton
+            Content="{x:Bind Name}"/>
+        </DataTemplate>
+
+        <DataTemplate
+          x:Key="TextSettingsItemTemplate"
+          x:DataType="local:TextSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelStyle}">
+            <TextBox
+              Header="{x:Bind Name}"
+              Text="{x:Bind BoundValue, Mode=TwoWay}"
+              Width="240"
+              HorizontalAlignment="Left"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <local:SettingsItemTemplateSelector
+          x:Key="SettingsItemTemplateSelector"
+          BooleanSettingsItemTemplate="{StaticResource BooleanSettingsItemTemplate}"
+          ButtonSettingsItemTemplate="{StaticResource ButtonSettingsItemTemplate}"
+          CaptionSettingsItemTemplate="{StaticResource CaptionSettingsItemTemplate}"
+          ColorSettingsItemTemplate="{StaticResource ColorSettingsItemTemplate}"
+          FontFamilyPickerItemTemplate="{StaticResource FontFamilyPickerSettingsItemTemplate}"
+          GroupSettingsItemTemplate="{StaticResource GroupSettingsItemTemplate}"
+          IntegerSettingsItemTemplate="{StaticResource IntegerSettingsItemTemplate}"
+          NumberSettingsItemTemplate="{StaticResource NumberSettingsItemTemplate}"
+          RadioCollectionSettingsItemTemplate="{StaticResource RadioCollectionSettingsItemTemplate}"
+          RadioSettingsItemTemplate="{StaticResource RadioSettingsItemTemplate}"
+          TextSettingsItemTemplate="{StaticResource TextSettingsItemTemplate}"/>
+
+      </SemanticZoom.Resources>
+
+      <SemanticZoom.ZoomedInView>
+        <ListView
+          ItemsSource="{x:Bind SettingsItems.View}"
+          SelectionMode="None"
+          ItemTemplateSelector="{StaticResource SettingsItemTemplateSelector}"
+          ScrollViewer.IsHorizontalScrollChainingEnabled="False">
+          <ListView.GroupStyle>
+            <GroupStyle
+              HeaderTemplate="{StaticResource ZoomedInGroupHeaderTemplate}"/>
+          </ListView.GroupStyle>
+        </ListView>
+      </SemanticZoom.ZoomedInView>
+
+      <SemanticZoom.ZoomedOutView>
+        <ListView
+          ItemsSource="{x:Bind SettingsItems.View.CollectionGroups}"
+          SelectionMode="None"
+          ItemTemplate="{StaticResource ZoomedOutTemplate}"/>
+      </SemanticZoom.ZoomedOutView>
+
+    </SemanticZoom>
+
+    <Grid
+      x:Name="SaveAsDefaultsContainer"
+      Visibility="Collapsed"
+      Padding="24"
+      BorderBrush="{StaticResource DividerStrokeColorDefaultBrush}"
+      BorderThickness="0,1,0,0"
+      ColumnSpacing="8"
+      Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+      <Button
+        x:Name="SaveAsDefaultsButton"
+        HorizontalAlignment="Stretch"
+        Style="{StaticResource AccentButtonStyle}"
+        Click="SaveAsDefaultsButton_Click"
+        Grid.Column="0">
+        <StackPanel
+          Orientation="Horizontal"
+          Spacing="8">
+          <SymbolIcon Symbol="Save"/>
+          <TextBlock>Save as defaults</TextBlock>
+        </StackPanel>
+      </Button>
+      <Button
+        x:Name="CloseButton"
+        HorizontalAlignment="Stretch"
+        Click="CloseButton_Click"
+        Grid.Column="1">
+        <TextBlock>Close</TextBlock>
+      </Button>
+    </Grid>
+  </Grid>
+</winex:WindowEx>

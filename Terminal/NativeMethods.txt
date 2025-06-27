@@ -1,0 +1,11 @@
+EnumDisplaySettings
+GetMonitorInfo
+GetWindowRect
+IsWindowVisible
+MonitorFromWindow
+SetWindowLong
+SetWindowPos
+DEVMODEW
+HWND_TOPMOST
+MONITORINFOEXW
+WINDOW_EX_STYLE

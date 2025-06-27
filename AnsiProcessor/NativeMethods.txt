@@ -1,0 +1,4 @@
+GetKeyboardLayout
+MapVirtualKey
+ToUnicodeEx
+VIRTUAL_KEY

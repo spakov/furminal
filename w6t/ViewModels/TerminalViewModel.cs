@@ -1,0 +1,143 @@
+﻿using AnsiProcessor.AnsiColors;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ConPTY;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
+using System;
+using System.ComponentModel;
+using System.IO;
+using System.Threading.Tasks;
+
+namespace w6t.ViewModels {
+  internal partial class TerminalViewModel : ObservableObject {
+    private readonly DispatcherQueue dispatcherQueue;
+
+    private readonly Pseudoconsole pseudoconsole;
+
+    private Palette _palette;
+
+    private FileStream? _consoleOutput;
+    private FileStream? _consoleInput;
+    private int _rows;
+    private int _columns;
+
+    /// <summary>
+    /// Callback for handling the case in which the pseudoconsole dies.
+    /// </summary>
+    public delegate void OnPseudoconsoleDied(Exception e);
+
+    /// <summary>
+    /// Invoked if the pseudoconsole dies.
+    /// </summary>
+    public event OnPseudoconsoleDied? PseudoconsoleDied;
+
+    /// <summary>
+    /// The <see cref="Palette"/> used for ANSI colors.
+    /// </summary>
+    public Palette AnsiColors {
+      get => _palette;
+      set => SetProperty(ref _palette, value);
+    }
+
+    /// <summary>
+    /// The console's output <see cref="FileStream"/>.
+    /// </summary>
+    public FileStream? ConsoleOutput {
+      get => _consoleOutput;
+      set => SetProperty(ref _consoleOutput, value);
+    }
+
+    /// <summary>
+    /// The console's input <see cref="FileStream"/>.
+    /// </summary>
+    public FileStream? ConsoleInput {
+      get => _consoleInput;
+      set => SetProperty(ref _consoleInput, value);
+    }
+
+    /// <summary>
+    /// The number of console rows.
+    /// </summary>
+    public int Rows {
+      get => _rows;
+
+      set {
+        if (_rows != value) {
+          pseudoconsole.Rows = (uint) value;
+        }
+
+        SetProperty(ref _rows, value);
+      }
+    }
+
+    /// <summary>
+    /// The number of console columns.
+    /// </summary>
+    public int Columns {
+      get => _columns;
+
+      set {
+        if (_columns != value) {
+          pseudoconsole.Columns = (uint) value;
+        }
+
+        SetProperty(ref _columns, value);
+      }
+    }
+
+    /// <summary>
+    /// Initializes a <see cref="TerminalViewModel"/>.
+    /// </summary>
+    /// <param name="startDirectory">The directory in which to start the
+    /// shell.</param>
+    /// <param name="command">The command to execute in the
+    /// pseudoconsole.</param>
+    internal TerminalViewModel(string? startDirectory, string command) {
+      dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
+      _palette = new();
+
+      _rows = 24;
+      _columns = 80;
+
+      if (startDirectory is not null) {
+        string expandedStartDirectory = Environment.ExpandEnvironmentVariables(startDirectory);
+
+        if (Directory.Exists(expandedStartDirectory) && Directory.GetCurrentDirectory() == Environment.SystemDirectory) {
+          Directory.SetCurrentDirectory(expandedStartDirectory);
+        }
+      }
+
+      pseudoconsole = new(command, (uint) _rows, (uint) _columns);
+      pseudoconsole.Ready += Pseudoconsole_Ready;
+      pseudoconsole.Disposing += Pseudoconsole_Disposing;
+
+      StartPseudoconsole();
+    }
+
+    /// <summary>
+    /// Starts the pseudoconsole, checking for error conditions.
+    /// </summary>
+    /// <exception cref="ArgumentException"></exception>
+    private async void StartPseudoconsole() {
+      try {
+        await Task.Run(pseudoconsole.Start);
+      } catch (Win32Exception e) {
+         PseudoconsoleDied?.Invoke(new ArgumentException($"Failed to start pseudoconsole with command \"{pseudoconsole.Command}\".", e));
+      }
+    }
+
+    /// <summary>
+    /// Invoked when the pseudoconsole is ready.
+    /// </summary>
+    private void Pseudoconsole_Ready() {
+      ConsoleOutput = pseudoconsole.ConsoleOutStream;
+      ConsoleInput = pseudoconsole.ConsoleInStream;
+    }
+
+    /// <summary>
+    /// Invoked when the pseudoconsole is being disposed.
+    /// </summary>
+    private void Pseudoconsole_Disposing() => dispatcherQueue.TryEnqueue(Application.Current.Exit);
+  }
+}

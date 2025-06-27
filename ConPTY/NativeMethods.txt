@@ -1,0 +1,16 @@
+CloseHandle
+ClosePseudoConsole
+CreatePipe
+CreateProcess
+CreatePseudoConsole
+DeleteProcThreadAttributeList
+InitializeProcThreadAttributeList
+ResizePseudoConsole
+SetConsoleCtrlHandler
+UpdateProcThreadAttribute
+CTRL_C_EVENT
+PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE
+PROCESS_INFORMATION
+SECURITY_ATTRIBUTES
+STARTUPINFOW
+STARTUPINFOEXW
