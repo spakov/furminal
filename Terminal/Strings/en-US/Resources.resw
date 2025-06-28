@@ -129,6 +129,9 @@
   <data name="BehaviorName" xml:space="preserve">
     <value>Behavior</value>
   </data>
+  <data name="ClearTypeTextAntialiasingName" xml:space="preserve">
+    <value>ClearType</value>
+  </data>
   <data name="ColumnsName" xml:space="preserve">
     <value>Columns</value>
   </data>
@@ -189,6 +192,9 @@
   <data name="FontSizeName" xml:space="preserve">
     <value>Font size</value>
   </data>
+  <data name="GrayscaleTextAntialiasingName" xml:space="preserve">
+    <value>Grayscale</value>
+  </data>
   <data name="LinesPerScrollbackName" xml:space="preserve">
     <value>Lines per large scroll</value>
   </data>
@@ -200,6 +206,9 @@
   </data>
   <data name="MonospaceOnlyName" xml:space="preserve">
     <value>Show fixed-width fonts only</value>
+  </data>
+  <data name="NoneTextAntialiasingName" xml:space="preserve">
+    <value>None</value>
   </data>
   <data name="PasteOnMiddleClickName" xml:space="preserve">
     <value>Paste on middle mouse button</value>
@@ -221,6 +230,15 @@
   </data>
   <data name="TabWidthName" xml:space="preserve">
     <value>Tab width</value>
+  </data>
+  <data name="TextAntialiasingExplanation1" xml:space="preserve">
+    <value>ClearType is best used only when "Make default background color invisible" is disabled.</value>
+  </data>
+  <data name="TextAntialiasingExplanation2" xml:space="preserve">
+    <value>Unicode box-drawing characters are always drawn without antialiasing.</value>
+  </data>
+  <data name="TextAntialiasingName" xml:space="preserve">
+    <value>Text antialiasing</value>
   </data>
   <data name="UseBackgroundColorEraseName" xml:space="preserve">
     <value>Use background color erase</value>

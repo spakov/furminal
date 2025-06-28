@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Terminal {
   /// <summary>
@@ -34,12 +35,20 @@ namespace Terminal {
       Bottom = (float) bottom;
     }
 
-    public static bool operator ==(RectF a, RectF b) => a.Top == b.Top && a.Left == b.Left && a.Right == b.Right && a.Bottom == b.Bottom;
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
+    public static bool operator ==(RectF a, RectF b) {
+      if (a.Top != b.Top) return false;
+      if (a.Left != b.Left) return false;
+      if (a.Right != b.Right) return false;
+      if (a.Bottom != b.Bottom) return false;
 
-    public static bool operator !=(RectF a, RectF b) => a.Top != b.Top || a.Left != b.Left || a.Right != b.Right || a.Bottom != b.Bottom;
+      return true;
+    }
 
-    public override readonly bool Equals([NotNullWhen(true)] object? obj) => base.Equals(obj);
+    public static bool operator !=(RectF a, RectF b) => !(a == b);
 
-    public override readonly int GetHashCode() => base.GetHashCode();
+    public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is RectF other && this == other;
+
+    public override readonly int GetHashCode() => HashCode.Combine(Top, Left, Right, Bottom);
   }
 }

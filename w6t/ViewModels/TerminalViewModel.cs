@@ -58,15 +58,18 @@ namespace w6t.ViewModels {
     /// <summary>
     /// The number of console rows.
     /// </summary>
+    /// <remarks>It's important to make sure we invoke <see
+    /// cref="ObservableObject.SetProperty"/> before we tell the pseudoconsole
+    /// about the change to ensure scrollback is handled gracefully!</remarks>
     public int Rows {
       get => _rows;
 
       set {
+        SetProperty(ref _rows, value);
+
         if (_rows != value) {
           pseudoconsole.Rows = (uint) value;
         }
-
-        SetProperty(ref _rows, value);
       }
     }
 
@@ -77,11 +80,11 @@ namespace w6t.ViewModels {
       get => _columns;
 
       set {
+        SetProperty(ref _columns, value);
+
         if (_columns != value) {
           pseudoconsole.Columns = (uint) value;
         }
-
-        SetProperty(ref _columns, value);
       }
     }
 

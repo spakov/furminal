@@ -10,7 +10,6 @@ using Microsoft.UI.Input;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Terminal {
   /// <summary>
@@ -39,6 +38,7 @@ namespace Terminal {
 
     private bool _useBackgroundColorErase;
     private bool _backgroundIsInvisible;
+    private TextAntialiasingStyles _textAntialiasing;
     private bool _useVisualBell;
     private CursorStyles _cursorStyle;
     private bool _cursorBlink;
@@ -163,6 +163,16 @@ namespace Terminal {
       }
     }
 
+    /// <inheritdoc cref="TerminalControl.TextAntialiasing"/>
+    internal TextAntialiasingStyles TextAntialiasing {
+      get => _textAntialiasing;
+
+      set {
+        _textAntialiasing = value;
+        terminalRenderer.OffscreenBufferDirty = true;
+      }
+    }
+
     /// <inheritdoc cref="TerminalControl.UseBackgroundColorErase"/>
     internal bool UseBackgroundColorErase {
       get => _useBackgroundColorErase;
@@ -172,7 +182,11 @@ namespace Terminal {
     /// <inheritdoc cref="TerminalControl.BackgroundIsInvisible"/>
     internal bool BackgroundIsInvisible {
       get => _backgroundIsInvisible;
-      set => _backgroundIsInvisible = value;
+
+      set {
+        _backgroundIsInvisible = value;
+        terminalRenderer.OffscreenBufferDirty = true;
+      }
     }
 
     /// <inheritdoc cref="TerminalControl.UseVisualBell"/>
@@ -437,6 +451,7 @@ namespace Terminal {
       _fontFamily = terminalControl.FontFamily;
       _fontSize = terminalControl.FontSize;
 
+      _textAntialiasing = terminalControl.TextAntialiasing;
       _useBackgroundColorErase = terminalControl.UseBackgroundColorErase;
       _backgroundIsInvisible = terminalControl.BackgroundIsInvisible;
       _useVisualBell = terminalControl.UseVisualBell;

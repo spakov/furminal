@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Text;
 
 namespace AnsiProcessor.Output {
   /// <summary>
@@ -85,26 +87,27 @@ namespace AnsiProcessor.Output {
       return true;
     }
 
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
-    public static bool operator !=(GraphicRendition a, GraphicRendition b) {
-      if (a.Bold != b.Bold) return true;
-      if (a.Faint != b.Faint) return true;
-      if (a.Italic != b.Italic) return true;
-      if (a.Underline != b.Underline) return true;
-      if (a.Blink != b.Blink) return true;
-      if (a.Inverse != b.Inverse) return true;
-      if (a.CrossedOut != b.CrossedOut) return true;
-      if (a.DoubleUnderline != b.DoubleUnderline) return true;
-      if (a.ForegroundColor != b.ForegroundColor) return true;
-      if (a.BackgroundColor != b.BackgroundColor) return true;
-      if (a.UnderlineColor != b.UnderlineColor) return true;
-      if (a.UnderlineStyle != b.UnderlineStyle) return true;
+    public static bool operator !=(GraphicRendition a, GraphicRendition b) => !(a == b);
 
-      return false;
+    public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is GraphicRendition other && this == other;
+
+    public override readonly int GetHashCode() {
+      return HashCode.Combine(
+        HashCode.Combine(
+          Bold,
+          Faint,
+          Italic,
+          Underline,
+          Blink,
+          Inverse,
+          CrossedOut,
+          DoubleUnderline
+        ),
+        ForegroundColor,
+        BackgroundColor,
+        UnderlineColor,
+        UnderlineStyle
+      );
     }
-
-    public override readonly bool Equals([NotNullWhen(true)] object? obj) => base.Equals(obj);
-
-    public override readonly int GetHashCode() => base.GetHashCode();
   }
 }

@@ -100,6 +100,33 @@ namespace Terminal.Settings {
         LargeChange = 1.0
       };
 
+      RadioSettingsItem noneTextAntialiasing = new() {
+        Key = "TextAntialiasing",
+        Name = terminalControl.ResourceLoader.GetString("NoneTextAntialiasingName")
+      };
+
+      RadioSettingsItem grayscaleTextAntialiasing = new() {
+        Key = "GrayscaleTextAntialiasing",
+        Name = terminalControl.ResourceLoader.GetString("GrayscaleTextAntialiasingName")
+      };
+
+      RadioSettingsItem clearTypeTextAntialiasing = new() {
+        Key = "ClearTypeTextAntialiasing",
+        Name = terminalControl.ResourceLoader.GetString("ClearTypeTextAntialiasingName")
+      };
+
+      RadioCollectionSettingsItem textAntialiasing = new() {
+        Key = nameof(terminalControl.TextAntialiasing),
+        Name = terminalControl.ResourceLoader.GetString("TextAntialiasingName"),
+        Items = [
+          noneTextAntialiasing,
+          grayscaleTextAntialiasing,
+          clearTypeTextAntialiasing
+        ],
+        Getter = () => (int) terminalControl.TextAntialiasing,
+        Setter = (textAntialiasing) => terminalControl.TextAntialiasing = (TextAntialiasingStyles) textAntialiasing
+      };
+
       BooleanSettingsItem useBackgroundColorErase = new() {
         Key = nameof(terminalControl.UseBackgroundColorErase),
         Name = terminalControl.ResourceLoader.GetString("UseBackgroundColorEraseName"),
@@ -323,6 +350,9 @@ namespace Terminal.Settings {
           Items = [
             fontFamily,
             fontSize,
+            textAntialiasing,
+            new CaptionSettingsItem() { Key = "TextAntialiasingCaption1", Getter = () => terminalControl.ResourceLoader.GetString("TextAntialiasingExplanation1") },
+            new CaptionSettingsItem() { Key = "TextAntialiasingCaption2", Getter = () => terminalControl.ResourceLoader.GetString("TextAntialiasingExplanation2") },
             useBackgroundColorErase,
             backgroundIsInvisible
           ]
@@ -435,6 +465,14 @@ namespace Terminal.Settings {
         terminalControl.RegisterPropertyChangedCallback(
           TerminalControl.FontSizeProperty,
           (_, _) => fontSize.BoundValue = terminalControl.FontSize
+        )
+      );
+
+      callbackTokens.Add(
+        TerminalControl.TextAntialiasingProperty,
+        terminalControl.RegisterPropertyChangedCallback(
+          TerminalControl.TextAntialiasingProperty,
+          (_, _) => textAntialiasing.BoundValue = (int) terminalControl.TextAntialiasing
         )
       );
 

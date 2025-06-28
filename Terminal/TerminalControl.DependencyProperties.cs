@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.IO;
 using Terminal.Helpers;
 using Windows.UI;
@@ -475,6 +476,40 @@ namespace Terminal {
       TerminalControl terminalControl = (TerminalControl) d;
 
       terminalControl.terminalEngine.FontSize = terminalControl.FontSize;
+      terminalControl.InvalidateMeasure();
+    }
+
+    /// <summary>
+    /// <inheritdoc cref="TextAntialiasingProperty"/>
+    /// </summary>
+    public TextAntialiasingStyles TextAntialiasing {
+      get => (TextAntialiasingStyles) GetValue(TextAntialiasingProperty);
+      set => SetValue(TextAntialiasingProperty, value);
+    }
+
+    /// <summary>
+    /// The terminal text antialiasing style.
+    /// </summary>
+    public static readonly DependencyProperty TextAntialiasingProperty = DependencyProperty.Register(
+      nameof(TextAntialiasing),
+      typeof(TextAntialiasingStyles),
+      typeof(TerminalControl),
+      new PropertyMetadata(TextAntialiasingStyles.Grayscale, OnTextAntialiasingChanged)
+    );
+
+    /// <summary>
+    /// Invoked when the text antialiasing changes.
+    /// </summary>
+    /// <param name="d"><inheritdoc
+    /// cref="DependencyPropertyChangedEventHandler"
+    /// path="/param[@name='sender']"/></param>
+    /// <param name="e"><inheritdoc
+    /// cref="DependencyPropertyChangedEventHandler"
+    /// path="/param[@name='e']"/></param>
+    private static void OnTextAntialiasingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+      TerminalControl terminalControl = (TerminalControl) d;
+
+      terminalControl.TerminalEngine.TextAntialiasing = terminalControl.TextAntialiasing;
       terminalControl.InvalidateMeasure();
     }
 

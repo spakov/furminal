@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Text;
-using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -69,16 +69,19 @@ namespace Terminal {
 
     private readonly CanvasTextFormat[] textFormats = new CanvasTextFormat[0x07];
 
-    private readonly Dictionary<(int, bool, bool, bool), CanvasTextLayout> canvasTextLayoutCache = [];
-    private readonly Dictionary<(int, bool, bool, bool), RectF> overfillCache = [];
+    private readonly Dictionary<CellFingerprint, CanvasTextLayout> canvasTextLayoutCache;
+    private readonly Dictionary<CellFingerprint, RectF> overfillCache;
 
-    private SizeF _cellSize;
-    private bool _cellSizeDirty;
+    private SizeF cellSize;
+    private bool cellSizeDirty;
 
     private CanvasRenderTarget? offscreenBuffer;
-    private CanvasRenderTarget? lastFrameOffscreenBuffer;
-    private List<Cell[]>? lastFrameScreenBuffer;
-    private bool lastFrameBackgroundIsInvisible;
+    private bool offscreenBufferDirty;
+    private Caret lastFrameBounds;
+    private Cell[,] lastFrameCells;
+    private readonly Queue<DrawableCell> drawableCells;
+    private readonly Queue<DrawableCell> drawableCellForegrounds;
+    private readonly HashSet<DrawableCell> seenDrawableCells;
 
     private bool _cursorDisplayed;
     private bool _cursorVisible;
@@ -103,25 +106,43 @@ namespace Terminal {
     internal CanvasTextFormat[] TextFormats => textFormats;
 
     /// <summary>
+    /// The <see cref="CanvasTextLayout"/> cache.
+    /// </summary>
+    internal Dictionary<CellFingerprint, CanvasTextLayout> CanvasTextLayoutCache => canvasTextLayoutCache;
+
+    /// <summary>
+    /// The overfill cache.
+    /// </summary>
+    internal Dictionary<CellFingerprint, RectF> OverfillCache => overfillCache;
+
+    /// <summary>
     /// The terminal cell size.
     /// </summary>
     internal SizeF CellSize {
-      get => _cellSize;
-      set => _cellSize = value;
+      get => cellSize;
+      set => cellSize = value;
     }
 
     /// <summary>
     /// Whether the terminal cell size needs to be recalculated.
     /// </summary>
     internal bool CellSizeDirty {
-      get => _cellSizeDirty;
-      set => _cellSizeDirty = value;
+      get => cellSizeDirty;
+      set => cellSizeDirty = value;
     }
 
     /// <summary>
     /// The offscreen buffer.
     /// </summary>
     internal CanvasRenderTarget? OffscreenBuffer => offscreenBuffer;
+
+    /// <summary>
+    /// Whether the offscreen buffer needs to be redrawn.
+    /// </summary>
+    internal bool OffscreenBufferDirty {
+      get => offscreenBufferDirty;
+      set => offscreenBufferDirty = value;
+    }
 
     /// <summary>
     /// Whether the cursor is to be displayed on the next Draw.
@@ -150,12 +171,15 @@ namespace Terminal {
     /// </summary>
     private double RefreshRate {
       get => _refreshRate;
+
       set {
-        _refreshRate = value;
+        if (_refreshRate != value) {
+          _refreshRate = value;
 
 #if DEBUG
-        logger.LogInformation("Refresh rate is {refreshRate:F} Hz", _refreshRate);
+          logger.LogInformation("Refresh rate is {refreshRate:F} Hz", _refreshRate);
 #endif
+        }
       }
     }
 
@@ -177,6 +201,15 @@ namespace Terminal {
       this.terminalEngine = terminalEngine;
 
       InitializeTextFormats();
+
+      canvasTextLayoutCache = [];
+      overfillCache = [];
+
+      lastFrameBounds = new(-1, -1);
+      lastFrameCells = new Cell[0, 0];
+      drawableCells = [];
+      drawableCellForegrounds = [];
+      seenDrawableCells = [];
 
       // This will be updated when the TerminalControl is added to the XAML
       // tree
@@ -225,6 +258,7 @@ namespace Terminal {
     internal void ResizeOffscreenBuffer(bool force = false) {
       if (offscreenBuffer is not null || force) {
         offscreenBuffer = new(terminalEngine.Canvas, terminalEngine.NominalSizeInPixels.ToSize());
+        offscreenBufferDirty = true;
       }
     }
 
@@ -309,8 +343,8 @@ namespace Terminal {
       );
 
       CellSize = new(
-        canvasTextLayout.DrawBounds.Width,
-        canvasTextLayout.DrawBounds.Height
+        MathF.Round((float) canvasTextLayout.DrawBounds.Width),
+        MathF.Round((float) canvasTextLayout.DrawBounds.Height)
       );
 
 #if DEBUG
@@ -330,637 +364,330 @@ namespace Terminal {
 
       int rows = terminalEngine.Rows;
       int columns = terminalEngine.Columns;
+      TextAntialiasingStyles textAntialiasing = terminalEngine.TextAntialiasing;
       System.Drawing.Color defaultBackgroundColor = terminalEngine.Palette.DefaultBackgroundColor;
       bool backgroundIsInvisible = terminalEngine.BackgroundIsInvisible;
 
+      Cell[,] thisFrameCells = new Cell[rows, columns];
+      drawableCells.Clear();
+
       using (CanvasDrawingSession drawingSession = offscreenBuffer.CreateDrawingSession()) {
-        RectF overfill;
-
         for (int row = 0; row < rows; row++) {
-          overfill = new();
-
           for (int column = 0; column < columns; column++) {
-            // These rules were *atrocious* to work out, but seem to handle
-            // cell-tracked change draw updates nicely
+            Caret caret = new(row, column);
+
+            Vector2 point = new(column * CellSize.Width, row * CellSize.Height);
+
+            Cell cell = terminalEngine.VideoTerminal[row][column];
+
             if (
-              // 1. Always redraw if our offscreen buffer was recreated
-              lastFrameOffscreenBuffer != offscreenBuffer
-
-              // 2. Always redraw on the first frame
-              || lastFrameScreenBuffer is null
-
-              // 3. Always redraw if BackgroundIsInvisible changed
-              || lastFrameBackgroundIsInvisible != backgroundIsInvisible
-
-              // 4. Always redraw if our screen buffer grew
-              || row > lastFrameScreenBuffer.Count - 1
-              || column > lastFrameScreenBuffer[row].Length - 1
-
-              // 5. Always redraw if this cell changed
-              || terminalEngine.VideoTerminal[row][column] != lastFrameScreenBuffer[row][column]
-
-              // 6. Always redraw if the cell above this one had overfill on
-              //    the last frame
-              /*|| (
-                row > 0
-                && lastFrameScreenBuffer[row - 1][column].ContainsOverfillFromBelow
-              )
-
-              // 7. Always redraw if the cell before this one had overfill on
-              //    the last frame
-              || (
-                column > 0
-                && lastFrameScreenBuffer[row][column - 1].ContainsOverfillFromAfter
-              )
-
-              // 8. Always redraw if the cell after this one had overfill on
-              //    the last frame
-              || (
-                column < columns - 1
-                && lastFrameScreenBuffer[row][column + 1].ContainsOverfillFromBefore
-              )
-
-              // 9. Always redraw if the cell below this one had overfill on
-              //    the last frame
-              || (
-                row < rows - 1
-                && lastFrameScreenBuffer[row + 1][column].ContainsOverfillFromAbove
-              )
-
-              // 10. Always redraw if this cell is not null and contained
-              //     overfill on the last frame
-              || (
-                terminalEngine.VideoTerminal[row][column].Rune is not null
-                && (
-                  lastFrameScreenBuffer[row][column].ContainsOverfillFromBelow
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromAfter
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromBefore
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromAbove
-                )
-              )
-
-              // 11. Always redraw if this cell is null, contained overfill on
-              //     the last draw, and does not contain overfill now
-              || (
-                (
-                  terminalEngine.VideoTerminal[row][column].Rune is null
-                  || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column].Rune!)
-                )
-                && (
-                  lastFrameScreenBuffer[row][column].ContainsOverfillFromBelow
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromAfter
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromBefore
-                  || lastFrameScreenBuffer[row][column].ContainsOverfillFromAbove
-                )
-                && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromBelow
-                && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromAfter
-                && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromBefore
-                && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromAbove
-              )*/
+              offscreenBufferDirty
+              || rows != lastFrameBounds.Row
+              || columns != lastFrameBounds.Column
             ) {
-              if (terminalEngine.VideoTerminal[row][column].Rune is not null) {
-                float underfill = overfill.Right;
-
-                overfill = DrawCell(
+              drawableCells.Enqueue(
+                new(
+                  this,
                   drawingSession,
-                  defaultBackgroundColor,
-                  backgroundIsInvisible,
-                  terminalEngine.VideoTerminal[row][column],
-                  row,
-                  column,
-                  overfill.Right
-                );
-
-                // Special case 1: if we just drew a cell and had overfill to
-                // the top and the cell above it is null, we must draw the
-                // null cell above this one, then redraw this cell
-                // ISSUE: will overwrite existing overfill
-                /*if (
-                  overfill.Top > 0.0f
-                  && row > 0
-                  && (
-                    terminalEngine.VideoTerminal[row - 1][column].Rune is null
-                    || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column].Rune!)
-                  )
-                ) {
-                  DrawNullCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    row - 1,
-                    column,
-                    terminalEngine.VideoTerminal[row - 1][column].GraphicRendition
-                  );
-
-                  overfill = DrawCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    terminalEngine.VideoTerminal[row][column],
-                    row,
-                    column,
-                    underfill
-                  );
-                }
-
-                // Special case 2: if we just drew a cell and had overfill to
-                // the left and the cell before it is null, we must draw the
-                // null cell before this one, then redraw this cell
-                // ISSUE: will overwrite existing overfill
-                if (
-                  overfill.Left > 0.0f
-                  && column > 0
-                  && (
-                    terminalEngine.VideoTerminal[row][column - 1].Rune is null
-                    || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column - 1].Rune!)
-                  )
-                ) {
-                  DrawNullCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    row,
-                    column - 1,
-                    terminalEngine.VideoTerminal[row][column - 1].GraphicRendition
-                  );
-
-                  overfill = DrawCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    terminalEngine.VideoTerminal[row][column],
-                    row,
-                    column,
-                    underfill
-                  );
-                }
-
-                // Special case 3: if we just drew a cell and had overfill to
-                // the right and the cell after it is null, we must draw the
-                // null cell after this one, then redraw this cell
-                if (
-                  overfill.Right > 0.0f
-                  && column < columns - 1
-                  && (
-                    terminalEngine.VideoTerminal[row][column + 1].Rune is null
-                    || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column + 1].Rune!)
-                  )
-                ) {
-                  DrawNullCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    row,
-                    column + 1,
-                    terminalEngine.VideoTerminal[row][column + 1].GraphicRendition
-                  );
-
-                  overfill = DrawCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    terminalEngine.VideoTerminal[row][column],
-                    row,
-                    column,
-                    underfill
-                  );
-                }
-
-                // Special case 4: if we just drew a cell and had overfill to
-                // the bottom and the cell below it is null, we must draw the
-                // null cell below this one, then redraw this cell
-                if (
-                  overfill.Bottom > 0.0f
-                  && row < rows - 1
-                  && (
-                    terminalEngine.VideoTerminal[row + 1][column].Rune is null
-                    || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column].Rune!)
-                  )
-                ) {
-                  DrawNullCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    row + 1,
-                    column,
-                    terminalEngine.VideoTerminal[row + 1][column].GraphicRendition
-                  );
-
-                  overfill = DrawCell(
-                    drawingSession,
-                    defaultBackgroundColor,
-                    backgroundIsInvisible,
-                    terminalEngine.VideoTerminal[row][column],
-                    row,
-                    column,
-                    underfill
-                  );
-                }*/
-              } else {
-                DrawNullCell(
-                  drawingSession,
-                  defaultBackgroundColor,
-                  backgroundIsInvisible,
-                  row,
-                  column,
-                  terminalEngine.VideoTerminal[row][column].GraphicRendition,
-                  overfill.Right
-                );
-
-                overfill = new();
-              }
-
-              if (row > 0) {
-                terminalEngine.VideoTerminal[row - 1][column].ContainsOverfillFromBelow = overfill.Top > 0.0f;
-              }
-
-              if (column > 0) {
-                terminalEngine.VideoTerminal[row][column - 1].ContainsOverfillFromAfter = overfill.Left > 0.0f;
-              }
-
-              if (column < columns - 1) {
-                terminalEngine.VideoTerminal[row][column + 1].ContainsOverfillFromBefore = overfill.Right > 0.0f;
-              }
-
-              if (row < rows - 1) {
-                terminalEngine.VideoTerminal[row + 1][column].ContainsOverfillFromAbove = overfill.Bottom > 0.0f;
-              }
-            }
-          }
-        }
-
-        // Clean up any left-over artifacts
-        /*for (int row = 0; row < rows; row++) {
-          for (int column = 0; column < columns; column++) {
-            if (
-              // Special case 5: if this cell is null and does not contain
-              // overfill now, redraw it
-              (
-                terminalEngine.VideoTerminal[row][column].Rune is null
-                || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column].Rune!)
-              )
-              && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromBelow
-              && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromAfter
-              && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromBefore
-              && !terminalEngine.VideoTerminal[row][column].ContainsOverfillFromAbove
-            ) {
-              DrawNullCell(
-                drawingSession,
-                defaultBackgroundColor,
-                backgroundIsInvisible,
-                row,
-                column,
-                terminalEngine.VideoTerminal[row][column].GraphicRendition
+                  caret,
+                  point,
+                  terminalEngine.VideoTerminal[row][column]
+                )
               );
+            } else {
+              // Check cells that differ from the previous frame
+              if (caret.Row < lastFrameBounds.Row && caret.Column < lastFrameBounds.Column) {
+                if (cell != lastFrameCells[row, column]) {
+                  DrawableCell drawableCell;
+                  DrawableCell? upstairsNeighbor = null;
+                  DrawableCell? leftNeighbor = null;
+                  DrawableCell? rightNeighbor = null;
+                  DrawableCell? downstairsNeighbor = null;
+
+                  drawableCell = new(
+                    this,
+                    drawingSession,
+                    caret,
+                    point,
+                    terminalEngine.VideoTerminal[row][column]
+                  );
+
+                  if (row > 0) {
+                    upstairsNeighbor = new(
+                      this,
+                      drawingSession,
+                      new(row - 1, column),
+                      new(column * CellSize.Width, (row - 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row - 1][column]
+                    );
+                  }
+
+                  if (column > 0) {
+                    leftNeighbor = new(
+                      this,
+                      drawingSession,
+                      new(row, column - 1),
+                      new((column - 1) * CellSize.Width, row * CellSize.Height),
+                      terminalEngine.VideoTerminal[row][column - 1]
+                    );
+                  }
+
+                  if (column < columns - 1) {
+                    rightNeighbor = new(
+                      this,
+                      drawingSession,
+                      new(row, column + 1),
+                      new((column + 1) * CellSize.Width, row * CellSize.Height),
+                      terminalEngine.VideoTerminal[row][column + 1]
+                    );
+                  }
+
+                  if (row < rows - 1) {
+                    downstairsNeighbor = new(
+                      this,
+                      drawingSession,
+                      new(row + 1, column),
+                      new(column * CellSize.Width, (row + 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row + 1][column]
+                    );
+                  }
+
+                  // Check for overfill from the cell that was here on the last
+                  // frame
+                  if (overfillCache.TryGetValue(new CellFingerprint(lastFrameCells[row, column]), out RectF overfill)) {
+                    // Redraw this cell and its neighbors, but only if needed
+                    if (overfill.Top > 0.0f && upstairsNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                    }
+
+                    if (overfill.Left > 0.0f && leftNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                    }
+
+                    if (overfill.Right > 0.0f && rightNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                    }
+
+                    if (overfill.Bottom > 0.0f && downstairsNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                    }
+
+                    drawableCells.Enqueue(drawableCell);
+                  } else {
+                    // This is a cache miss, so assume the worst case
+                    if (upstairsNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                    }
+
+                    if (leftNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                    }
+
+                    if (rightNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                    }
+
+                    if (downstairsNeighbor != null) {
+                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                    }
+
+                    drawableCells.Enqueue(drawableCell);
+                  }
+                }
+              }
             }
+
+            thisFrameCells[caret.Row, caret.Column] = cell;
           }
-        }*/
-      }
+        }
 
-      lastFrameOffscreenBuffer = offscreenBuffer;
-      lastFrameScreenBuffer = [];
+        if (offscreenBufferDirty) {
+          offscreenBufferDirty = false;
+        }
 
-      for (int row = 0; row < rows; row++) {
-        lastFrameScreenBuffer.Add(new Cell[columns]);
+        lastFrameCells = thisFrameCells;
+        seenDrawableCells.Clear();
 
-        for (int column = 0; column < columns; column++) {
-          lastFrameScreenBuffer[row][column] = terminalEngine.VideoTerminal[row][column];
+        // Draw cell backgrounds
+        while (drawableCells.TryDequeue(out DrawableCell drawableCell)) {
+          if (seenDrawableCells.Contains(drawableCell)) continue;
+
+          DrawBackground(
+            drawingSession,
+            defaultBackgroundColor,
+            backgroundIsInvisible,
+            drawableCell
+          );
+
+          seenDrawableCells.Add(drawableCell);
+
+          if (drawableCell.Cell.Rune != null && !Rune.IsWhiteSpace((Rune) drawableCell.Cell.Rune)) {
+            drawableCellForegrounds.Enqueue(drawableCell);
+          }
+        }
+
+        seenDrawableCells.Clear();
+
+        // Draw cell foregrounds and decorations
+        while (drawableCellForegrounds.TryDequeue(out DrawableCell drawableCell)) {
+          if (seenDrawableCells.Contains(drawableCell)) continue;
+
+          DrawForeground(
+            drawingSession,
+            textAntialiasing,
+            defaultBackgroundColor,
+            backgroundIsInvisible,
+            drawableCell
+          );
+
+          DrawDecoration(
+            drawingSession,
+            drawableCell
+          );
+
+          seenDrawableCells.Add(drawableCell);
         }
       }
 
-      lastFrameBackgroundIsInvisible = backgroundIsInvisible;
+      lastFrameBounds = new(rows, columns);
 
       terminalEngine.InvalidateCanvas();
     }
 
     /// <summary>
-    /// Draws <paramref name="cell"/> to <paramref name="drawingSession"/>.
+    /// Draws <paramref name="drawableCell"/>'s background to <paramref
+    /// name="drawingSession"/>.
     /// </summary>
-    /// <remarks>
-    /// <para>It is assumed that <paramref name="cell"/>'s <see
-    /// cref="Cell.Rune"/> is not <see langword="null"/>.</para>
-    /// </remarks>
-    /// <param name="drawingSession">A <see
+    /// <param name="drawingSession">The draw loop's <see
     /// cref="CanvasDrawingSession"/>.</param>
     /// <param name="defaultBackgroundColor">The default background color with
     /// which to draw.</param>
     /// <param name="backgroundIsInvisible">Whether the background, if
     /// <paramref name="defaultBackgroundColor"/>, should be drawn as
     /// transparent.</param>
-    /// <param name="cell">The <see cref="Cell"/> to draw.</param>
-    /// <param name="row">The row at which <paramref name="cell"/> should be
-    /// drawn.</param>
-    /// <param name="col">The column at which <paramref name="cell"/> should be
-    /// drawn.</param>
-    /// <param name="underfill">The overfill of the previous character, which
-    /// will not be drawn over.</param>
-    /// <returns>A <see cref="RectF"/> containing any overfill beyond <see
-    /// cref="CellSize"/> that was used in each direction, or <c>0.0f</c> if
-    /// none.</returns>
-    private RectF DrawCell(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, Cell cell, int row, int col, float underfill = 0.0f) {
-      Vector2 point = new(
-        col * CellSize.Width,
-        row * CellSize.Height
+    /// <param name="drawableCell">The cell to draw.</param>
+    private void DrawBackground(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
+      Color calculatedColor = drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
+        ? drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
+        : drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible);
+
+      drawingSession.Blend = CanvasBlend.Copy;
+
+      drawingSession.FillRectangle(
+        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(CellSize.Width * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(CellSize.Height * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        calculatedColor
       );
 
-      int runeIndex = cell.Rune is null ? -1 : ((Rune) cell.Rune).Value;
-      bool bold = cell.GraphicRendition.Bold;
-      bool faint = cell.GraphicRendition.Faint;
-      bool italic = cell.GraphicRendition.Italic;
-
-      if (!canvasTextLayoutCache.TryGetValue((runeIndex, bold, faint, italic), out CanvasTextLayout? canvasTextLayout)) {
-        canvasTextLayout = new(
-          drawingSession,
-          cell.Rune.ToString(),
-          cell.GraphicRendition.TextFormat(this),
-          0.0f,
-          0.0f
-        );
-
-        canvasTextLayoutCache.Add((runeIndex, bold, faint, italic), canvasTextLayout);
-      }
-
-      if (!overfillCache.TryGetValue((runeIndex, bold, faint, italic), out RectF overfill)) {
-        float overfillTop = Math.Abs(
-          Math.Min(
-            (float) canvasTextLayout.DrawBounds.Y,
-            0.0f
-          )
-        );
-
-        float overfillLeft = Math.Abs(
-          Math.Min(
-            (float) canvasTextLayout.DrawBounds.X,
-            0.0f
-          )
-        );
-
-        float overfillRight = Math.Max(
-          Math.Max(
-            (float) (canvasTextLayout.DrawBounds.X + canvasTextLayout.DrawBounds.Width),
-            (float) canvasTextLayout.LayoutBounds.Width
-          ) - CellSize.Width,
-          0.0f
-        );
-
-        float overfillBottom = Math.Max(
-          Math.Max(
-            (float) (canvasTextLayout.DrawBounds.Y + canvasTextLayout.DrawBounds.Height),
-            (float) canvasTextLayout.LayoutBounds.Height
-          ) - CellSize.Height,
-          0.0f
-        );
-
-        overfill = new(overfillTop, overfillLeft, overfillRight, overfillBottom);
-
-        overfillCache.Add((runeIndex, bold, faint, italic), overfill);
-      }
-
-#if DEBUG
-      logger.LogTrace("Rune '{rune}' yields width = {width}", cell.Rune.ToString(), canvasTextLayout.DrawBounds.Width);
-
-      if (overfill.Top > 0.0f || overfill.Left > 0.0f || overfill.Right > 0.0f || overfill.Bottom > 0.0f) {
-        logger.LogTrace("Rune '{rune}' resulted in overfill:", cell.Rune.ToString());
-        logger.LogTrace("  Top: {top}", overfill.Top);
-        logger.LogTrace("  Left: {left}", overfill.Left);
-        logger.LogTrace("  Right: {right}", overfill.Right);
-        logger.LogTrace("  Bottom: {bottom}", overfill.Bottom);
-      }
-#endif
-
-      DrawBackground(
-        drawingSession,
-        defaultBackgroundColor,
-        backgroundIsInvisible,
-        cell,
-        point,
-        underfill,
-        overfill.Right
-      );
-
-      DrawForeground(
-        drawingSession,
-        defaultBackgroundColor,
-        backgroundIsInvisible,
-        cell,
-        canvasTextLayout,
-        point
-      );
-
-      DrawDecoration(
-        drawingSession,
-        cell,
-        row,
-        col
-      );
-
-      return overfill;
+      drawingSession.Blend = CanvasBlend.SourceOver;
     }
 
     /// <summary>
-    /// Draws a null cell to <paramref name="drawingSession"/>.
+    /// Draws <paramref name="drawableCell"/>'s foreground to <paramref
+    /// name="drawingSession"/>.
     /// </summary>
-    /// <param name="drawingSession">A <see
+    /// <param name="drawingSession">The draw loop's <see
     /// cref="CanvasDrawingSession"/>.</param>
+    /// <param name="textAntialiasing">The text antialiasing style with which
+    /// to draw <paramref name="drawableCell"/>.</param>
     /// <param name="defaultBackgroundColor">The default background color with
     /// which to draw.</param>
     /// <param name="backgroundIsInvisible">Whether the background, if
     /// <paramref name="defaultBackgroundColor"/>, should be drawn as
     /// transparent.</param>
-    /// <param name="row">The row at which <paramref name="cell"/> should be
-    /// drawn.</param>
-    /// <param name="col">The column at which <paramref name="cell"/> should be
-    /// drawn.</param>
-    /// <param name="graphicRendition">The <see cref="GraphicRendition"/>
-    /// to use.</param>
-    /// <param name="underfill">The overfill of the previous character, which
-    /// will not be drawn over.</param>
-    private void DrawNullCell(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, int row, int col, GraphicRendition graphicRendition, float underfill = 0.0f) {
-      Vector2 point = new(
-        col * CellSize.Width,
-        row * CellSize.Height
-      );
+    /// <param name="drawableCell">The cell to draw.</param>
+    /// <exception cref="ArgumentException"></exception>
+    private static void DrawForeground(CanvasDrawingSession drawingSession, TextAntialiasingStyles textAntialiasing, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
+      if (drawableCell.Cell.Rune is null) return;
 
-      DrawNullBackground(
-        drawingSession,
-        graphicRendition,
-        defaultBackgroundColor,
-        backgroundIsInvisible,
-        point,
-        underfill
-      );
-    }
-
-    /// <summary>
-    /// Draws the cell background to <paramref name="drawingSession"/>.
-    /// </summary>
-    /// <param name="drawingSession"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="defaultBackgroundColor"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='defaultBackgroundColor']"/></param>
-    /// <param name="backgroundIsInvisible"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='backgroundIsInvisible']"/></param>
-    /// <param name="cell"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='cell']"/></param>
-    /// <param name="point">The point at which the background should be
-    /// drawn.</param>
-    /// <param name="underfill">The overfill of the previous character, which
-    /// will not be drawn over.</param>
-    /// <param name="overfill">The overfill of the current character.</param>
-    private void DrawBackground(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, Cell cell, Vector2 point, float underfill, float overfill) {
-      Color calculatedColor = cell.GraphicRendition.Inverse ^ cell.Selected
-        ? cell.GraphicRendition.CalculatedForegroundColor()
-        : cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible);
-
-      drawingSession.Antialiasing = CanvasAntialiasing.Aliased;
-      drawingSession.Blend = CanvasBlend.Copy;
-
-      drawingSession.FillRectangle(
-        point.X + underfill,
-        point.Y,
-        CellSize.Width - underfill + overfill,
-        CellSize.Height,
-        calculatedColor
-      );
-
-      drawingSession.Blend = CanvasBlend.SourceOver;
-      drawingSession.Antialiasing = CanvasAntialiasing.Antialiased;
-    }
-
-    /// <summary>
-    /// Draws a null cell background to <paramref name="drawingSession"/>.
-    /// </summary>
-    /// <param name="drawingSession"><inheritdoc cref="DrawNullCell"
-    /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="graphicRendition"><inheritdoc cref="DrawNullCell"
-    /// path="/param[@name='graphicRendition']"/></param>
-    /// <param name="defaultBackgroundColor"><inheritdoc cref="DrawNullCell"
-    /// path="/param[@name='defaultBackgroundColor']"/></param>
-    /// <param name="backgroundIsInvisible"><inheritdoc cref="DrawNullCell"
-    /// path="/param[@name='backgroundIsInvisible']"/></param>
-    /// <param name="point">The point at which the background should be
-    /// drawn.</param>
-    /// <param name="underfill">The overfill of the previous character, which
-    /// will not be drawn over.</param>
-    private void DrawNullBackground(CanvasDrawingSession drawingSession, GraphicRendition graphicRendition, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, Vector2 point, float underfill) {
-      Color calculatedColor = graphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible);
-
-      drawingSession.Antialiasing = CanvasAntialiasing.Aliased;
-      drawingSession.Blend = CanvasBlend.Copy;
-
-      drawingSession.FillRectangle(
-        point.X,
-        point.Y,
-        CellSize.Width - underfill,
-        CellSize.Height,
-        calculatedColor
-      );
-
-      drawingSession.Blend = CanvasBlend.SourceOver;
-      drawingSession.Antialiasing = CanvasAntialiasing.Antialiased;
-    }
-
-    /// <summary>
-    /// Draws the cell foreground to <paramref name="drawingSession"/>.
-    /// </summary>
-    /// <param name="drawingSession"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="defaultBackgroundColor"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='defaultBackgroundColor']"/></param>
-    /// <param name="backgroundIsInvisible"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='backgroundIsInvisible']"/></param>
-    /// <param name="cell"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='cell']"/></param>
-    /// <param name="canvasTextLayout">The <see cref="CanvasTextLayout"/>
-    /// representing the cell's contents.</param>
-    /// <param name="point">The point at which the foreground should be
-    /// drawn.</param>
-    private static void DrawForeground(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, Cell cell, CanvasTextLayout canvasTextLayout, Vector2 point) {
-      if (cell.Rune is null) return;
-
-      // Always present box-drawing and block-element characters as aliased
-      drawingSession.TextAntialiasing = ((Rune) cell.Rune!).Value is (>= 0x2500 and <= 0x257f) or (>= 0x2580 and <= 0x259f)
+      // Always present box-drawing characters as aliased
+      drawingSession.TextAntialiasing = ((Rune) drawableCell.Cell.Rune!).Value is >= 0x2500 and <= 0x257f
         ? CanvasTextAntialiasing.Aliased
-        : CanvasTextAntialiasing.Grayscale;
+        : textAntialiasing switch {
+            (TextAntialiasingStyles) (-1) => CanvasTextAntialiasing.Aliased,
+            TextAntialiasingStyles.None => CanvasTextAntialiasing.Aliased,
+            TextAntialiasingStyles.Grayscale => CanvasTextAntialiasing.Grayscale,
+            TextAntialiasingStyles.ClearType => CanvasTextAntialiasing.ClearType,
+            _ => throw new ArgumentException($"Invalid TextAntialiasingStyles {textAntialiasing}.", nameof(textAntialiasing))
+          };
 
       drawingSession.DrawTextLayout(
-        canvasTextLayout,
-        point,
-        cell.GraphicRendition.Inverse ^ cell.Selected
-          ? cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible, honorBackgroundIsInvisible: false)
-          : cell.GraphicRendition.CalculatedForegroundColor()
+        drawableCell.CanvasTextLayout,
+        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
+          ? drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible, honorBackgroundIsInvisible: false)
+          : drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
       );
     }
 
     /// <summary>
-    /// Draws the cell decorations to <paramref name="drawingSession"/>.
+    /// Draws <paramref name="drawableCell"/>'s decorations to <paramref
+    /// name="drawingSession"/>.
     /// </summary>
-    /// <param name="drawingSession"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="cell"><inheritdoc cref="DrawCell"
-    /// path="/param[@name='cell']"/></param>
-    /// <param name="row">The row at which the decoration should be
-    /// drawn.</param>
-    /// <param name="col">The column at which the decoration should be
-    /// drawn.</param>
-    private void DrawDecoration(CanvasDrawingSession drawingSession, Cell cell, int row, int col) {
+    /// <param name="drawingSession">The draw loop's <see
+    /// cref="CanvasDrawingSession"/>.</param>
+    /// <param name="drawableCell">The cell to draw.</param>
+    private void DrawDecoration(CanvasDrawingSession drawingSession, DrawableCell drawableCell) {
       // Single underline (or double underline)
       if (
         (
-          cell.GraphicRendition.Underline
+          drawableCell.Cell.GraphicRendition.Underline
           && (
-            cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Single
-            || cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Double
+            drawableCell.Cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Single
+            || drawableCell.Cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Double
           )
-        ) || cell.GraphicRendition.DoubleUnderline
+        ) || drawableCell.Cell.GraphicRendition.DoubleUnderline
       ) {
         DrawTextLine(
           drawingSession,
-          cell,
-          col,
-          (row * CellSize.Height) + (CellSize.Height * decorationBottom),
+          drawableCell.Cell,
+          drawableCell.Caret.Column,
+          (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationBottom),
           useUnderlineColor: true
         );
       }
 
       // Crossed-out
-      if (cell.GraphicRendition.CrossedOut) {
+      if (drawableCell.Cell.GraphicRendition.CrossedOut) {
         DrawTextLine(
           drawingSession,
-          cell,
-          col,
-          (row * CellSize.Height) + (CellSize.Height * decorationMidpoint),
+          drawableCell.Cell,
+          drawableCell.Caret.Column,
+          (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationMidpoint),
           useUnderlineColor: false
         );
       }
 
       // Double underline
       if (
-        cell.GraphicRendition.DoubleUnderline
+        drawableCell.Cell.GraphicRendition.DoubleUnderline
         || (
-          cell.GraphicRendition.Underline
-          && cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Double
+          drawableCell.Cell.GraphicRendition.Underline
+          && drawableCell.Cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Double
         )
       ) {
         DrawTextLine(
           drawingSession,
-          cell,
-          col,
-          (row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom),
+          drawableCell.Cell,
+          drawableCell.Caret.Column,
+          (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom),
           useUnderlineColor: true
         );
       }
 
       // Undercurl
       if (
-        cell.GraphicRendition.Underline
-        && cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Undercurl
+        drawableCell.Cell.GraphicRendition.Underline
+        && drawableCell.Cell.GraphicRendition.UnderlineStyle == UnderlineStyles.Undercurl
       ) {
         DrawUndercurl(
           drawingSession,
-          cell,
-          row,
-          col
+          drawableCell.Cell,
+          drawableCell.Caret.Row,
+          drawableCell.Caret.Column
         );
       }
     }

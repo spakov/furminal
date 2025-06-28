@@ -228,10 +228,12 @@ namespace w6t.Views {
       logger.LogDebug("  NominalSizeInPixels: {width} x {height}", TerminalControl.NominalSizeInPixels.Width, TerminalControl.NominalSizeInPixels.Height);
 #endif
 
+      // I have no idea why we're off by 3 pixels, but it seems to be
+      // consistent, at least
       AppWindow.ResizeClient(
         new(
           (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Width),
-          (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Height)
+          (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Height) + 3
         )
       );
     }
@@ -285,8 +287,8 @@ namespace w6t.Views {
       }
 
       // Determine the client area offset, which should remain constant. This
-      // is the actual height of the window chrome, which can (and does) differ
-      // from the height set in XAML
+      // is the actual height of the window chrome, which can (and evidently
+      // does) differ from the height set in XAML.
       clientAreaOffset ??= (int) (AppWindow.ClientSize.Height - TerminalControl.NominalSizeInPixels.Height);
 
       // Account for the title bar, which is part of the client area

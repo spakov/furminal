@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "w6t (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "w6t (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

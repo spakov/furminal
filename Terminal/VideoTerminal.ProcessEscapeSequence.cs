@@ -63,7 +63,9 @@ namespace Terminal {
                   if (col + csiEscapeSequence.Ps![0] < screenBuffer[row].Length) {
                     screenBuffer[row][col] = screenBuffer[row][col + csiEscapeSequence.Ps![0]];
                   } else {
-                    screenBuffer[row][col] = new();
+                    screenBuffer[row][col] = new() {
+                      GraphicRendition = graphicRendition
+                    };
 
                     if (terminalEngine.UseBackgroundColorErase) {
                       screenBuffer[row][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -97,7 +99,9 @@ namespace Terminal {
                   if (col - csiEscapeSequence.Ps![0] >= 0) {
                     screenBuffer[row][col + csiEscapeSequence.Ps![0]] = screenBuffer[row][col];
                   } else {
-                    screenBuffer[row][col] = new();
+                    screenBuffer[row][col] = new() {
+                      GraphicRendition = graphicRendition
+                    };
 
                     if (terminalEngine.UseBackgroundColorErase) {
                       screenBuffer[row][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -310,7 +314,9 @@ namespace Terminal {
             if (autoWrapMode) WrapPending = false;
 
             for (int i = 0; i < csiEscapeSequence.Ps![0]; i++) {
-              screenBuffer[Row][Column] = new();
+              screenBuffer[Row][Column] = new() {
+                GraphicRendition = graphicRendition
+              };
 
               if (terminalEngine.UseBackgroundColorErase) {
                 screenBuffer[Row][Column].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -353,7 +359,9 @@ namespace Terminal {
                   screenBuffer.Add(new Cell[terminalEngine.Columns]);
 
                   for (int col = 0; col < terminalEngine.Columns; col++) {
-                    screenBuffer[terminalEngine.Rows - 1][col] = new();
+                    screenBuffer[terminalEngine.Rows - 1][col] = new() {
+                      GraphicRendition = graphicRendition
+                    };
 
                     if (terminalEngine.UseBackgroundColorErase) {
                       screenBuffer[terminalEngine.Rows - 1][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -382,7 +390,9 @@ namespace Terminal {
                 screenBuffer.Insert(0, new Cell[terminalEngine.Columns]);
 
                 for (int col = 0; col < terminalEngine.Columns; col++) {
-                  screenBuffer[terminalEngine.Rows - 1][col] = new();
+                  screenBuffer[terminalEngine.Rows - 1][col] = new() {
+                    GraphicRendition = graphicRendition
+                  };
 
                   if (terminalEngine.UseBackgroundColorErase) {
                     screenBuffer[terminalEngine.Rows - 1][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -408,7 +418,9 @@ namespace Terminal {
             }
 
             for (int j = Column; j < Math.Min(Column + csiEscapeSequence.Ps![0], terminalEngine.Columns); j++) {
-              screenBuffer[Row][j] = new();
+              screenBuffer[Row][j] = new() {
+                GraphicRendition = graphicRendition
+              };
 
               if (terminalEngine.UseBackgroundColorErase) {
                 screenBuffer[Row][j].GraphicRendition.BackgroundColor = backgroundColorErase;

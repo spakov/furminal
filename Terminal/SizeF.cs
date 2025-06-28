@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Terminal {
   /// <summary>
@@ -31,12 +32,18 @@ namespace Terminal {
     /// <returns>A <see cref="Windows.Foundation.Size"/>.</returns>
     public readonly Windows.Foundation.Size ToSize() => new(Width, Height);
 
-    public static bool operator ==(SizeF a, SizeF b) => a.Width == b.Width && a.Height == b.Height;
+    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
+    public static bool operator ==(SizeF a, SizeF b) {
+      if (a.Width != b.Width) return false;
+      if (a.Height != b.Height) return false;
 
-    public static bool operator !=(SizeF a, SizeF b) => a.Width != b.Width || a.Height != b.Height;
+      return true;
+    }
 
-    public override readonly bool Equals([NotNullWhen(true)] object? obj) => base.Equals(obj);
+    public static bool operator !=(SizeF a, SizeF b) => !(a == b);
 
-    public override readonly int GetHashCode() => base.GetHashCode();
+    public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is SizeF other && this == other;
+
+    public override readonly int GetHashCode() => HashCode.Combine(Width, Height);
   }
 }

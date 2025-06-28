@@ -4,7 +4,6 @@ using AnsiProcessor.AnsiColors;
 using AnsiProcessor.Helpers;
 using AnsiProcessor.Output;
 using AnsiProcessor.Output.EscapeSequences;
-
 #if DEBUG
 using Microsoft.Extensions.Logging;
 #endif
@@ -15,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Terminal {
   /// <summary>
@@ -298,8 +296,10 @@ namespace Terminal {
       logger.LogDebug("Resizing to {rows} x {columns}", terminalEngine.Rows, terminalEngine.Columns);
 #endif
 
-      Resize(screenBuffer);
-      Resize(alternateScreenBuffer);
+      bool useScrollback = scrollbackBuffer is not null && scrollbackBuffer.Count > 0;
+
+      Resize(screenBuffer, useScrollback: useScrollback);
+      Resize(alternateScreenBuffer, useScrollback: false);
 
 #if DEBUG
       logger.LogDebug("Caret is at {row}, {column}", Row, Column);
@@ -721,8 +721,10 @@ namespace Terminal {
     /// Handles pointer releases.
     /// </summary>
     /// <remarks>
-    /// Intended to be invoked by <see
-    /// cref="TerminalControl.Canvas_PointerReleased"/> to handle the event.
+    /// <para>Intended to be invoked by <see
+    /// cref="TerminalControl.Canvas_PointerReleased"/> to handle the
+    /// event.</para>
+    /// <para><c>SelectionMode = false</c> is handled by the caller.</para>
     /// </remarks>
     /// <param name="pointerPoint">The <see cref="PointerPoint"/> from <see
     /// cref="TerminalControl.Canvas_PointerReleased"/>.</param>
@@ -1101,7 +1103,7 @@ namespace Terminal {
     /// Shifts <paramref name="rows"/> rows from the top of the screen buffer.
     /// </summary>
     /// <remarks>
-    /// <para>If the scollback and scrollforward buffers are initialized,
+    /// <para>If the scrollback and scrollforward buffers are initialized,
     /// shifts into the scrollback buffer, shifting out of the scrollforward
     /// buffer as needed.</para>
     /// <para>If <see cref="UseAlternateScreenBuffer"/> is <see
@@ -1111,7 +1113,11 @@ namespace Terminal {
     /// <param name="rows">The number of rows to shift.</param>
     /// <param name="force">Whether to force the shift to scrollback, even if
     /// it will result in empty lines.</param>
+#if DEBUG
+    internal void ShiftToScrollback(uint rows = 1, bool force = false, [System.Runtime.CompilerServices.CallerMemberName] string? callerMemberName = null) {
+#else
     internal void ShiftToScrollback(uint rows = 1, bool force = false) {
+#endif
       bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && !UseAlternateScreenBuffer;
 
       SelectionMode = false;
@@ -1125,7 +1131,7 @@ namespace Terminal {
       }
 
 #if DEBUG
-      logger.LogInformation("ShiftToScrollback({rows}, force: {force})", rows, force);
+      logger.LogInformation("{callerMemberName} => ShiftToScrollback({rows}, force: {force})", callerMemberName, rows, force);
 #endif
 
       for (int row = 0; row < rows; row++) {
@@ -1149,7 +1155,9 @@ namespace Terminal {
           screenBuffer.Add(new Cell[terminalEngine.Columns]);
 
           for (int col = 0; col < terminalEngine.Columns; col++) {
-            screenBuffer[terminalEngine.Rows - 1][col] = new();
+            screenBuffer[terminalEngine.Rows - 1][col] = new() {
+              GraphicRendition = graphicRendition
+            };
 
             if (terminalEngine.UseBackgroundColorErase) {
               screenBuffer[terminalEngine.Rows - 1][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1164,8 +1172,8 @@ namespace Terminal {
     /// buffer.
     /// </summary>
     /// <remarks>
-    /// <para>If the scollback and scrollforward buffers are initialized,
-    /// from the bottom of the scrollback buffer into the screen buffer,
+    /// <para>If the scrollback and scrollforward buffers are initialized,
+    /// shifts from the bottom of the scrollback buffer into the screen buffer,
     /// shifting into the scrollforward buffer as needed.</para>
     /// <para>If <see cref="UseAlternateScreenBuffer"/> is <see
     /// langword="true"/>, behaves the same as if the scrollback and
@@ -1174,7 +1182,11 @@ namespace Terminal {
     /// <param name="rows">The number of rows to shift.</param>
     /// <param name="force">Whether to force the shift to scrollforward, even
     /// if it will result in empty lines.</param>
+#if DEBUG
+    internal void ShiftFromScrollback(uint rows = 1, bool force = false, [System.Runtime.CompilerServices.CallerMemberName] string? callerMemberName = null) {
+#else
     internal void ShiftFromScrollback(uint rows = 1, bool force = false) {
+#endif
       bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && !UseAlternateScreenBuffer;
 
       SelectionMode = false;
@@ -1188,7 +1200,7 @@ namespace Terminal {
       }
 
 #if DEBUG
-      logger.LogInformation("ShiftFromScrollback({rows}, force: {force})", rows, force);
+      logger.LogInformation("{callerMemberName} => ShiftFromScrollback({rows}, force: {force})", callerMemberName, rows, force);
 #endif
 
       for (int row = 0; row < rows; row++) {
@@ -1206,7 +1218,9 @@ namespace Terminal {
           screenBuffer.Insert(0, new Cell[terminalEngine.Columns]);
 
           for (int col = 0; col < terminalEngine.Columns; col++) {
-            screenBuffer[0][col] = new();
+            screenBuffer[0][col] = new() {
+              GraphicRendition = graphicRendition
+            };
 
             if (terminalEngine.UseBackgroundColorErase) {
               screenBuffer[0][col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1229,7 +1243,7 @@ namespace Terminal {
       int row = (int) (point.Y / (terminalEngine.Rows * terminalEngine.CellSize.Height) * terminalEngine.Rows);
       int column = (int) (point.X / (terminalEngine.Columns * terminalEngine.CellSize.Width) * terminalEngine.Columns);
 
-      if (row < 1 || column < 1) return (-1, -1);
+      if (row < 0 || column < 0) return (-1, -1);
 
       return row > screenBuffer.Count - 1
         ? (-1, -1)
@@ -1249,8 +1263,13 @@ namespace Terminal {
     /// Initializes <paramref name="buffer"/> as needed to account for a
     /// resize.
     /// </summary>
+    /// <remarks>Note that this method does not invoke <see
+    /// cref="ShiftToScrollback"/>; if <paramref name="useScrollback"/> is
+    /// <see langword="true"/>, the scrollback buffer must be
+    /// initialized.</remarks>
     /// <param name="buffer">A screen buffer.</param>
-    private void Resize(List<Cell[]> buffer) {
+    /// <param name="useScrollback">Whether to use scrollback.</param>
+    private void Resize(List<Cell[]> buffer, bool useScrollback) {
       // Resize columns in each row
       for (int row = 0; row < buffer.Count; row++) {
         Cell[] newRow = new Cell[terminalEngine.Columns];
@@ -1260,7 +1279,9 @@ namespace Terminal {
         }
 
         for (int col = buffer[row].Length - 1; col < terminalEngine.Columns; col++) {
-          newRow[col] = new();
+          newRow[col] = new() {
+            GraphicRendition = graphicRendition
+          };
 
           if (terminalEngine.UseBackgroundColorErase) {
             newRow[col].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1284,14 +1305,18 @@ namespace Terminal {
           }
         }
       } else if (terminalEngine.Rows < buffer.Count) { // Removing rows
-        if (scrollbackBuffer is not null && scrollbackBuffer.Count > 0) {
-          //ShiftToScrollback((uint) buffer.Count - (uint) terminalControl.Rows);
-        }
+        SelectionMode = false;
 
-        int bufferCount = buffer.Count;
+        for (int row = buffer.Count - 1; row >= terminalEngine.Rows; row--) {
+          if (useScrollback) {
+            if (scrollbackBuffer!.Count == terminalEngine.Scrollback) {
+              scrollbackBuffer.RemoveAt(0);
+            }
 
-        for (int row = terminalEngine.Rows; row < bufferCount; row++) {
-          buffer.RemoveAt(buffer.Count - 1);
+            scrollbackBuffer!.Add(buffer[0]);
+          }
+
+          buffer.RemoveAt(0);
         }
       }
     }
@@ -1329,7 +1354,9 @@ namespace Terminal {
           for (int i = 0; i <= Row; i++) {
             if (i < Row) {
               for (int j = 0; j < terminalEngine.Columns; j++) {
-                screenBuffer[i][j] = new();
+                screenBuffer[i][j] = new() {
+                  GraphicRendition = graphicRendition
+                };
 
                 if (terminalEngine.UseBackgroundColorErase) {
                   screenBuffer[i][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1337,7 +1364,9 @@ namespace Terminal {
               }
             } else {
               for (int j = 0; j < Column; j++) {
-                screenBuffer[i][j] = new();
+                screenBuffer[i][j] = new() {
+                  GraphicRendition = graphicRendition
+                };
 
                 if (terminalEngine.UseBackgroundColorErase) {
                   screenBuffer[i][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1352,7 +1381,9 @@ namespace Terminal {
           for (int i = Row; i < terminalEngine.Rows; i++) {
             if (i > Row) {
               for (int j = 0; j < terminalEngine.Columns; j++) {
-                screenBuffer[i][j] = new();
+                screenBuffer[i][j] = new() {
+                  GraphicRendition = graphicRendition
+                };
 
                 if (terminalEngine.UseBackgroundColorErase) {
                   screenBuffer[i][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1360,7 +1391,9 @@ namespace Terminal {
               }
             } else {
               for (int j = Column; j < terminalEngine.Columns; j++) {
-                screenBuffer[i][j] = new();
+                screenBuffer[i][j] = new() {
+                  GraphicRendition = graphicRendition
+                };
 
                 if (terminalEngine.UseBackgroundColorErase) {
                   screenBuffer[i][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1375,7 +1408,9 @@ namespace Terminal {
         case ScreenClearTypes.EntireWithScrollback:
           for (int i = Row; i < terminalEngine.Rows; i++) {
             for (int j = 0; j < terminalEngine.Columns; j++) {
-              screenBuffer[i][j] = new();
+              screenBuffer[i][j] = new() {
+                GraphicRendition = graphicRendition
+              };
 
               if (terminalEngine.UseBackgroundColorErase) {
                 screenBuffer[i][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1400,7 +1435,9 @@ namespace Terminal {
       switch (lineClearType) {
         case LineClearTypes.Before:
           for (int j = 0; j < Column; j++) {
-            screenBuffer[Row][j] = new();
+            screenBuffer[Row][j] = new() {
+              GraphicRendition = graphicRendition
+            };
 
             if (terminalEngine.UseBackgroundColorErase) {
               screenBuffer[Row][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1411,7 +1448,9 @@ namespace Terminal {
 
         case LineClearTypes.After:
           for (int j = Column; j < terminalEngine.Columns; j++) {
-            screenBuffer[Row][j] = new();
+            screenBuffer[Row][j] = new() {
+              GraphicRendition = graphicRendition
+            };
 
             if (terminalEngine.UseBackgroundColorErase) {
               screenBuffer[Row][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1422,7 +1461,9 @@ namespace Terminal {
 
         case LineClearTypes.Entire:
           for (int j = 0; j < terminalEngine.Columns; j++) {
-            screenBuffer[Row][j] = new();
+            screenBuffer[Row][j] = new() {
+              GraphicRendition = graphicRendition
+            };
 
             if (terminalEngine.UseBackgroundColorErase) {
               screenBuffer[Row][j].GraphicRendition.BackgroundColor = backgroundColorErase;
@@ -1546,7 +1587,7 @@ namespace Terminal {
       int signRow = row0 < row1 ? 1 : -1;
       int err = 0;
 
-      for (int i = 0; i < deltaColumn + deltaRow; i++) {
+      for (int i = 0; i <= deltaColumn + deltaRow; i++) {
         yield return (row0, column0);
 
         int err1 = err + deltaRow;

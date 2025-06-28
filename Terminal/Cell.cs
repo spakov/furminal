@@ -1,4 +1,5 @@
 ﻿using AnsiProcessor.Output;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -24,50 +25,19 @@ namespace Terminal {
     /// </summary>
     public bool Selected;
 
-    /// <summary>
-    /// Whether this <see cref="Cell"/> contains overfill from the cell below
-    /// it.
-    /// </summary>
-    public bool ContainsOverfillFromBelow;
-
-    /// <summary>
-    /// Whether this <see cref="Cell"/> contains overfill from the cell after
-    /// it.
-    /// </summary>
-    public bool ContainsOverfillFromAfter;
-
-    /// <summary>
-    /// Whether this <see cref="Cell"/> contains overfill from the cell before
-    /// it.
-    /// </summary>
-    public bool ContainsOverfillFromBefore;
-
-    /// <summary>
-    /// Whether this <see cref="Cell"/> contains overfill from the cell above
-    /// it.
-    /// </summary>
-    public bool ContainsOverfillFromAbove;
-
     [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
     public static bool operator ==(Cell a, Cell b) {
-      if (a.Rune != b.Rune) return false;
+      if ((a.Rune is null ? -1 : ((Rune) a.Rune).Value) != (b.Rune is null ? -1 : ((Rune) b.Rune).Value)) return false;
       if (a.GraphicRendition != b.GraphicRendition) return false;
       if (a.Selected != b.Selected) return false;
 
       return true;
     }
 
-    [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
-    public static bool operator !=(Cell a, Cell b) {
-      if (a.Rune != b.Rune) return true;
-      if (a.GraphicRendition != b.GraphicRendition) return true;
-      if (a.Selected != b.Selected) return true;
+    public static bool operator !=(Cell a, Cell b) => !(a == b);
 
-      return false;
-    }
+    public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is Cell other && this == other;
 
-    public override readonly bool Equals([NotNullWhen(true)] object? obj) => base.Equals(obj);
-
-    public override readonly int GetHashCode() => base.GetHashCode();
+    public override readonly int GetHashCode() => HashCode.Combine(Rune, GraphicRendition, Selected);
   }
 }
