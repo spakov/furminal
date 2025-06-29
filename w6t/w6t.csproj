@@ -33,7 +33,10 @@
 
   <Target Name="TransformAppxManifest" BeforeTargets="GenerateAppxManifest">
     <Message Importance="High" Text="Transforming Package.appxmanifest.in with version $(NBGV_SimpleVersion)" />
-    <WriteLinesToFile File="Package.appxmanifest" Lines="@(None->'%(Content)')" Overwrite="true" Encoding="UTF-8" />
+    <ReadLinesFromFile File="Package.appxmanifest.in">
+      <Output TaskParameter="Lines" ItemName="ManifestLinesRaw" />
+    </ReadLinesFromFile>
+    <WriteLinesToFile File="$(IntermediateOutputPath)Package.appxmanifest" Lines="@(ManifestLinesRaw)" Overwrite="true" Encoding="UTF-8" />
   </Target>
 
   <!--
