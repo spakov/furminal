@@ -311,86 +311,86 @@ namespace Terminal.Helpers {
       menuItem = menuItemName switch {
         "CopyMenuItem" => new MenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe8c8" },
-          Text = "Copy"
+          Text = terminalControl.ResourceLoader.GetString("CopyName")
         },
 
         "PasteMenuItem" => new MenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe77f" },
-          Text = "Paste"
+          Text = terminalControl.ResourceLoader.GetString("PasteName")
         },
 
         "SmallerTextMenuItem" => new MenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe8e7" },
-          Text = "Smaller Text"
+          Text = terminalControl.ResourceLoader.GetString("SmallerTextName")
         },
 
         "LargerTextMenuItem" => new MenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe8e8" },
-          Text = "Larger Text"
+          Text = terminalControl.ResourceLoader.GetString("LargerTextName")
         },
 
         "BackgroundIsInvisibleMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xea61" },
-          Text = "Background is Invisible",
+          Text = terminalControl.ResourceLoader.GetString("BackgroundIsInvisibleName"),
           IsChecked = terminalControl.BackgroundIsInvisible
         },
 
         "UseVisualBellMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xea8f" },
-          Text = "Use Visual Bell",
+          Text = terminalControl.ResourceLoader.GetString("UseVisualBellName"),
           IsChecked = terminalControl.UseVisualBell
         },
 
         "CopyOnMouseUpMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xf683" },
-          Text = "Copy on Mouse Up",
+          Text = terminalControl.ResourceLoader.GetString("CopyOnMouseUpName"),
           IsChecked = terminalControl.CopyOnMouseUp
         },
 
         "PasteOnRightClickMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xf148" },
-          Text = "Paste on Right Click",
+          Text = terminalControl.ResourceLoader.GetString("PasteOnRightClickName"),
           IsChecked = terminalControl.PasteOnRightClick
         },
 
         "PasteOnMiddleClickMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xf147" },
-          Text = "Paste on Middle Click",
+          Text = terminalControl.ResourceLoader.GetString("PasteOnMiddleClickName"),
           IsChecked = terminalControl.PasteOnMiddleClick
         },
 
         "CursorMenuItem" => new MenuFlyoutSubItem() {
           Icon = new FontIcon() { Glyph = "\xe8ac" },
-          Text = "Cursor"
+          Text = terminalControl.ResourceLoader.GetString("CursorName")
         },
 
         "BlockCursorMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe8a8" },
-          Text = "Block Cursor",
+          Text = terminalControl.ResourceLoader.GetString("CursorStyleBlockName"),
           IsChecked = terminalControl.CursorStyle == CursorStyles.Block
         },
 
         "UnderlineCursorMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe90e" },
-          Text = "Underline Cursor",
+          Text = terminalControl.ResourceLoader.GetString("CursorStyleUnderlineName"),
           IsChecked = terminalControl.CursorStyle == CursorStyles.Underline
         },
 
         "BarCursorMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe90c" },
-          Text = "Bar Cursor",
+          Text = terminalControl.ResourceLoader.GetString("CursorStyleBarName"),
           IsChecked = terminalControl.CursorStyle == CursorStyles.Bar
         },
 
         "CursorBlinkMenuItem" => new ToggleMenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe9a9" },
-          Text = "Cursor Blink",
+          Text = terminalControl.ResourceLoader.GetString("CursorBlinkName"),
           IsChecked = terminalControl.CursorBlink
         },
 
         "SettingsMenuItem" => new MenuFlyoutItem() {
           Icon = new FontIcon() { Glyph = "\xe713" },
-          Text = "Settings"
+          Text = terminalControl.ResourceLoader.GetString("SettingsWindowTitle")
         },
 
         _ => throw new ArgumentException($"Unknown menu item \"{menuItemName}\".", nameof(menuItemName)),

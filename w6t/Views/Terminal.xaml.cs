@@ -13,6 +13,9 @@ using w6t.Settings.Json;
 using w6t.ViewModels;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
+using Windows.Storage;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using WinUIEx;
 
 namespace w6t.Views {
@@ -29,6 +32,10 @@ namespace w6t.Views {
     internal static readonly LogLevel logLevel = LogLevel.None;
 #endif
 
+    // I have no idea why we're off by 3 pixels, but it seems to be
+    // consistent, at least
+    private const int mysteryOffset = 3;
+
     private readonly ResourceLoader resources;
 
     private readonly DependencyProperties dependencyProperties;
@@ -36,6 +43,10 @@ namespace w6t.Views {
     private readonly DispatcherQueueTimer visualBellTimer;
 
     private TerminalViewModel? viewModel;
+
+    private readonly string[]? startCommand;
+    private readonly int? startRows;
+    private readonly int? startColumns;
 
     private int? clientAreaOffset;
     private bool _resizeLock;
@@ -47,6 +58,21 @@ namespace w6t.Views {
       get => viewModel;
       set => viewModel = value;
     }
+
+    /// <summary>
+    /// The start command provided on the command line.
+    /// </summary>
+    internal string[]? StartCommand => startCommand;
+
+    /// <summary>
+    /// The start number of rows provided on the command line.
+    /// </summary>
+    internal int? StartRows => startRows;
+
+    /// <summary>
+    /// The start number of columns provided on the command line.
+    /// </summary>
+    internal int? StartColumns => startColumns;
 
     /// <summary>
     /// A "lock", to prevent resizing from cascading out of control.
@@ -86,7 +112,9 @@ namespace w6t.Views {
     /// <summary>
     /// Initializes a <see cref="Terminal"/>.
     /// </summary>
-    public Terminal() {
+    /// <param name="startRows">The number of terminal rows.</param>
+    /// <param name="startColumns">The number of terminal columns.</param>
+    public Terminal(string[]? startCommand, int? startRows, int? startColumns) {
 #if DEBUG
       using ILoggerFactory factory = LoggerFactory.Create(
         builder => {
@@ -98,15 +126,32 @@ namespace w6t.Views {
       logger = factory.CreateLogger<Terminal>();
 #endif
 
+      this.startCommand = startCommand;
+      this.startRows = startRows;
+      this.startColumns = startColumns;
+
+#if DEBUG
+      if (startCommand is not null) {
+        logger.LogInformation("<command>:");
+
+        foreach (string startCommandPart in startCommand) {
+          logger.LogInformation("  {startCommandPart}", startCommandPart);
+        }
+      }
+
+      logger.LogInformation("--rows: {startRows}", startRows);
+      logger.LogInformation("--columns: {startColumns}", startColumns);
+#endif
+
       jsonSerializerOptions = new() {
         WriteIndented = true
       };
       jsonSerializerOptions.Converters.Add(new ColorJsonConverter());
 
-      settingsJsonPath = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, settingsJsonFilename);
+      settingsJsonPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, settingsJsonFilename);
 
       settingsJsonWatcher = new() {
-        Path = Windows.Storage.ApplicationData.Current.LocalFolder.Path,
+        Path = ApplicationData.Current.LocalFolder.Path,
         Filter = settingsJsonFilename,
         NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
         EnableRaisingEvents = true
@@ -119,7 +164,7 @@ namespace w6t.Views {
       };
 
       dependencyProperties = new(this);
-      LoadSettings();
+      LoadSettings(initialLoad: true);
 
       visualBellTimer = DispatcherQueue.CreateTimer();
       UpdateVisualBellTimerInterval();
@@ -129,6 +174,12 @@ namespace w6t.Views {
       ViewModel.PseudoconsoleDied += ViewModel_PseudoconsoleDied;
       InitializeComponent();
       resources = ResourceLoader.GetForViewIndependentUse();
+
+      // Our Win32 window's cursor, at this point, is (probably) IDC_WAIT. It
+      // "bleeds through" when we do things like display context menus.
+      // Explanation from Raymond Chen:
+      // https://devblogs.microsoft.com/oldnewthing/20250424-00/?p=111114
+      PInvoke.SetCursor(PInvoke.LoadCursor((HMODULE) (nint) 0, PInvoke.IDC_ARROW));
 
       ExtendsContentIntoTitleBar = true;
 
@@ -228,12 +279,10 @@ namespace w6t.Views {
       logger.LogDebug("  NominalSizeInPixels: {width} x {height}", TerminalControl.NominalSizeInPixels.Width, TerminalControl.NominalSizeInPixels.Height);
 #endif
 
-      // I have no idea why we're off by 3 pixels, but it seems to be
-      // consistent, at least
       AppWindow.ResizeClient(
         new(
           (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Width),
-          (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Height) + 3
+          (int) Math.Ceiling(TerminalControl.NominalSizeInPixels.Height) + mysteryOffset
         )
       );
     }
@@ -305,6 +354,9 @@ namespace w6t.Views {
       logger.LogDebug("  NominalSizeInPixels: {width}, {height}", TerminalControl.NominalSizeInPixels.Width, TerminalControl.NominalSizeInPixels.Height);
 #endif
 
+      ApplicationData.Current.LocalSettings.Values["WindowWidth"] = requestedWidth;
+      ApplicationData.Current.LocalSettings.Values["WindowHeight"] = requestedHeight + mysteryOffset;
+
       args.Handled = true;
     }
 
@@ -331,6 +383,6 @@ namespace w6t.Views {
     /// path="/param[@name='sender']"/></param>
     /// <param name="e"><inheritdoc cref="RoutedEventHandler"
     /// path="/param[@name='e']"/></param>
-    private void TerminalControl_Loaded(object sender, RoutedEventArgs e) => LoadSettings(terminalIsInitialized: true);
+    private void TerminalControl_Loaded(object sender, RoutedEventArgs e) => LoadSettings(initialLoad: true, terminalIsInitialized: true);
   }
 }

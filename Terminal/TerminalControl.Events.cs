@@ -11,10 +11,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Collections.ObjectModel;
+using System.IO;
 using Terminal.Helpers;
 using Terminal.Settings;
-using static Terminal.TerminalControl;
 
 namespace Terminal {
   public sealed partial class TerminalControl : UserControl {

@@ -31,12 +31,26 @@ namespace w6t.Views {
     private readonly Timer settingsSaveTimer;
 
     /// <summary>
-    /// Loads and applies settings from <see cref="settingsJsonPath"/>.
+    /// Loads and applies settings, including from the command line and from
+    /// <see cref="settingsJsonPath"/>.
     /// </summary>
-    /// <remarks>Does nothing if the file does not exist.</remarks>
+    /// <param name="initialLoad">Whether this is the initial loading of
+    /// settings.</param>
     /// <param name="terminalIsInitialized">Whether the <see
     /// cref="TerminalControl"/> is ready.</param>
-    public void LoadSettings(bool terminalIsInitialized = false) {
+    public void LoadSettings(bool initialLoad = false, bool terminalIsInitialized = false) {
+      if (startCommand is not null && startCommand.Length > 0 && initialLoad) {
+        dependencyProperties.Command = string.Join(' ', startCommand);
+      }
+
+      if (startRows is not null && initialLoad && terminalIsInitialized) {
+        TerminalControl.Rows = (int) startRows;
+      }
+
+      if (startColumns is not null && initialLoad && terminalIsInitialized) {
+        TerminalControl.Columns = (int) startColumns;
+      }
+
       if (!File.Exists(settingsJsonPath)) return;
 
       Settings.Json.Settings? settings = null;
@@ -60,12 +74,23 @@ namespace w6t.Views {
       if (!readSucceeded || settings is null) return;
 
       if (settings.Basics is not null) {
-        if (settings.Basics.Command is not null) dependencyProperties.Command = settings.Basics.Command;
+        if (startCommand is null || startCommand.Length == 0) {
+          if (settings.Basics.Command is not null) {
+            dependencyProperties.Command = settings.Basics.Command;
+          }
+        }
 
         if (terminalIsInitialized) {
           if (settings.Basics.DefaultWindowTitle is not null) TerminalControl.DefaultWindowTitle = settings.Basics.DefaultWindowTitle;
-          if (settings.Basics.Rows is not null) TerminalControl.Rows = (int) settings.Basics.Rows;
-          if (settings.Basics.Columns is not null) TerminalControl.Columns = (int) settings.Basics.Columns;
+
+          if (startRows is null || !initialLoad) {
+            if (settings.Basics.Rows is not null) TerminalControl.Rows = (int) settings.Basics.Rows;
+          }
+
+          if (startColumns is null || !initialLoad) {
+            if (settings.Basics.Columns is not null) TerminalControl.Columns = (int) settings.Basics.Columns;
+          }
+
           if (settings.Basics.TabWidth is not null) TerminalControl.TabWidth = (int) settings.Basics.TabWidth;
         }
 
@@ -465,7 +490,9 @@ namespace w6t.Views {
         ]
       };
 
-      foreach (SettingsGroup settingsGroup in settingsViewModel.Groups) {
+      for (int i = 0; i < settingsViewModel.Groups.Count; i++) {
+        SettingsGroup settingsGroup = settingsViewModel.Groups[i];
+
         if (settingsGroup.Key == "Basics") {
           if (settingsGroup.Items is null) continue;
 
@@ -491,16 +518,17 @@ namespace w6t.Views {
         } else if (settingsGroup.Key == "Behavior") {
           if (settingsGroup.Items is null) continue;
 
-          for (int i = 0; i < settingsGroup.Items.Count; i++) {
-            if (settingsGroup.Items[i].Key == "UseVisualBell") {
-              settingsGroup.Items.Insert(i + 1, visualBellDisplayTime);
-              settingsGroup.Items.Insert(i + 2, new CaptionSettingsItem() { Key = "VisualBellDisplayTimeCaption", Getter = () => resources.GetString("VisualBellDisplayTimeExplanation") });
+          for (int j = 0; j < settingsGroup.Items.Count; j++) {
+            if (settingsGroup.Items[j].Key == "UseVisualBell") {
+              settingsGroup.Items.Insert(j + 1, visualBellDisplayTime);
+              settingsGroup.Items.Insert(j + 2, new CaptionSettingsItem() { Key = "VisualBellDisplayTimeCaption", Getter = () => resources.GetString("VisualBellDisplayTimeExplanation") });
             }
           }
+        } else if (settingsGroup.Key == "KeyBindings") {
+          settingsViewModel.Groups.Insert(i++, colorPalette);
         }
       }
 
-      settingsViewModel.Groups.Add(colorPalette);
       settingsViewModel.Groups.Add(advanced);
 
       settingsViewModel.CallbackTokens.Add(
@@ -670,7 +698,7 @@ namespace w6t.Views {
 
       Task.Delay(settleDelay).ContinueWith(_ => {
         // This does not arrive from the UI thread
-        TerminalControl.DispatcherQueue.TryEnqueue(() => LoadSettings(terminalIsInitialized: true));
+        TerminalControl.DispatcherQueue.TryEnqueue(() => LoadSettings(initialLoad: false, terminalIsInitialized: true));
       });
     }
 

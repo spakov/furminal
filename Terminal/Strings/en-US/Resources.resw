@@ -141,6 +141,15 @@
   <data name="CopyAndPasteName" xml:space="preserve">
     <value>Copy and Paste</value>
   </data>
+  <data name="CopyKeyBinding" xml:space="preserve">
+    <value>Ctrl-Shift-C</value>
+  </data>
+  <data name="CopyKeyBindingName" xml:space="preserve">
+    <value>Copy selection</value>
+  </data>
+  <data name="CopyName" xml:space="preserve">
+    <value>Copy</value>
+  </data>
   <data name="CopyNewlineUnixName" xml:space="preserve">
     <value>UNIX (\n)</value>
   </data>
@@ -195,6 +204,12 @@
   <data name="GrayscaleTextAntialiasingName" xml:space="preserve">
     <value>Grayscale</value>
   </data>
+  <data name="KeyBindingsName" xml:space="preserve">
+    <value>Key Bindings</value>
+  </data>
+  <data name="LargerTextName" xml:space="preserve">
+    <value>Larger text</value>
+  </data>
   <data name="LinesPerScrollbackName" xml:space="preserve">
     <value>Lines per large scroll</value>
   </data>
@@ -210,8 +225,20 @@
   <data name="NoneTextAntialiasingName" xml:space="preserve">
     <value>None</value>
   </data>
+  <data name="PasteKeyBinding" xml:space="preserve">
+    <value>Ctrl-Shift-V</value>
+  </data>
+  <data name="PasteKeyBindingName" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="PasteName" xml:space="preserve">
+    <value>Paste</value>
+  </data>
   <data name="PasteOnMiddleClickName" xml:space="preserve">
     <value>Paste on middle mouse button</value>
+  </data>
+  <data name="PasteOnRightClickExplanation" xml:space="preserve">
+    <value>If enabled, use Ctrl-Right Click to access the context menu.</value>
   </data>
   <data name="PasteOnRightClickName" xml:space="preserve">
     <value>Paste on right mouse button</value>
@@ -222,11 +249,80 @@
   <data name="ScrollbackGroupName" xml:space="preserve">
     <value>Scrollback</value>
   </data>
+  <data name="ScrollBackKeyBinding" xml:space="preserve">
+    <value>Shift-Page Up</value>
+  </data>
+  <data name="ScrollBackKeyBindingName" xml:space="preserve">
+    <value>Large scroll back</value>
+  </data>
   <data name="ScrollbackName" xml:space="preserve">
     <value>Lines</value>
   </data>
+  <data name="ScrollForwardKeyBinding" xml:space="preserve">
+    <value>Shift-Page Down</value>
+  </data>
+  <data name="ScrollForwardKeyBindingName" xml:space="preserve">
+    <value>Large scroll forward</value>
+  </data>
+  <data name="SendBsKeyBinding" xml:space="preserve">
+    <value>Ctrl-H</value>
+  </data>
+  <data name="SendBsKeyBindingName" xml:space="preserve">
+    <value>Send BS</value>
+  </data>
+  <data name="SendEscKeyBinding" xml:space="preserve">
+    <value>Ctrl-[</value>
+  </data>
+  <data name="SendEscKeyBindingName" xml:space="preserve">
+    <value>Send ESC</value>
+  </data>
+  <data name="SendFsKeyBinding" xml:space="preserve">
+    <value>Ctrl-\</value>
+  </data>
+  <data name="SendFsKeyBindingName" xml:space="preserve">
+    <value>Send FS</value>
+  </data>
+  <data name="SendGsKeyBinding" xml:space="preserve">
+    <value>Ctrl-]</value>
+  </data>
+  <data name="SendGsKeyBindingName" xml:space="preserve">
+    <value>Send GS</value>
+  </data>
+  <data name="SendNulKeyBinding" xml:space="preserve">
+    <value>Ctrl-Space</value>
+  </data>
+  <data name="SendNulKeyBindingName" xml:space="preserve">
+    <value>Send NUL</value>
+  </data>
+  <data name="SendRsKeyBinding" xml:space="preserve">
+    <value>Ctrl-`</value>
+  </data>
+  <data name="SendRsKeyBindingName" xml:space="preserve">
+    <value>Send RS</value>
+  </data>
+  <data name="SendUsKeyBinding" xml:space="preserve">
+    <value>Ctrl--</value>
+  </data>
+  <data name="SendUsKeyBindingName" xml:space="preserve">
+    <value>Send US</value>
+  </data>
   <data name="SettingsWindowTitle" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="SmallerTextName" xml:space="preserve">
+    <value>Smaller text</value>
+  </data>
+  <data name="SmallScrollBackKeyBinding" xml:space="preserve">
+    <value>Shift-Up</value>
+  </data>
+  <data name="SmallScrollBackKeyBindingName" xml:space="preserve">
+    <value>Small scroll back</value>
+  </data>
+  <data name="SmallScrollForwardKeyBinding" xml:space="preserve">
+    <value>Shift-Down</value>
+  </data>
+  <data name="SmallScrollForwardKeyBindingName" xml:space="preserve">
+    <value>Small scroll forward</value>
   </data>
   <data name="TabWidthName" xml:space="preserve">
     <value>Tab width</value>

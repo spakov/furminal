@@ -150,8 +150,17 @@
   <data name="ColorPaletteName" xml:space="preserve">
     <value>Color Palette</value>
   </data>
+  <data name="ColumnsOptionDescription" xml:space="preserve">
+    <value>The number of terminal columns</value>
+  </data>
+  <data name="CommandArgumentDescription" xml:space="preserve">
+    <value>The command to run, usually a shell</value>
+  </data>
   <data name="CommandExplanation" xml:space="preserve">
     <value>This is typically a shell.</value>
+  </data>
+  <data name="CommandLineError" xml:space="preserve">
+    <value>Error: {0}</value>
   </data>
   <data name="CommandName" xml:space="preserve">
     <value>Command</value>
@@ -189,6 +198,9 @@
   <data name="DefaultUnderlineColorName" xml:space="preserve">
     <value>Default underline color</value>
   </data>
+  <data name="Description" xml:space="preserve">
+    <value>The w6t terminal emulator.</value>
+  </data>
   <data name="GreenBrightColorName" xml:space="preserve">
     <value>Bright green</value>
   </data>
@@ -221,6 +233,9 @@
   </data>
   <data name="RedStandardColorName" xml:space="preserve">
     <value>Red</value>
+  </data>
+  <data name="RowsOptionDescription" xml:space="preserve">
+    <value>The number of terminal rows</value>
   </data>
   <data name="SettingsJsonLocationExplanation" xml:space="preserve">
     <value>The w6t settings.json file is located at {0}. While the Settings window is open, w6t will automatically load it when the file is written.</value>

@@ -332,6 +332,86 @@ namespace Terminal.Settings {
         }
       };
 
+      // Key Bindings
+
+      KeyBindingSettingsItem scrollBack = new() {
+        Key = "ScrollBackKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("ScrollBackKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("ScrollBackKeyBinding")
+      };
+
+      KeyBindingSettingsItem scrollForward = new() {
+        Key = "ScrollForwardKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("ScrollForwardKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("ScrollForwardKeyBinding")
+      };
+
+      KeyBindingSettingsItem smallScrollBack = new() {
+        Key = "SmallScrollBackKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SmallScrollBackKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SmallScrollBackKeyBinding")
+      };
+
+      KeyBindingSettingsItem smallScrollForward = new() {
+        Key = "SmallScrollForwardKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SmallScrollForwardKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SmallScrollForwardKeyBinding")
+      };
+
+      KeyBindingSettingsItem copy = new() {
+        Key = "CopyKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("CopyKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("CopyKeyBinding")
+      };
+
+      KeyBindingSettingsItem paste = new() {
+        Key = "PasteKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("PasteKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("PasteKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendNul = new() {
+        Key = "SendNulKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendNulKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendNulKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendBs = new() {
+        Key = "SendBsKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendBsKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendBsKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendEsc = new() {
+        Key = "SendEscKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendEscKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendEscKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendFs = new() {
+        Key = "SendFsKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendFsKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendFsKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendGs = new() {
+        Key = "SendGsKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendGsKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendGsKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendRs = new() {
+        Key = "SendRsKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendRsKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendRsKeyBinding")
+      };
+
+      KeyBindingSettingsItem sendUs = new() {
+        Key = "SendUsKeyBinding",
+        Name = terminalControl.ResourceLoader.GetString("SendUsKeyBindingName"),
+        Getter = () => terminalControl.ResourceLoader.GetString("SendUsKeyBinding")
+      };
+
       Groups = [
         new() {
           Key = "Basics",
@@ -408,6 +488,7 @@ namespace Terminal.Settings {
             copyOnMouseUp,
             pasteOnMiddleClick,
             pasteOnRightClick,
+            new CaptionSettingsItem() { Key = "PasteOnRightClickCaption", Getter = () => terminalControl.ResourceLoader.GetString("PasteOnRightClickExplanation") },
             new GroupSettingsItem() {
               Key = "CopyAndPasteLineEndingForCopiedLines",
               Name = terminalControl.ResourceLoader.GetString("CopyAndPasteLineEndingForCopiedLinesName"),
@@ -416,6 +497,26 @@ namespace Terminal.Settings {
                 copyNewlineUnix
               ]
             }
+          ]
+        },
+
+        new() {
+          Key = "KeyBindings",
+          Name = terminalControl.ResourceLoader.GetString("KeyBindingsName"),
+          Items = [
+            scrollBack,
+            scrollForward,
+            smallScrollBack,
+            smallScrollForward,
+            copy,
+            paste,
+            sendNul,
+            sendBs,
+            sendEsc,
+            sendFs,
+            sendGs,
+            sendRs,
+            sendUs
           ]
         }
       ];

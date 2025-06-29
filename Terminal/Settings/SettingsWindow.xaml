@@ -210,6 +210,21 @@
         </DataTemplate>
 
         <DataTemplate
+          x:Key="KeyBindingSettingsItemTemplate"
+          x:DataType="local:KeyBindingSettingsItem">
+          <StackPanel
+            Style="{StaticResource SettingsItemsStackPanelCaptionStyle}">
+            <TextBlock
+              Text="{x:Bind Name, Mode=OneWay}"
+              HorizontalAlignment="Left"/>
+            <TextBlock
+              Text="{x:Bind KeyBinding, Mode=OneWay}"
+              Foreground="{StaticResource TextFillColorSecondaryBrush}"
+              HorizontalAlignment="Right"/>
+          </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate
           x:Key="NumberSettingsItemTemplate"
           x:DataType="local:NumberSettingsItem">
           <StackPanel
@@ -268,6 +283,7 @@
           FontFamilyPickerItemTemplate="{StaticResource FontFamilyPickerSettingsItemTemplate}"
           GroupSettingsItemTemplate="{StaticResource GroupSettingsItemTemplate}"
           IntegerSettingsItemTemplate="{StaticResource IntegerSettingsItemTemplate}"
+          KeyBindingSettingsItemTemplate="{StaticResource KeyBindingSettingsItemTemplate}"
           NumberSettingsItemTemplate="{StaticResource NumberSettingsItemTemplate}"
           RadioCollectionSettingsItemTemplate="{StaticResource RadioCollectionSettingsItemTemplate}"
           RadioSettingsItemTemplate="{StaticResource RadioSettingsItemTemplate}"

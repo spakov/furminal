@@ -6,6 +6,7 @@ using Microsoft.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +34,11 @@ namespace Terminal {
 #if DEBUG
     internal readonly ILogger logger;
 #endif
+
+    /// <summary>
+    /// The Windows DPI scale factor constant.
+    /// </summary>
+    private const float dpiConstant = 96.0f;
 
     /// <summary>
     /// A full-block character, used to calculate the size of a cell.
@@ -226,9 +232,11 @@ namespace Terminal {
           if (nowTicks - lastFrameTicks >= ticksPerFrame) {
             lastFrameTicks = nowTicks;
 
-            lock (terminalEngine.ScreenBufferLock) {
-              DrawFrame();
-            }
+            terminalEngine.DispatcherQueue.TryEnqueue(() => {
+              lock (terminalEngine.ScreenBufferLock) {
+                DrawFrame();
+              }
+            });
           } else {
             Thread.Sleep(1);
           }
@@ -257,8 +265,12 @@ namespace Terminal {
     /// buffer.</param>
     internal void ResizeOffscreenBuffer(bool force = false) {
       if (offscreenBuffer is not null || force) {
-        offscreenBuffer = new(terminalEngine.Canvas, terminalEngine.NominalSizeInPixels.ToSize());
         offscreenBufferDirty = true;
+        offscreenBuffer = new(terminalEngine.Canvas, terminalEngine.NominalSizeInPixels.ToSize());
+
+        using (CanvasDrawingSession drawingSession = offscreenBuffer.CreateDrawingSession()) {
+          drawingSession.Clear(Colors.Transparent);
+        }
       }
     }
 
@@ -357,8 +369,11 @@ namespace Terminal {
     /// <summary>
     /// Draws a terminal frame.
     /// </summary>
-    /// <remarks>Does not compose the cursor—that is handled by <see
-    /// cref="TerminalControl.Canvas_Draw"/>.</remarks>
+    /// <remarks>
+    /// <para>Intended to be executed on the UI thread.</para>
+    /// <para>Does not compose the cursor—that is handled by <see
+    /// cref="TerminalControl.Canvas_Draw"/>.</para>
+    /// </remarks>
     private void DrawFrame() {
       if (offscreenBuffer is null) return;
 
@@ -574,10 +589,10 @@ namespace Terminal {
       drawingSession.Blend = CanvasBlend.Copy;
 
       drawingSession.FillRectangle(
-        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
-        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
-        MathF.Round(CellSize.Width * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
-        MathF.Round(CellSize.Height * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+        MathF.Round(CellSize.Width * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+        MathF.Round(CellSize.Height * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
         calculatedColor
       );
 
@@ -615,8 +630,8 @@ namespace Terminal {
 
       drawingSession.DrawTextLayout(
         drawableCell.CanvasTextLayout,
-        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
-        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / 96.0f)) / (drawingSession.Dpi / 96.0f),
+        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
         drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
           ? drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible, honorBackgroundIsInvisible: false)
           : drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
@@ -643,8 +658,7 @@ namespace Terminal {
       ) {
         DrawTextLine(
           drawingSession,
-          drawableCell.Cell,
-          drawableCell.Caret.Column,
+          drawableCell,
           (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationBottom),
           useUnderlineColor: true
         );
@@ -654,8 +668,7 @@ namespace Terminal {
       if (drawableCell.Cell.GraphicRendition.CrossedOut) {
         DrawTextLine(
           drawingSession,
-          drawableCell.Cell,
-          drawableCell.Caret.Column,
+          drawableCell,
           (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationMidpoint),
           useUnderlineColor: false
         );
@@ -671,8 +684,7 @@ namespace Terminal {
       ) {
         DrawTextLine(
           drawingSession,
-          drawableCell.Cell,
-          drawableCell.Caret.Column,
+          drawableCell,
           (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom),
           useUnderlineColor: true
         );
@@ -685,9 +697,7 @@ namespace Terminal {
       ) {
         DrawUndercurl(
           drawingSession,
-          drawableCell.Cell,
-          drawableCell.Caret.Row,
-          drawableCell.Caret.Column
+          drawableCell
         );
       }
     }
@@ -697,24 +707,22 @@ namespace Terminal {
     /// </summary>
     /// <param name="drawingSession"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="cell"><inheritdoc cref="DrawDecoration"
+    /// <param name="drawableCell"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='cell']"/></param>
-    /// <param name="col"><inheritdoc cref="DrawDecoration"
-    /// path="/param[@name='col']"/></param>
     /// <param name="underlineY">The Y location at which to draw the
     /// underline.</param>
     /// <param name="useUnderlineColor">Whether to use the underline color
     /// (<see langword="true"/>) or the foreground color (<see
     /// langword="false"/>).</param>
-    private void DrawTextLine(CanvasDrawingSession drawingSession, Cell cell, int col, float underlineY, bool useUnderlineColor) {
+    private void DrawTextLine(CanvasDrawingSession drawingSession, DrawableCell drawableCell, float underlineY, bool useUnderlineColor) {
       drawingSession.DrawLine(
-        col * CellSize.Width,
+        drawableCell.Caret.Column * CellSize.Width,
         underlineY,
-        (col * CellSize.Width) + CellSize.Width,
+        (drawableCell.Caret.Column * CellSize.Width) + CellSize.Width,
         underlineY,
         useUnderlineColor
-          ? cell.GraphicRendition.UnderlineColor.ToWindowsUIColor()
-          : cell.GraphicRendition.CalculatedForegroundColor(),
+          ? drawableCell.Cell.GraphicRendition.UnderlineColor.ToWindowsUIColor()
+          : drawableCell.Cell.GraphicRendition.CalculatedForegroundColor(),
         (float) terminalEngine.FontSize * decorationWeight
       );
     }
@@ -726,68 +734,64 @@ namespace Terminal {
     /// character.</remarks>
     /// <param name="drawingSession"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='drawingSession']"/></param>
-    /// <param name="cell"><inheritdoc cref="DrawDecoration"
+    /// <param name="drawableCell"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='cell']"/></param>
-    /// <param name="row">The row at which the undercurl should be
-    /// drawn.</param>
-    /// <param name="col">The column at which the undercurl should be
-    /// drawn.</param>
-    private void DrawUndercurl(CanvasDrawingSession drawingSession, Cell cell, int row, int col) {
+    private void DrawUndercurl(CanvasDrawingSession drawingSession, DrawableCell drawableCell) {
       // The top-left point of our w
       Vector2 pointA = new(
-        col * CellSize.Width,
-        (row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
+        drawableCell.Caret.Column * CellSize.Width,
+        (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
       );
 
       // The bottom of the first half of our w
       Vector2 pointB = new(
-        (col * CellSize.Width) + (CellSize.Width * 0.25f),
-        (row * CellSize.Height) + (CellSize.Height * decorationBottom)
+        (drawableCell.Caret.Column * CellSize.Width) + (CellSize.Width * 0.25f),
+        (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationBottom)
       );
 
       // The top midpoint of our w
       Vector2 pointC = new(
-        (col * CellSize.Width) + (CellSize.Width * 0.5f),
-        (row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
+        (drawableCell.Caret.Column * CellSize.Width) + (CellSize.Width * 0.5f),
+        (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
       );
 
       // The bottom of the second half of our w
       Vector2 pointD = new(
-        (col * CellSize.Width) + (CellSize.Width * 0.75f),
-        (row * CellSize.Height) + (CellSize.Height * decorationBottom)
+        (drawableCell.Caret.Column * CellSize.Width) + (CellSize.Width * 0.75f),
+        (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationBottom)
       );
 
       // The top-right point of our w
       Vector2 pointE = new(
-        (col * CellSize.Width) + CellSize.Width,
-        (row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
+        (drawableCell.Caret.Column * CellSize.Width) + CellSize.Width,
+        (drawableCell.Caret.Row * CellSize.Height) + (CellSize.Height * decorationAlmostBottom)
       );
 
       drawingSession.DrawLine(
         pointA,
         pointB,
-        cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
+        drawableCell.Cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
         (float) terminalEngine.FontSize * decorationUndercurlWeight
       );
 
       drawingSession.DrawLine(
         pointB,
         pointC,
-        cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
+        drawableCell.Cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
         (float) terminalEngine.FontSize * decorationUndercurlWeight
       );
 
       drawingSession.DrawLine(
         pointC,
         pointD,
-        cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
+        drawableCell.Cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
         (float) terminalEngine.FontSize * decorationUndercurlWeight
       );
 
       drawingSession.DrawLine(
         pointD,
         pointE,
-        cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
+        drawableCell.Cell.GraphicRendition.UnderlineColor.ToWindowsUIColor(),
         (float) terminalEngine.FontSize * decorationUndercurlWeight
       );
     }

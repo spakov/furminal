@@ -6,6 +6,7 @@ using AnsiProcessor.TermCap;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
 using System.Collections.Concurrent;
 using System.Text;
@@ -71,6 +72,9 @@ namespace Terminal {
 
     /// <inheritdoc cref="TerminalControl.HWnd"/>
     internal nint HWnd => terminalControl.HWnd;
+
+    /// <inheritdoc cref="TerminalControl.DispatcherQueue"/>
+    internal DispatcherQueue DispatcherQueue => terminalControl.DispatcherQueue;
 
     /// <inheritdoc cref="TerminalControl.AnsiColors"/>
     internal Palette Palette {

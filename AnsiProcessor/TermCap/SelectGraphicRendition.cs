@@ -45,6 +45,7 @@ namespace AnsiProcessor.TermCap {
       Ansi.EscapeSequences.SGR.BACKGROUND_WHITE,
       Ansi.EscapeSequences.SGR.BACKGROUND_EXTENDED,
       Ansi.EscapeSequences.SGR.BACKGROUND_DEFAULT,
+      Ansi.EscapeSequences.SGR.UNDERLINE_COLOR,
       Ansi.EscapeSequences.SGR.FOREGROUND_BRIGHT_BLACK,
       Ansi.EscapeSequences.SGR.FOREGROUND_BRIGHT_RED,
       Ansi.EscapeSequences.SGR.FOREGROUND_BRIGHT_GREEN,

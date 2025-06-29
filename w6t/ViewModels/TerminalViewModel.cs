@@ -65,9 +65,11 @@ namespace w6t.ViewModels {
       get => _rows;
 
       set {
+        int oldRows = _rows;
+
         SetProperty(ref _rows, value);
 
-        if (_rows != value) {
+        if (oldRows != value) {
           pseudoconsole.Rows = (uint) value;
         }
       }
@@ -80,9 +82,11 @@ namespace w6t.ViewModels {
       get => _columns;
 
       set {
+        int oldColumns = _columns;
+
         SetProperty(ref _columns, value);
 
-        if (_columns != value) {
+        if (oldColumns != value) {
           pseudoconsole.Columns = (uint) value;
         }
       }

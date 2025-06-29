@@ -6,12 +6,22 @@ namespace AnsiProcessor.Helpers {
   /// <summary>
   /// Methods for converting an extended 24-bit SGR color to an RGB color.
   /// </summary>
-  /// <remarks>Source: <see
-  /// href="https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit"/></remarks>
+  /// <remarks>
+  /// <para>Sources:</para>
+  /// <list type="bullet">
+  /// <item><see
+  /// href="https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit"/></item>
+  /// <item><see
+  /// href="https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#:~:text=The%20color%20space%20identifier%20Pi%20is%20ignored."
+  /// /></item>
+  /// </list>
+  /// </remarks>
   internal static class Color24Helper {
     /// <summary>
     /// Converts <paramref name="parameters"/> to a <see cref="Color"/>.
     /// </summary>
+    /// <remarks>We ignore the ODA colorspace ID, since its behavior is
+    /// undefined, which is what Mr. Dickey does as well.</remarks>
     /// <param name="parameters">The SGR parameters, which are separated by
     /// either <c>;</c> or <c>;</c>, split.</param>
     /// <returns>A <see cref="Color"/> representing <paramref

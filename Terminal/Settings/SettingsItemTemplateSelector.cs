@@ -14,6 +14,7 @@ namespace Terminal.Settings {
     public DataTemplate? FontFamilyPickerItemTemplate { get; set; }
     public DataTemplate? GroupSettingsItemTemplate { get; set; }
     public DataTemplate? IntegerSettingsItemTemplate { get; set; }
+    public DataTemplate? KeyBindingSettingsItemTemplate { get; set; }
     public DataTemplate? NumberSettingsItemTemplate { get; set; }
     public DataTemplate? RadioCollectionSettingsItemTemplate { get; set; }
     public DataTemplate? RadioSettingsItemTemplate { get; set; }
@@ -28,6 +29,7 @@ namespace Terminal.Settings {
         FontFamilyPickerSettingsItem => FontFamilyPickerItemTemplate!,
         GroupSettingsItem => GroupSettingsItemTemplate!,
         IntegerSettingsItem => IntegerSettingsItemTemplate!,
+        KeyBindingSettingsItem => KeyBindingSettingsItemTemplate!,
         NumberSettingsItem => NumberSettingsItemTemplate!,
         RadioCollectionSettingsItem => RadioCollectionSettingsItemTemplate!,
         RadioSettingsItem => RadioSettingsItemTemplate!,

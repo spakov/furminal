@@ -767,7 +767,7 @@ namespace Terminal {
       nameof(CursorColor),
       typeof(Color),
       typeof(TerminalControl),
-      new PropertyMetadata(Colors.White)
+      new PropertyMetadata(new Color() { A = 0xff, R = 0xba, G = 0xc2, B = 0xde })
     );
 
     /// <summary>

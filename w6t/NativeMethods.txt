@@ -1,0 +1,4 @@
+LoadCursor
+MessageBox
+SetCursor
+IDC_ARROW
