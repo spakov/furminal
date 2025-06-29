@@ -1,7 +1,8 @@
 {
   "profiles": {
     "w6t (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "commandLineArgs": "--version"
     },
     "w6t (Unpackaged)": {
       "commandName": "Project"

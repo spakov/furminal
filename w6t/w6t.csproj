@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <WindowsPackageType>MSIX</WindowsPackageType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>w6t</RootNamespace>
@@ -29,14 +30,24 @@
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
+    <AppxManifest Include="$(IntermediateOutputPath)Package.appxmanifest" />
   </ItemGroup>
 
-  <Target Name="TransformAppxManifest" BeforeTargets="GenerateAppxManifest">
-    <Message Importance="High" Text="Transforming Package.appxmanifest.in with version $(NBGV_SimpleVersion)" />
-    <ReadLinesFromFile File="Package.appxmanifest.in">
-      <Output TaskParameter="Lines" ItemName="ManifestLinesRaw" />
-    </ReadLinesFromFile>
-    <WriteLinesToFile File="$(IntermediateOutputPath)Package.appxmanifest" Lines="@(ManifestLinesRaw)" Overwrite="true" Encoding="UTF-8" />
+  <PropertyGroup>
+    <Namespace>
+      <Namespace Prefix="dn" Uri="http://schemas.microsoft.com/appx/manifest/foundation/windows10" />
+      <Namespace Prefix="mp" Uri="http://schemas.microsoft.com/appx/2014/phone/manifest" />
+      <Namespace Prefix="desktop4" Uri="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4" />
+      <Namespace Prefix="uap" Uri="http://schemas.microsoft.com/appx/manifest/uap/windows10" />
+      <Namespace Prefix="uap4" Uri="http://schemas.microsoft.com/appx/manifest/uap/windows10/4" />
+      <Namespace Prefix="uap5" Uri="http://schemas.microsoft.com/appx/manifest/uap/windows10/5" />
+      <Namespace Prefix="rescap" Uri="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" />
+    </Namespace>
+  </PropertyGroup>
+  <Target Name="TransformAppxManifest" BeforeTargets="BeforeBuild" DependsOnTargets="GetBuildVersion">
+    <Message Importance="High" Text="Transforming Package.appxmanifest.in with version $(BuildVersionSimple).0" />
+    <Copy SourceFiles="Package.appxmanifest.in" DestinationFiles="$(IntermediateOutputPath)Package.appxmanifest" />
+    <XmlPoke XmlInputPath="$(IntermediateOutputPath)Package.appxmanifest" Query="/dn:Package/dn:Identity/@Version" Namespaces="$(Namespace)" Value="$(BuildVersionSimple).0" />
   </Target>
 
   <!--
@@ -82,12 +93,12 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-    <AppxPackageDir>$(MSBuildProjectDirectory)\w6t\package\</AppxPackageDir>
+    <AppxPackageDir>$(MSBuildProjectDirectory)\package\</AppxPackageDir>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
-    <AppxBundle>Always</AppxBundle>
+    <AppxBundle>Never</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxBundlePlatforms>x64;ARM64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <PackageCertificateThumbprint>470C2ADC9D549C61B677423C83E60199F30C6C0A</PackageCertificateThumbprint>
   </PropertyGroup>
 </Project>
