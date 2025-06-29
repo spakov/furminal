@@ -31,6 +31,11 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
+  <Target Name="TransformAppxManifest" BeforeTargets="GenerateAppxManifest">
+    <Message Importance="High" Text="Transforming Package.appxmanifest.in with version $(NBGV_SimpleVersion)" />
+    <WriteLinesToFile File="Package.appxmanifest" Lines="@(None->'%(Content)')" Overwrite="true" Encoding="UTF-8" />
+  </Target>
+
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget

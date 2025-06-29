@@ -13,7 +13,7 @@
   <Identity
     Name="d0269623-e165-42a0-981b-f3d28e22462f"
     Publisher="CN=spakov"
-    Version="1.0.0.0" />
+    Version="$(NBGV_SimpleVersion).0" />
 
   <mp:PhoneIdentity PhoneProductId="d0269623-e165-42a0-981b-f3d28e22462f" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

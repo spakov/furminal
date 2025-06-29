@@ -3,6 +3,7 @@
   "version": "1.0-alpha",
   "release": {
     "branchName": "release/v{version}",
+    "tagName": "v{version}",
     "versionIncrement": "minor",
     "firstUnstableTag": "alpha"
   },
