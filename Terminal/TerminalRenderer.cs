@@ -6,7 +6,6 @@ using Microsoft.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -370,9 +369,14 @@ namespace Terminal {
     /// Draws a terminal frame.
     /// </summary>
     /// <remarks>
-    /// <para>Intended to be executed on the UI thread.</para>
-    /// <para>Does not compose the cursor—that is handled by <see
-    /// cref="TerminalControl.Canvas_Draw"/>.</para>
+    /// <para>Assumptions:</para>
+    /// <list type="bullet">
+    /// <item>Intended to be executed on the UI thread.</item>
+    /// <item>Each cell can only possibly overfill up to one cell away on each
+    /// of its eight adjacent cells.</item>
+    /// <item>Does not compose the cursor—that is handled by <see
+    /// cref="TerminalControl.Canvas_Draw"/>.</item>
+    /// </list>
     /// </remarks>
     private void DrawFrame() {
       if (offscreenBuffer is null) return;
@@ -410,16 +414,423 @@ namespace Terminal {
                 )
               );
             } else {
+              DrawableCell? upstairsLeftNeighbor = null;
+              DrawableCell? upstairsNeighbor = null;
+              DrawableCell? upstairsRightNeighbor = null;
+              DrawableCell? leftNeighbor = null;
+              DrawableCell? rightNeighbor = null;
+              DrawableCell? downstairsLeftNeighbor = null;
+              DrawableCell? downstairsNeighbor = null;
+              DrawableCell? downstairsRightNeighbor = null;
+              DrawableCell? thisCell = null;
+
               // Check cells that differ from the previous frame
               if (caret.Row < lastFrameBounds.Row && caret.Column < lastFrameBounds.Column) {
                 if (cell != lastFrameCells[row, column]) {
-                  DrawableCell drawableCell;
-                  DrawableCell? upstairsNeighbor = null;
-                  DrawableCell? leftNeighbor = null;
-                  DrawableCell? rightNeighbor = null;
-                  DrawableCell? downstairsNeighbor = null;
+                  // Check for overfill from the cell that was here on the last
+                  // frame
+                  if (overfillCache.TryGetValue(new CellFingerprint(lastFrameCells[row, column]), out RectF overfill)) {
+                    // Redraw this cell and its neighbors, but only if needed
+                    if (overfill.Top > 0.0f && row > 0) {
+                      upstairsNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column),
+                        new(column * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column]
+                      );
 
-                  drawableCell = new(
+                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                    }
+
+                    if (overfill.Left > 0.0f && column > 0) {
+                      leftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row, column - 1),
+                        new((column - 1) * CellSize.Width, row * CellSize.Height),
+                        terminalEngine.VideoTerminal[row][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                    }
+
+                    if (upstairsNeighbor != null && leftNeighbor != null) {
+                      upstairsLeftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column - 1),
+                        new((column - 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) upstairsLeftNeighbor);
+                    }
+
+                    if (overfill.Right > 0.0f && column < columns - 1) {
+                      rightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row, column + 1),
+                        new((column + 1) * CellSize.Width, row * CellSize.Height),
+                        terminalEngine.VideoTerminal[row][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                    }
+
+                    if (upstairsNeighbor != null && rightNeighbor != null) {
+                      upstairsRightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column + 1),
+                        new((column + 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) upstairsRightNeighbor);
+                    }
+
+                    if (overfill.Bottom > 0.0f && row < rows - 1) {
+                      downstairsNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column),
+                        new(column * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                    }
+
+                    if (downstairsNeighbor != null && leftNeighbor != null) {
+                      downstairsLeftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column - 1),
+                        new((column - 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsLeftNeighbor);
+                    }
+
+                    if (downstairsNeighbor != null && rightNeighbor != null) {
+                      downstairsRightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column + 1),
+                        new((column + 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsRightNeighbor);
+                    }
+
+                    thisCell = new(
+                      this,
+                      drawingSession,
+                      caret,
+                      point,
+                      terminalEngine.VideoTerminal[row][column]
+                    );
+
+                    drawableCells.Enqueue((DrawableCell) thisCell);
+                  } else {
+                    // This is a cache miss, so assume the worst case
+                    if (row > 0) {
+                      upstairsNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column),
+                        new(column * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                    }
+
+                    if (column > 0) {
+                      leftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row, column - 1),
+                        new((column - 1) * CellSize.Width, row * CellSize.Height),
+                        terminalEngine.VideoTerminal[row][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                    }
+
+                    if (upstairsNeighbor != null && leftNeighbor != null) {
+                      upstairsLeftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column - 1),
+                        new((column - 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) upstairsLeftNeighbor);
+                    }
+
+                    if (column < columns - 1) {
+                      rightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row, column + 1),
+                        new((column + 1) * CellSize.Width, row * CellSize.Height),
+                        terminalEngine.VideoTerminal[row][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                    }
+
+                    if (upstairsNeighbor != null && rightNeighbor != null) {
+                      upstairsRightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row - 1, column + 1),
+                        new((column + 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row - 1][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) upstairsRightNeighbor);
+                    }
+
+                    if (row < rows - 1) {
+                      downstairsNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column),
+                        new(column * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                    }
+
+                    if (downstairsNeighbor != null && leftNeighbor != null) {
+                      downstairsLeftNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column - 1),
+                        new((column - 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column - 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsLeftNeighbor);
+                    }
+
+                    if (downstairsNeighbor != null && rightNeighbor != null) {
+                      downstairsRightNeighbor = new(
+                        this,
+                        drawingSession,
+                        new(row + 1, column + 1),
+                        new((column + 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                        terminalEngine.VideoTerminal[row + 1][column + 1]
+                      );
+
+                      drawableCells.Enqueue((DrawableCell) downstairsRightNeighbor);
+                    }
+
+                    thisCell = new(
+                      this,
+                      drawingSession,
+                      caret,
+                      point,
+                      terminalEngine.VideoTerminal[row][column]
+                    );
+
+                    drawableCells.Enqueue((DrawableCell) thisCell);
+                  }
+                }
+              }
+
+              // Now for the tricky bit: for each null cell, we must determine
+              // whether another cell overfills into this cell, and if so, we
+              // must redraw it as well
+              if (terminalEngine.VideoTerminal[row][column].Rune == null || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column].Rune!)) {
+                bool enqueued = false;
+
+                if (row > 0) {
+                  if (terminalEngine.VideoTerminal[row - 1][column].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column].Rune!)) {
+                    upstairsNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row - 1, column),
+                      new(column * CellSize.Width, (row - 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row - 1][column]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) upstairsNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Bottom > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (column > 0) {
+                  if (terminalEngine.VideoTerminal[row][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column - 1].Rune!)) {
+                    leftNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row, column - 1),
+                      new((column - 1) * CellSize.Width, row * CellSize.Height),
+                      terminalEngine.VideoTerminal[row][column - 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) leftNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Right > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (row > 0 && column > 0) {
+                  if (terminalEngine.VideoTerminal[row - 1][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column - 1].Rune!)) {
+                    upstairsLeftNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row - 1, column - 1),
+                      new((column - 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row - 1][column - 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) upstairsLeftNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Left > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) upstairsLeftNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) upstairsLeftNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (column < columns - 1) {
+                  if (terminalEngine.VideoTerminal[row][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column + 1].Rune!)) {
+                    rightNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row, column + 1),
+                      new((column + 1) * CellSize.Width, row * CellSize.Height),
+                      terminalEngine.VideoTerminal[row][column + 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) rightNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Left > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (row > 0 && column < columns - 1) {
+                  if (terminalEngine.VideoTerminal[row - 1][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column + 1].Rune!)) {
+                    upstairsRightNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row - 1, column + 1),
+                      new((column + 1) * CellSize.Width, (row - 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row - 1][column + 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) upstairsRightNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Left > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) upstairsRightNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) upstairsRightNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (row < rows - 1) {
+                  if (terminalEngine.VideoTerminal[row + 1][column].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column].Rune!)) {
+                    downstairsNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row + 1, column),
+                      new(column * CellSize.Width, (row + 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row + 1][column]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) downstairsNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Top > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (row < rows - 1 && column > 0) {
+                  if (terminalEngine.VideoTerminal[row + 1][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column - 1].Rune!)) {
+                    downstairsLeftNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row + 1, column - 1),
+                      new((column - 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row + 1][column - 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) downstairsLeftNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Left > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) downstairsLeftNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) downstairsLeftNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (row < rows - 1 && column < columns - 1) {
+                  if (terminalEngine.VideoTerminal[row + 1][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column + 1].Rune!)) {
+                    downstairsRightNeighbor ??= new(
+                      this,
+                      drawingSession,
+                      new(row + 1, column + 1),
+                      new((column + 1) * CellSize.Width, (row + 1) * CellSize.Height),
+                      terminalEngine.VideoTerminal[row + 1][column + 1]
+                    );
+
+                    if (overfillCache.TryGetValue(((DrawableCell) downstairsRightNeighbor).CellFingerprint, out RectF overfill)) {
+                      if (overfill.Left > 0.0f) {
+                        drawableCells.Enqueue((DrawableCell) downstairsRightNeighbor);
+                        enqueued = true;
+                      }
+                    } else {
+                      drawableCells.Enqueue((DrawableCell) downstairsRightNeighbor);
+                      enqueued = true;
+                    }
+                  }
+                }
+
+                if (enqueued) {
+                  thisCell ??= new(
                     this,
                     drawingSession,
                     caret,
@@ -427,87 +838,7 @@ namespace Terminal {
                     terminalEngine.VideoTerminal[row][column]
                   );
 
-                  if (row > 0) {
-                    upstairsNeighbor = new(
-                      this,
-                      drawingSession,
-                      new(row - 1, column),
-                      new(column * CellSize.Width, (row - 1) * CellSize.Height),
-                      terminalEngine.VideoTerminal[row - 1][column]
-                    );
-                  }
-
-                  if (column > 0) {
-                    leftNeighbor = new(
-                      this,
-                      drawingSession,
-                      new(row, column - 1),
-                      new((column - 1) * CellSize.Width, row * CellSize.Height),
-                      terminalEngine.VideoTerminal[row][column - 1]
-                    );
-                  }
-
-                  if (column < columns - 1) {
-                    rightNeighbor = new(
-                      this,
-                      drawingSession,
-                      new(row, column + 1),
-                      new((column + 1) * CellSize.Width, row * CellSize.Height),
-                      terminalEngine.VideoTerminal[row][column + 1]
-                    );
-                  }
-
-                  if (row < rows - 1) {
-                    downstairsNeighbor = new(
-                      this,
-                      drawingSession,
-                      new(row + 1, column),
-                      new(column * CellSize.Width, (row + 1) * CellSize.Height),
-                      terminalEngine.VideoTerminal[row + 1][column]
-                    );
-                  }
-
-                  // Check for overfill from the cell that was here on the last
-                  // frame
-                  if (overfillCache.TryGetValue(new CellFingerprint(lastFrameCells[row, column]), out RectF overfill)) {
-                    // Redraw this cell and its neighbors, but only if needed
-                    if (overfill.Top > 0.0f && upstairsNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
-                    }
-
-                    if (overfill.Left > 0.0f && leftNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
-                    }
-
-                    if (overfill.Right > 0.0f && rightNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
-                    }
-
-                    if (overfill.Bottom > 0.0f && downstairsNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
-                    }
-
-                    drawableCells.Enqueue(drawableCell);
-                  } else {
-                    // This is a cache miss, so assume the worst case
-                    if (upstairsNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) upstairsNeighbor);
-                    }
-
-                    if (leftNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) leftNeighbor);
-                    }
-
-                    if (rightNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) rightNeighbor);
-                    }
-
-                    if (downstairsNeighbor != null) {
-                      drawableCells.Enqueue((DrawableCell) downstairsNeighbor);
-                    }
-
-                    drawableCells.Enqueue(drawableCell);
-                  }
+                  drawableCells.Enqueue((DrawableCell) thisCell);
                 }
               }
             }
@@ -621,12 +952,12 @@ namespace Terminal {
       drawingSession.TextAntialiasing = ((Rune) drawableCell.Cell.Rune!).Value is >= 0x2500 and <= 0x257f
         ? CanvasTextAntialiasing.Aliased
         : textAntialiasing switch {
-            (TextAntialiasingStyles) (-1) => CanvasTextAntialiasing.Aliased,
-            TextAntialiasingStyles.None => CanvasTextAntialiasing.Aliased,
-            TextAntialiasingStyles.Grayscale => CanvasTextAntialiasing.Grayscale,
-            TextAntialiasingStyles.ClearType => CanvasTextAntialiasing.ClearType,
-            _ => throw new ArgumentException($"Invalid TextAntialiasingStyles {textAntialiasing}.", nameof(textAntialiasing))
-          };
+          (TextAntialiasingStyles) (-1) => CanvasTextAntialiasing.Aliased,
+          TextAntialiasingStyles.None => CanvasTextAntialiasing.Aliased,
+          TextAntialiasingStyles.Grayscale => CanvasTextAntialiasing.Grayscale,
+          TextAntialiasingStyles.ClearType => CanvasTextAntialiasing.ClearType,
+          _ => throw new ArgumentException($"Invalid TextAntialiasingStyles {textAntialiasing}.", nameof(textAntialiasing))
+        };
 
       drawingSession.DrawTextLayout(
         drawableCell.CanvasTextLayout,
