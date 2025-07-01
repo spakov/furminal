@@ -491,8 +491,8 @@ namespace Terminal {
     /// Invalidates <see cref="TerminalControl.Canvas"/>, asking it to redraw
     /// itself.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0200:Remove unnecessary lambda expression", Justification = "Suggestion is incorrect, changes meaning")]
-    internal void InvalidateCanvas() => terminalControl.DispatcherQueue.TryEnqueue(() => Canvas.Invalidate());
+    /// <remarks>This must be called from the UI thread!</remarks>
+    internal void InvalidateCanvas() => Canvas.Invalidate();
 
     /// <inheritdoc cref="TerminalRenderer.CleanCellSize"/>
     internal void CleanCellSize() => terminalRenderer.CleanCellSize();

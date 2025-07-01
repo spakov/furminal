@@ -27,7 +27,7 @@ namespace Terminal {
 
     [SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Impacts readability")]
     public static bool operator ==(Cell a, Cell b) {
-      if ((a.Rune is null ? -1 : ((Rune) a.Rune).Value) != (b.Rune is null ? -1 : ((Rune) b.Rune).Value)) return false;
+      if ((a.Rune == null ? -1 : ((Rune) a.Rune).Value) != (b.Rune == null ? -1 : ((Rune) b.Rune).Value)) return false;
       if (a.GraphicRendition != b.GraphicRendition) return false;
       if (a.Selected != b.Selected) return false;
 
