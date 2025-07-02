@@ -104,6 +104,8 @@ namespace w6t.Views {
         if (terminalIsInitialized) {
           if (settings.Appearance.FontFamily is not null) TerminalControl.FontFamily = settings.Appearance.FontFamily;
           if (settings.Appearance.FontSize is not null) TerminalControl.FontSize = (double) settings.Appearance.FontSize;
+          if (settings.Appearance.TextAntialiasing is not null) TerminalControl.TextAntialiasing = (TextAntialiasingStyles) settings.Appearance.TextAntialiasing;
+          if (settings.Appearance.FullColorEmoji is not null) TerminalControl.FullColorEmoji = (bool) settings.Appearance.FullColorEmoji;
           if (settings.Appearance.UseBackgroundColorErase is not null) TerminalControl.UseBackgroundColorErase = (bool) settings.Appearance.UseBackgroundColorErase;
           if (settings.Appearance.BackgroundIsInvisible is not null) TerminalControl.BackgroundIsInvisible = (bool) settings.Appearance.BackgroundIsInvisible;
         }
@@ -595,6 +597,8 @@ namespace w6t.Views {
           SolidColorWindowBackdropColor = dependencyProperties.SolidColorWindowBackdropColor,
           FontFamily = TerminalControl.FontFamily,
           FontSize = TerminalControl.FontSize,
+          TextAntialiasing = TerminalControl.TextAntialiasing,
+          FullColorEmoji = TerminalControl.FullColorEmoji,
           UseBackgroundColorErase = TerminalControl.UseBackgroundColorErase,
           BackgroundIsInvisible = TerminalControl.BackgroundIsInvisible
         },

@@ -10,8 +10,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Input;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
+using WideCharacter;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 
@@ -274,7 +276,7 @@ namespace Terminal {
               }
             } else if (vtInput is char vtCharacter) {
               lock (terminalEngine.ScreenBufferLock) {
-                WriteRune(new(vtCharacter));
+                WriteGraphemeCluster(vtCharacter.ToString());
               }
             } else if (vtInput is EscapeSequence vtEscapeSequence) {
               lock (terminalEngine.ScreenBufferLock) {
@@ -374,29 +376,31 @@ namespace Terminal {
       logger.LogInformation("Processing text \"{text}\"", text);
 #endif
 
-      foreach (Rune rune in text.EnumerateRunes()) {
-        WriteRune(rune);
+      TextElementEnumerator graphemeClusterEnumerator = StringInfo.GetTextElementEnumerator(text);
+
+      while (graphemeClusterEnumerator.MoveNext()) {
+        WriteGraphemeCluster(graphemeClusterEnumerator.GetTextElement());
       }
     }
 
     /// <summary>
-    /// Writes <paramref name="rune"/> to the screen buffer.
+    /// Writes <paramref name="graphemeCluster"/> to the screen buffer.
     /// </summary>
-    /// <param name="rune">The rune to write.</param>
-    private void WriteRune(Rune? rune) {
+    /// <param name="graphemeCluster">The grapheme cluster to write.</param>
+    private void WriteGraphemeCluster(string? graphemeCluster) {
       // Snap out of scrollback mode
       ScrollbackMode = false;
 
 #if DEBUG
-      logger.LogDebug("Handling rune {rune}", rune is null ? "(null)" : $"'{PrintableHelper.MakePrintable(rune.ToString()!)}'");
+      logger.LogDebug("Handling grapheme cluster {graphemeCluster}", PrintableHelper.MakePrintable(graphemeCluster));
 #endif
 
-      if (rune is not null) {
-        if (((Rune) rune).Value < 0x20) {
+      if (graphemeCluster is not null) {
+        if (graphemeCluster[0] < 0x20) {
           if (autoWrapMode) WrapPending = false;
         }
 
-        switch (((Rune) rune).Value) {
+        switch (graphemeCluster[0]) {
           // Null character
           case AnsiProcessor.Ansi.C0.NUL:
             return;
@@ -447,13 +451,47 @@ namespace Terminal {
         WrapPending = false;
       }
 
+      int graphemeClusterWidth = graphemeCluster.WideCharacterWidth();
+
+      // Wrap if we don't have space to write a wide character
+      if (graphemeClusterWidth > 1 && autoWrapMode && Column == terminalEngine.Columns - 2) {
+#if DEBUG
+        logger.LogDebug("Auto-wrap initiated (wide character)");
+#endif
+
+        NextRow();
+        WrapPending = false;
+      }
+
       screenBuffer[Row][Column] = new() {
-        Rune = rune,
+        GraphemeCluster = graphemeCluster,
         GraphicRendition = graphicRendition,
       };
 
+      if (graphemeClusterWidth > 1) {
+        if (autoWrapMode && Column == terminalEngine.Columns - 1) {
+          WrapPending = true;
+        } else {
+          CaretRight();
+        }
+
+        if (autoWrapMode && WrapPending) {
 #if DEBUG
-      logger.LogDebug("screenBuffer[{Row}][{Column}] = '{rune}'", Row, Column, rune);
+          logger.LogDebug("Auto-wrap initiated (wide character)");
+#endif
+
+          NextRow();
+          WrapPending = false;
+        }
+
+        screenBuffer[Row][Column] = new() {
+          GraphemeCluster = null,
+          GraphicRendition = graphicRendition,
+        };
+      }
+
+#if DEBUG
+      logger.LogDebug("screenBuffer[{Row}][{Column}] = '{graphemeCluster}'", Row, Column, graphemeCluster);
 #endif
 
       if (autoWrapMode && Column == terminalEngine.Columns - 1) {
@@ -1074,7 +1112,7 @@ namespace Terminal {
             screenBuffer[row][col].Selected = false;
 
             if (copy) {
-              selection.Append(screenBuffer[row][col].Rune);
+              selection.Append(screenBuffer[row][col].GraphemeCluster);
             }
           }
         }

@@ -51,7 +51,7 @@ namespace Terminal {
               if (autoWrapMode) WrapPending = false;
 
               for (int i = 0; i < csiEscapeSequence.Ps![0]; i++) {
-                WriteRune(null);
+                WriteGraphemeCluster(null);
               }
 
 #if DEBUG
@@ -484,7 +484,7 @@ namespace Terminal {
             }
 
             for (int i = 0; i < csiEscapeSequence.Ps![0]; i++) {
-              WriteRune(source.Rune);
+              WriteGraphemeCluster(source.GraphemeCluster);
             }
 
 #if DEBUG

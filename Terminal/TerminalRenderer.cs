@@ -1,5 +1,7 @@
 ﻿using AnsiProcessor.Output;
+#if DEBUG
 using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI;
@@ -12,6 +14,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Terminal.Helpers;
+using WideCharacter;
 using Windows.UI;
 using Windows.UI.Text;
 using Windows.Win32;
@@ -72,9 +75,9 @@ namespace Terminal {
 
     private readonly TerminalEngine terminalEngine;
 
-    private readonly CanvasTextFormat[] textFormats = new CanvasTextFormat[0x07];
+    private readonly CanvasTextFormat[] textFormats = new CanvasTextFormat[0x10];
 
-    private readonly Dictionary<CellFingerprint, CanvasTextLayout> canvasTextLayoutCache;
+    private readonly Dictionary<CellFingerprint, CanvasTextLayout?> canvasTextLayoutCache;
     private readonly Dictionary<CellFingerprint, RectF> overfillCache;
 
     private SizeF cellSize;
@@ -110,6 +113,7 @@ namespace Terminal {
     /// <item><c>0x04</c>: italic</item>
     /// <item><c>0x05</c>: bold and italic</item>
     /// <item><c>0x06</c>: faint and italic</item>
+    /// <item><c>0x0f</c>: emoji</item>
     /// </list>
     /// </remarks>
     internal CanvasTextFormat[] TextFormats => textFormats;
@@ -117,12 +121,15 @@ namespace Terminal {
     /// <summary>
     /// The <see cref="CanvasTextLayout"/> cache.
     /// </summary>
-    internal Dictionary<CellFingerprint, CanvasTextLayout> CanvasTextLayoutCache => canvasTextLayoutCache;
+    internal Dictionary<CellFingerprint, CanvasTextLayout?> CanvasTextLayoutCache => canvasTextLayoutCache;
 
     /// <summary>
     /// The overfill cache.
     /// </summary>
     internal Dictionary<CellFingerprint, RectF> OverfillCache => overfillCache;
+
+    /// <inheritdoc cref="TerminalEngine.FullColorEmoji"/>
+    internal bool FullColorEmoji => terminalEngine.FullColorEmoji;
 
     /// <summary>
     /// The terminal cell size.
@@ -257,7 +264,7 @@ namespace Terminal {
               dispatcherQueueLength++;
             }
 
-            if (dispatcherQueueLength > 100 || terminalEngine.VTQueue.Count > 100) {
+            if (dispatcherQueueLength > 50 || terminalEngine.VTQueue.Count > 50) {
               // We're pushing too hard, so cut our frame rate
               if (effectiveFrameRate > 0.0) {
                 if (effectiveFrameRate > 1.0) {
@@ -345,6 +352,16 @@ namespace Terminal {
         if ((i & italicVariant) != 0) {
           textFormats[i]!.FontStyle = FontStyle.Italic;
         }
+      }
+
+      if (terminalEngine.FullColorEmoji) {
+        textFormats[0x0f] = new() {
+          FontFamily = "Segoe UI Emoji",
+          FontSize = (float) terminalEngine.FontSize,
+          Options = CanvasDrawTextOptions.EnableColorFont,
+          HorizontalAlignment = CanvasHorizontalAlignment.Left,
+          VerticalAlignment = CanvasVerticalAlignment.Top
+        };
       }
 
       CellSizeDirty = true;
@@ -435,7 +452,7 @@ namespace Terminal {
       bool frameChanged = false;
       drawableCells.Clear();
 
-      if (rows != lastFrameBounds.Row || columns != lastFrameBounds.Column) {
+      if (rows != lastFrameBounds.Row || columns != lastFrameBounds.Column || offscreenBufferDirty) {
         frameChanged = true;
       } else {
         for (int row = 0; row < rows; row++) {
@@ -720,14 +737,14 @@ namespace Terminal {
                 if (
                   effectiveFrameRate >= 10.0f
                   && (
-                    terminalEngine.VideoTerminal[row][column].Rune == null
-                    || Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column].Rune!)
+                    terminalEngine.VideoTerminal[row][column].GraphemeCluster == null
+                    || char.IsWhiteSpace(terminalEngine.VideoTerminal[row][column].GraphemeCluster![0])
                   )
                 ) {
                   bool enqueued = false;
 
                   if (row > 0) {
-                    if (terminalEngine.VideoTerminal[row - 1][column].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row - 1][column].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row - 1][column].GraphemeCluster![0])) {
                       upstairsNeighbor ??= new(
                         this,
                         drawingSession,
@@ -749,7 +766,7 @@ namespace Terminal {
                   }
 
                   if (column > 0) {
-                    if (terminalEngine.VideoTerminal[row][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column - 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row][column - 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row][column - 1].GraphemeCluster![0])) {
                       leftNeighbor ??= new(
                         this,
                         drawingSession,
@@ -771,7 +788,7 @@ namespace Terminal {
                   }
 
                   if (row > 0 && column > 0) {
-                    if (terminalEngine.VideoTerminal[row - 1][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column - 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row - 1][column - 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row - 1][column - 1].GraphemeCluster![0])) {
                       upstairsLeftNeighbor ??= new(
                         this,
                         drawingSession,
@@ -793,7 +810,7 @@ namespace Terminal {
                   }
 
                   if (column < columns - 1) {
-                    if (terminalEngine.VideoTerminal[row][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row][column + 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row][column + 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row][column + 1].GraphemeCluster![0])) {
                       rightNeighbor ??= new(
                         this,
                         drawingSession,
@@ -815,7 +832,7 @@ namespace Terminal {
                   }
 
                   if (row > 0 && column < columns - 1) {
-                    if (terminalEngine.VideoTerminal[row - 1][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row - 1][column + 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row - 1][column + 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row - 1][column + 1].GraphemeCluster![0])) {
                       upstairsRightNeighbor ??= new(
                         this,
                         drawingSession,
@@ -837,7 +854,7 @@ namespace Terminal {
                   }
 
                   if (row < rows - 1) {
-                    if (terminalEngine.VideoTerminal[row + 1][column].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row + 1][column].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row + 1][column].GraphemeCluster![0])) {
                       downstairsNeighbor ??= new(
                         this,
                         drawingSession,
@@ -859,7 +876,7 @@ namespace Terminal {
                   }
 
                   if (row < rows - 1 && column > 0) {
-                    if (terminalEngine.VideoTerminal[row + 1][column - 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column - 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row + 1][column - 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row + 1][column - 1].GraphemeCluster![0])) {
                       downstairsLeftNeighbor ??= new(
                         this,
                         drawingSession,
@@ -881,7 +898,7 @@ namespace Terminal {
                   }
 
                   if (row < rows - 1 && column < columns - 1) {
-                    if (terminalEngine.VideoTerminal[row + 1][column + 1].Rune != null && !Rune.IsWhiteSpace((Rune) terminalEngine.VideoTerminal[row + 1][column + 1].Rune!)) {
+                    if (terminalEngine.VideoTerminal[row + 1][column + 1].GraphemeCluster != null && !char.IsWhiteSpace(terminalEngine.VideoTerminal[row + 1][column + 1].GraphemeCluster![0])) {
                       downstairsRightNeighbor ??= new(
                         this,
                         drawingSession,
@@ -939,7 +956,7 @@ namespace Terminal {
 
           seenDrawableCells.Add(drawableCell);
 
-          if (drawableCell.Cell.Rune != null && !Rune.IsWhiteSpace((Rune) drawableCell.Cell.Rune)) {
+          if (drawableCell.Cell.GraphemeCluster != null && !char.IsWhiteSpace(drawableCell.Cell.GraphemeCluster![0])) {
             drawableCellForegrounds.Enqueue(drawableCell);
           }
         }
@@ -951,6 +968,9 @@ namespace Terminal {
           if (seenDrawableCells.Contains(drawableCell)) continue;
 
           DrawForeground(
+#if DEBUG
+            logger,
+#endif
             drawingSession,
             textAntialiasing,
             defaultBackgroundColor,
@@ -1007,6 +1027,9 @@ namespace Terminal {
     /// Draws <paramref name="drawableCell"/>'s foreground to <paramref
     /// name="drawingSession"/>.
     /// </summary>
+#if DEBUG
+    /// <param name="logger">An <see cref="ILogger"/>.</param>
+#endif
     /// <param name="drawingSession">The draw loop's <see
     /// cref="CanvasDrawingSession"/>.</param>
     /// <param name="textAntialiasing">The text antialiasing style with which
@@ -1018,11 +1041,34 @@ namespace Terminal {
     /// transparent.</param>
     /// <param name="drawableCell">The cell to draw.</param>
     /// <exception cref="ArgumentException"></exception>
-    private static void DrawForeground(CanvasDrawingSession drawingSession, TextAntialiasingStyles textAntialiasing, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
-      if (drawableCell.Cell.Rune is null) return;
+#if DEBUG
+    private void DrawForeground(ILogger logger, CanvasDrawingSession drawingSession, TextAntialiasingStyles textAntialiasing, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
+#else
+    private void DrawForeground(CanvasDrawingSession drawingSession, TextAntialiasingStyles textAntialiasing, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
+#endif
+      if (drawableCell.Cell.GraphemeCluster is null) return;
 
-      // Always present box-drawing characters as aliased
-      drawingSession.TextAntialiasing = ((Rune) drawableCell.Cell.Rune!).Value is >= 0x2500 and <= 0x257f
+#if DEBUG
+      StringBuilder drawnGraphemeCluster = new();
+
+      drawnGraphemeCluster.Append('\'');
+      drawnGraphemeCluster.Append(drawableCell.Cell.GraphemeCluster);
+      drawnGraphemeCluster.Append("\' => [ ");
+
+      foreach (char @char in drawableCell.Cell.GraphemeCluster) {
+        drawnGraphemeCluster.Append((int) @char);
+        drawnGraphemeCluster.Append(", ");
+      }
+
+      drawnGraphemeCluster.Append(']');
+
+      logger.LogTrace("Drawing character {character}", drawnGraphemeCluster.ToString());
+#endif
+
+      // Always present box-drawing characters (U+2500 through U+257F) as aliased
+      drawingSession.TextAntialiasing = drawableCell.Cell.GraphemeCluster.Length == 1
+        && drawableCell.Cell.GraphemeCluster[0] >= '─'
+        && drawableCell.Cell.GraphemeCluster[0] <= '╿'
         ? CanvasTextAntialiasing.Aliased
         : textAntialiasing switch {
           (TextAntialiasingStyles) (-1) => CanvasTextAntialiasing.Aliased,
@@ -1032,14 +1078,24 @@ namespace Terminal {
           _ => throw new ArgumentException($"Invalid TextAntialiasingStyles {textAntialiasing}.", nameof(textAntialiasing))
         };
 
-      drawingSession.DrawTextLayout(
-        drawableCell.CanvasTextLayout,
-        MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
-        MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
-        drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
-          ? drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible, honorBackgroundIsInvisible: false)
-          : drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
-      );
+      if (terminalEngine.FullColorEmoji && drawableCell.Cell.GraphemeCluster.IsEmoji()) {
+        drawingSession.DrawText(
+          drawableCell.Cell.GraphemeCluster,
+          MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+          MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+          Colors.Black,
+          TextFormats[0x0f]
+        );
+      } else {
+        drawingSession.DrawTextLayout(
+          drawableCell.CanvasTextLayout,
+          MathF.Round(drawableCell.Point.X * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+          MathF.Round(drawableCell.Point.Y * (drawingSession.Dpi / dpiConstant)) / (drawingSession.Dpi / dpiConstant),
+          drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
+            ? drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible, honorBackgroundIsInvisible: false)
+            : drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
+        );
+      }
     }
 
     /// <summary>

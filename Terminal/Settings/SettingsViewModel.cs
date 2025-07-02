@@ -127,6 +127,13 @@ namespace Terminal.Settings {
         Setter = (textAntialiasing) => terminalControl.TextAntialiasing = (TextAntialiasingStyles) textAntialiasing
       };
 
+      BooleanSettingsItem fullColorEmoji = new() {
+        Key = nameof(terminalControl.FullColorEmoji),
+        Name = terminalControl.ResourceLoader.GetString("FullColorEmojiName"),
+        Getter = () => terminalControl.FullColorEmoji,
+        Setter = (fullColorEmoji) => terminalControl.FullColorEmoji = fullColorEmoji
+      };
+
       BooleanSettingsItem useBackgroundColorErase = new() {
         Key = nameof(terminalControl.UseBackgroundColorErase),
         Name = terminalControl.ResourceLoader.GetString("UseBackgroundColorEraseName"),
@@ -433,6 +440,8 @@ namespace Terminal.Settings {
             textAntialiasing,
             new CaptionSettingsItem() { Key = "TextAntialiasingCaption1", Getter = () => terminalControl.ResourceLoader.GetString("TextAntialiasingExplanation1") },
             new CaptionSettingsItem() { Key = "TextAntialiasingCaption2", Getter = () => terminalControl.ResourceLoader.GetString("TextAntialiasingExplanation2") },
+            fullColorEmoji,
+            new CaptionSettingsItem() { Key = "FullColorEmojiCaption", Getter = () => terminalControl.ResourceLoader.GetString("FullColorEmojiExplanation") },
             useBackgroundColorErase,
             backgroundIsInvisible
           ]
@@ -574,6 +583,14 @@ namespace Terminal.Settings {
         terminalControl.RegisterPropertyChangedCallback(
           TerminalControl.TextAntialiasingProperty,
           (_, _) => textAntialiasing.BoundValue = (int) terminalControl.TextAntialiasing
+        )
+      );
+
+      callbackTokens.Add(
+        TerminalControl.FullColorEmojiProperty,
+        terminalControl.RegisterPropertyChangedCallback(
+          TerminalControl.FullColorEmojiProperty,
+          (_, _) => fullColorEmoji.BoundValue = terminalControl.FullColorEmoji
         )
       );
 

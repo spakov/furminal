@@ -132,6 +132,9 @@ namespace Terminal.Settings {
       }
 
       Activate();
+
+      // Occasionally the terminal's canvas clears at this point. Not sure why.
+      terminalControl.TerminalEngine.MarkOffscreenBufferDirty();
     }
 
     /// <summary>

@@ -201,6 +201,12 @@
   <data name="FontSizeName" xml:space="preserve">
     <value>Font size</value>
   </data>
+  <data name="FullColorEmojiExplanation" xml:space="preserve">
+    <value>Uses the Segoe UI Emoji font for emoji.</value>
+  </data>
+  <data name="FullColorEmojiName" xml:space="preserve">
+    <value>Draw full-color emoji</value>
+  </data>
   <data name="GrayscaleTextAntialiasingName" xml:space="preserve">
     <value>Grayscale</value>
   </data>

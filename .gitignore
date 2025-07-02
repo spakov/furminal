@@ -1,6 +1,9 @@
-**/.vs/
-**/bin/
-**/obj/
 **/*.user
+**/.vs/
+**/CMakeSettings.json
+**/bin/
+**/nupkg/
+**/obj/
+**/out/
 package/
 w6t/Properties/launchSettings.json

@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup Label="Globals" />
+  
   <PropertyGroup>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
@@ -14,13 +16,16 @@
     <PackageId>spakov.$(AssemblyName)</PackageId>
     <Authors>spakov</Authors>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" />
+  
   <ItemGroup>
     <None Remove="SettingsWindow.xaml" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6" />
@@ -35,18 +40,23 @@
     <PackageReference Include="System.Windows.Extensions" Version="9.0.6" />
     <PackageReference Include="WinUIEx" Version="2.6.0" />
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\AnsiProcessor\AnsiProcessor.csproj" />
     <ProjectReference Include="..\ConPTY\ConPTY.csproj" />
+    <ProjectReference Include="..\WideCharacter\WideCharacter.csproj" />
   </ItemGroup>
+  
   <ItemGroup>
     <PRIResource Include="Strings\**\*.resw" />
   </ItemGroup>
+  
   <ItemGroup>
     <Page Update="SettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  
   <ItemGroup>
     <Page Update="TerminalControl.xaml">
       <Generator>MSBuild:Compile</Generator>

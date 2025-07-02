@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using Terminal.Helpers;
+using WideCharacter;
 
 namespace Terminal {
   /// <summary>
@@ -60,8 +61,10 @@ namespace Terminal {
       if (!terminalRenderer.CanvasTextLayoutCache.TryGetValue(CellFingerprint, out CanvasTextLayout? canvasTextLayout)) {
         canvasTextLayout = new CanvasTextLayout(
           drawingSession,
-          cell.Rune.ToString(),
-          cell.GraphicRendition.TextFormat(terminalRenderer),
+          cell.GraphemeCluster,
+          terminalRenderer.FullColorEmoji && cell.GraphemeCluster.IsEmoji()
+            ? terminalRenderer.TextFormats[0x0f]
+            : cell.GraphicRendition.TextFormat(terminalRenderer),
           0.0f,
           0.0f
         );
@@ -72,7 +75,7 @@ namespace Terminal {
       CanvasTextLayout = canvasTextLayout!;
 
       // Take into account antialiasing
-      float fudge = cell.Rune != null && !Rune.IsWhiteSpace((Rune) cell.Rune) ? 2.0f : 0.0f;
+      float fudge = cell.GraphemeCluster != null && !char.IsWhiteSpace(cell.GraphemeCluster[0]) ? 2.0f : 0.0f;
 
       if (!terminalRenderer.OverfillCache.TryGetValue(CellFingerprint, out RectF overfill)) {
         float overfillTop = Math.Abs(

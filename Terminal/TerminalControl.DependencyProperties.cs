@@ -123,6 +123,7 @@ namespace Terminal {
       }
 
       terminalControl.terminalEngine.Palette = terminalControl.AnsiColors;
+      terminalControl.terminalEngine.MarkOffscreenBufferDirty();
     }
 
     /// <summary>
@@ -510,7 +511,41 @@ namespace Terminal {
       TerminalControl terminalControl = (TerminalControl) d;
 
       terminalControl.TerminalEngine.TextAntialiasing = terminalControl.TextAntialiasing;
-      terminalControl.InvalidateMeasure();
+      terminalControl.terminalEngine.MarkOffscreenBufferDirty();
+    }
+
+    /// <summary>
+    /// <inheritdoc cref="FullColorEmojiProperty"/>
+    /// </summary>
+    public bool FullColorEmoji {
+      get => (bool) GetValue(FullColorEmojiProperty);
+      set => SetValue(FullColorEmojiProperty, value);
+    }
+
+    /// <summary>
+    /// Whether the terminal should draw full-color emoji.
+    /// </summary>
+    public static readonly DependencyProperty FullColorEmojiProperty = DependencyProperty.Register(
+      nameof(FullColorEmoji),
+      typeof(bool),
+      typeof(TerminalControl),
+      new PropertyMetadata(false, OnFullColorEmojiChanged)
+    );
+
+    /// <summary>
+    /// Invoked when the full-color emoji property changes.
+    /// </summary>
+    /// <param name="d"><inheritdoc
+    /// cref="DependencyPropertyChangedEventHandler"
+    /// path="/param[@name='sender']"/></param>
+    /// <param name="e"><inheritdoc
+    /// cref="DependencyPropertyChangedEventHandler"
+    /// path="/param[@name='e']"/></param>
+    private static void OnFullColorEmojiChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+      TerminalControl terminalControl = (TerminalControl) d;
+
+      terminalControl.TerminalEngine.FullColorEmoji = terminalControl.FullColorEmoji;
+      terminalControl.terminalEngine.MarkOffscreenBufferDirty();
     }
 
     /// <summary>
@@ -548,6 +583,7 @@ namespace Terminal {
       TerminalControl terminalControl = (TerminalControl) d;
 
       terminalControl.terminalEngine.UseBackgroundColorErase = terminalControl.UseBackgroundColorErase;
+      terminalControl.terminalEngine.MarkOffscreenBufferDirty();
     }
 
     /// <summary>

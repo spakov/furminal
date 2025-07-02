@@ -40,6 +40,7 @@ namespace Terminal {
     private bool _useBackgroundColorErase;
     private bool _backgroundIsInvisible;
     private TextAntialiasingStyles _textAntialiasing;
+    private bool _fullColorEmoji;
     private bool _useVisualBell;
     private CursorStyles _cursorStyle;
     private bool _cursorBlink;
@@ -172,8 +173,25 @@ namespace Terminal {
       get => _textAntialiasing;
 
       set {
-        _textAntialiasing = value;
-        terminalRenderer.OffscreenBufferDirty = true;
+        if (_textAntialiasing != value) {
+          _textAntialiasing = value;
+
+          terminalRenderer.OffscreenBufferDirty = true;
+        }
+      }
+    }
+
+    /// <inheritdoc cref="TerminalControl.FullColorEmoji"/>
+    internal bool FullColorEmoji {
+      get => _fullColorEmoji;
+
+      set {
+        if (_fullColorEmoji != value) {
+          _fullColorEmoji = value;
+
+          terminalRenderer.InitializeTextFormats();
+          terminalRenderer.InvalidateLayoutCaches();
+        }
       }
     }
 
@@ -486,6 +504,11 @@ namespace Terminal {
 
     /// <inheritdoc cref="TerminalRenderer.UpdateRefreshRate"/>
     internal void UpdateRefreshRate() => terminalRenderer.UpdateRefreshRate();
+
+    /// <summary>
+    /// Marks the offscreen buffer as dirty, forcing a frame draw.
+    /// </summary>
+    internal void MarkOffscreenBufferDirty() => terminalRenderer.OffscreenBufferDirty = true;
 
     /// <summary>
     /// Invalidates <see cref="TerminalControl.Canvas"/>, asking it to redraw
