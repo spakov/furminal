@@ -93,8 +93,6 @@ namespace Terminal {
     private readonly Queue<DrawableCell> drawableCellForegrounds;
     private readonly HashSet<DrawableCell> seenDrawableCells;
 
-    private uint dispatcherQueueLength;
-
     private bool _cursorDisplayed;
     private bool _cursorVisible;
 
@@ -256,15 +254,13 @@ namespace Terminal {
           if (nowTicks - lastFrameTicks >= effectiveTicksPerFrame) {
             lastFrameTicks = nowTicks;
 
-            if (terminalEngine.DispatcherQueue.TryEnqueue(() => {
+            terminalEngine.DispatcherQueue.TryEnqueue(() => {
               lock (terminalEngine.ScreenBufferLock) {
                 DrawFrame();
               }
-            })) {
-              dispatcherQueueLength++;
-            }
+            });
 
-            if (dispatcherQueueLength > 50 || terminalEngine.VTQueue.Count > 50) {
+            if (terminalEngine.VTQueue.Count > 50) {
               // We're pushing too hard, so cut our frame rate
               if (effectiveFrameRate > 0.0) {
                 if (effectiveFrameRate > 1.0) {
@@ -985,12 +981,43 @@ namespace Terminal {
 
           seenDrawableCells.Add(drawableCell);
         }
+
+#if DEBUG
+        drawingSession.TextAntialiasing = CanvasTextAntialiasing.Aliased;
+        drawingSession.Antialiasing = CanvasAntialiasing.Aliased;
+
+        CanvasTextLayout effectiveFrameRateTextLayout = new(
+          drawingSession,
+          effectiveFrameRate.ToString(),
+          new CanvasTextFormat() { FontSize = 8.0f },
+          50.0f,
+          8.0f
+        );
+
+        drawingSession.FillRectangle(
+          new Windows.Foundation.Rect(
+            0.0,
+            0.0,
+            effectiveFrameRateTextLayout.DrawBounds.Width + 2.0,
+            effectiveFrameRateTextLayout.DrawBounds.Height + 2.0
+          ),
+          Colors.Black
+        );
+
+        drawingSession.DrawTextLayout(
+          effectiveFrameRateTextLayout,
+          new Vector2(
+            (float) (1.0 - effectiveFrameRateTextLayout.DrawBounds.X),
+            (float) (1.0 - effectiveFrameRateTextLayout.DrawBounds.Y)
+          ),
+          Colors.White
+        );
+#endif
       }
 
       lastFrameBounds = new(rows, columns);
 
       terminalEngine.InvalidateCanvas();
-      dispatcherQueueLength--;
     }
 
     /// <summary>

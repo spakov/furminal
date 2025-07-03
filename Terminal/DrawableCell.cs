@@ -3,7 +3,6 @@ using Microsoft.Graphics.Canvas.Text;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using System.Text;
 using Terminal.Helpers;
 using WideCharacter;
 
