@@ -4,6 +4,7 @@ CreatePipe
 CreateProcess
 CreatePseudoConsole
 DeleteProcThreadAttributeList
+GetExitCodeProcess
 InitializeProcThreadAttributeList
 ResizePseudoConsole
 SetConsoleCtrlHandler

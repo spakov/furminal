@@ -131,20 +131,18 @@ namespace AnsiProcessor {
     /// Handles ANSI input from <see cref="consoleOutStream"/>.
     /// </summary>
     private async Task HandleAnsi() {
-      using (StreamReader streamReader = new(consoleOutStream)) {
-        while (true) {
-          int bytesRead = await consoleOutStream.ReadAsync(buffer);
-          if (bytesRead == 0) return;
+      while (true) {
+        int bytesRead = await consoleOutStream.ReadAsync(buffer);
+        if (bytesRead == 0) return;
 
-          int charsDecoded = decoder.GetChars(buffer, 0, bytesRead, charBuffer, 0, false);
-          for (int i = 0; i < charsDecoded; i++) {
-            HandleCharacter(charBuffer[i]);
-          }
-
-          FlushText();
-
-          await WaitUntilResume();
+        int charsDecoded = decoder.GetChars(buffer, 0, bytesRead, charBuffer, 0, false);
+        for (int i = 0; i < charsDecoded; i++) {
+          HandleCharacter(charBuffer[i]);
         }
+
+        FlushText();
+
+        await WaitUntilResume();
       }
     }
 

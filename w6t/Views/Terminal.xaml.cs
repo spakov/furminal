@@ -172,7 +172,7 @@ namespace w6t.Views {
       UpdateVisualBellTimerInterval();
       visualBellTimer.Tick += VisualBellTimer_Tick;
 
-      ViewModel = new(dependencyProperties.StartDirectory, dependencyProperties.Command);
+      ViewModel = new(this, dependencyProperties.StartDirectory, dependencyProperties.Command);
       ViewModel.PseudoconsoleDied += ViewModel_PseudoconsoleDied;
       InitializeComponent();
       resources = ResourceLoader.GetForViewIndependentUse();
@@ -196,6 +196,12 @@ namespace w6t.Views {
       TerminalControl.RegisterPropertyChangedCallback(TerminalControl.FontFamilyProperty, SetFontFamily);
       TerminalControl.RegisterPropertyChangedCallback(TerminalControl.FontSizeProperty, SetFontSize);
     }
+
+    /// <summary>
+    /// Writes <paramref name="message"/> to the terminal.
+    /// </summary>
+    /// <param name="message">The message to write.</param>
+    internal void Write(string message) => TerminalControl.Write(message);
 
     /// <summary>
     /// Handles the case in which the <see cref="ViewModel"/>'s <see

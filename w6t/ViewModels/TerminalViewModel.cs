@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 namespace w6t.ViewModels {
   internal partial class TerminalViewModel : ObservableObject {
+    private readonly Views.Terminal terminal;
+
     private readonly DispatcherQueue dispatcherQueue;
 
     private readonly Pseudoconsole pseudoconsole;
@@ -95,11 +97,14 @@ namespace w6t.ViewModels {
     /// <summary>
     /// Initializes a <see cref="TerminalViewModel"/>.
     /// </summary>
+    /// <param name="terminal">A <see cref="Views.Terminal"/>.</param>
     /// <param name="startDirectory">The directory in which to start the
     /// shell.</param>
     /// <param name="command">The command to execute in the
     /// pseudoconsole.</param>
-    internal TerminalViewModel(string? startDirectory, string command) {
+    internal TerminalViewModel(Views.Terminal terminal, string? startDirectory, string command) {
+      this.terminal = terminal;
+
       dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
       _palette = new();
@@ -117,7 +122,7 @@ namespace w6t.ViewModels {
 
       pseudoconsole = new(command, (uint) _rows, (uint) _columns);
       pseudoconsole.Ready += Pseudoconsole_Ready;
-      pseudoconsole.Disposing += Pseudoconsole_Disposing;
+      pseudoconsole.Done += Pseudoconsole_Done;
 
       StartPseudoconsole();
     }
@@ -145,6 +150,14 @@ namespace w6t.ViewModels {
     /// <summary>
     /// Invoked when the pseudoconsole is being disposed.
     /// </summary>
-    private void Pseudoconsole_Disposing() => dispatcherQueue.TryEnqueue(Application.Current.Exit);
+    /// <param name="exitCode">The exit code of the command that
+    /// executed.</param>
+    private void Pseudoconsole_Done(uint exitCode) {
+      if (exitCode == 0) {
+        dispatcherQueue.TryEnqueue(Application.Current.Exit);
+      } else {
+        terminal.Write($"{pseudoconsole.Command} exited with {exitCode}");
+      }
+    }
   }
 }

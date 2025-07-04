@@ -98,6 +98,14 @@ namespace Terminal {
     }
 
     /// <summary>
+    /// Writes a message to the terminal.
+    /// </summary>
+    /// <remarks>Keep in mind that the source of the message may be confusing
+    /// to the user.</remarks>
+    /// <param name="message"></param>
+    public void Write(string message) => terminalEngine.VideoTerminal.Write(message);
+
+    /// <summary>
     /// Writes an error to the terminal.
     /// </summary>
     /// <remarks>This is meant to be used in exceptional cases that prevent

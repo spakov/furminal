@@ -356,14 +356,33 @@ namespace Terminal {
     /// <summary>
     /// Writes <paramref name="message"/> to the terminal.
     /// </summary>
+    /// <param name="message">The message to write.</param>
+    internal void Write(string message) {
+      lock (terminalEngine.ScreenBufferLock) {
+        graphicRendition.ForegroundColor = System.Drawing.Color.White;
+        graphicRendition.BackgroundColor = System.Drawing.Color.Navy;
+
+        NextRow();
+        WriteText(message);
+        NextRow();
+      }
+    }
+
+    /// <summary>
+    /// Writes <paramref name="message"/> to the terminal in very pronounced
+    /// colors.
+    /// </summary>
     /// <remarks>This is meant to be used in exceptional cases that prevent
     /// the terminal from working at all.</remarks>
     /// <param name="message">The message to write.</param>
     internal void WriteError(string message) {
       lock (terminalEngine.ScreenBufferLock) {
-        graphicRendition.ForegroundColor = System.Drawing.Color.Red;
-        graphicRendition.BackgroundColor = System.Drawing.Color.Black;
+        graphicRendition.ForegroundColor = System.Drawing.Color.White;
+        graphicRendition.BackgroundColor = System.Drawing.Color.Red;
+
+        NextRow();
         WriteText(message);
+        NextRow();
       }
     }
 

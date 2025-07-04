@@ -1,6 +1,7 @@
 ﻿using ConPTY.Win32.Interop;
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,10 +17,15 @@ namespace ConPTY {
   /// attach.</param>
   /// <param name="rows">The ConPTY number of rows.</param>
   /// <param name="columns">The ConPTY number of columns.</param>
-  public class Pseudoconsole(string command, uint rows = 80, uint columns = 24) {
-    private SafeFileHandle? consoleInputPipeWriteHandle;
-
+  /// <param name="restartOnDone">Whether to restart the process when it
+  /// exits normally.</param>
+  public class Pseudoconsole(string command, uint rows = 80, uint columns = 24, bool restartOnDone = false) : IDisposable {
+    private Pipe? stdin;
+    private Pipe? stdout;
     private PseudoConsole? pseudoConsole;
+    private Process? process;
+
+    private bool disposedValue;
 
     /// <summary>
     /// Callback for receiving notification that the pseudoconsole is ready.
@@ -32,15 +38,14 @@ namespace ConPTY {
     public event OnReady? Ready;
 
     /// <summary>
-    /// Callback for receiving notification that the pseudoconsole is being
-    /// disposed.
+    /// Callback for receiving notification that the pseudoconsole is done.
     /// </summary>
-    public delegate void OnDisposing();
+    public delegate void OnDone(uint exitCode);
 
     /// <summary>
-    /// Invoked when the psuedoconsole is being disposed.
+    /// Invoked when the psuedoconsole is done.
     /// </summary>
-    public event OnDisposing? Disposing;
+    public event OnDone? Done;
 
     /// <summary>
     /// A stream of VT-100-enabled output from the console.
@@ -86,26 +91,41 @@ namespace ConPTY {
     }
 
     /// <summary>
+    /// Whether to restart the process when it exits normally.
+    /// </summary>
+    public bool RestartOnDone {
+      get => restartOnDone;
+      
+      set {
+        if (restartOnDone != value) {
+          restartOnDone = value;
+        }
+      }
+    }
+
+    /// <summary>
     /// Starts the pseudoconsole, runs the command, and attaches input and
     /// output streams.
     /// </summary>
     /// <exception cref="System.ComponentModel.Win32Exception"></exception>
     public async Task Start() {
-      using (Pipe stdin = new())
-      using (Pipe stdout = new())
-      using (pseudoConsole = PseudoConsole.Create(stdin.Read, stdout.Write, rows, columns))
-      using (Process process = ProcessHelper.Start(command, PseudoConsole.PseudoConsoleThreadAttribute, pseudoConsole.Handle)) {
-        ConsoleOutStream = new FileStream(stdout.Read, FileAccess.Read);
+      stdin = new();
+      stdout = new();
+      pseudoConsole = PseudoConsole.Create(stdin.Read, stdout.Write, rows, columns);
 
-        consoleInputPipeWriteHandle = stdin.Write;
-        ConsoleInStream = new FileStream(consoleInputPipeWriteHandle, FileAccess.Write);
+      ConsoleOutStream = new FileStream(stdout.Read, FileAccess.Read);
+      ConsoleInStream = new FileStream(stdin.Write, FileAccess.Write);
 
-        Ready?.Invoke();
-        OnClose(() => DisposeResources(process, pseudoConsole, stdout, stdin));
+      Ready?.Invoke();
+
+      uint exitCode;
+
+      do {
+        process = ProcessHelper.Start(command, PseudoConsole.PseudoConsoleThreadAttribute, pseudoConsole.Handle);
         await Task.Run(() => WaitForExit(process).WaitOne(Timeout.Infinite));
-      }
-
-      Disposing?.Invoke();
+        PInvoke.GetExitCodeProcess(new SafeProcessHandle(process.ProcessInformation.hProcess, false), out exitCode);
+        Done?.Invoke(exitCode);
+      } while (RestartOnDone && exitCode == 0);
     }
 
     /// <summary>
@@ -127,33 +147,41 @@ namespace ConPTY {
     }
 
     /// <summary>
-    /// Registers a handler to be invoked when a console close event occurs.
-    /// </summary>
-    /// <remarks>This method uses a platform invocation to set a console
-    /// control handler. The provided  <paramref name="handler"/> will be
-    /// called when a CTRL+C event is received. The method does not prevent
-    /// the default behavior of the event.</remarks>
-    /// <param name="handler">The action to execute when a console close event,
-    /// such as a CTRL+C signal, is detected.</param>
-    private static void OnClose(Action handler) {
-      PInvoke.SetConsoleCtrlHandler(
-        eventType => {
-          if (eventType == PInvoke.CTRL_C_EVENT) handler();
-
-          return false;
-        },
-        true
-      );
-    }
-
-    /// <summary>
     /// Disposes all <see cref="IDisposable"/>s in <paramref
     /// name="disposables"/>.
     /// </summary>
     /// <param name="disposables">The <see cref="IDisposable"/>s to
     /// dispose.</param>
-    private static void DisposeResources(params IDisposable[] disposables) {
+    private static void DisposeResources(IDisposable[] disposables) {
       foreach (IDisposable disposable in disposables) disposable.Dispose();
+    }
+
+    /// <summary>
+    /// Disposes of resources.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose of managed
+    /// resources.</param>
+    protected virtual void Dispose(bool disposing) {
+      if (!disposedValue) {
+        if (disposing) {
+          List<IDisposable> disposables = [];
+
+          if (process is not null) disposables.Add(process);
+          if (pseudoConsole is not null) disposables.Add(pseudoConsole);
+          if (stdout is not null) disposables.Add(stdout);
+          if (stdin is not null) disposables.Add(stdin);
+
+          DisposeResources([.. disposables]);
+        }
+
+        disposedValue = true;
+      }
+    }
+
+    public void Dispose() {
+      // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+      Dispose(disposing: true);
+      GC.SuppressFinalize(this);
     }
   }
 }
