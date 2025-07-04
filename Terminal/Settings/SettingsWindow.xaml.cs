@@ -1,24 +1,44 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
+using Microsoft.Win32;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Dwm;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
-using WinUIEx;
 
 namespace Terminal.Settings {
   /// <summary>
   /// The settings window.
   /// </summary>
-  public sealed partial class SettingsWindow : WindowEx {
+  /// <remarks>Why not just use a <see cref="Window"/>? Well, if we do, we're
+  /// relying on the assumption that the consumer of <see
+  /// cref="TerminalControl"/> is running in a <see cref="Window"/>. For
+  /// TermBar, that's not the case—it's running in a <see
+  /// cref="DesktopWindowXamlSource"/>. If we use a <see cref="Window"/>,
+  /// closing the settings window closes the entire hosting application, which
+  /// is obviously not desired behavior.</remarks>
+  public sealed partial class SettingsWindow : UserControl {
     private const int preferredWidth = 400;
     private const int preferredHeight = 640;
     private const int preferredMargin = 8;
 
+    private const string lightThemeKey = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+    private const string lightThemeName = "AppsUseLightTheme";
+
     private readonly TerminalControl terminalControl;
     private readonly SettingsViewModel viewModel;
+
+    private readonly HWND nativeHWnd;
+    private readonly HWND islandHWnd;
+
+    private readonly WNDPROC? settingsWindowProc = null;
+    private int lastDarkMode = -1;
 
     /// <summary>
     /// The <see cref="SettingsViewModel"/>.
@@ -33,21 +53,74 @@ namespace Terminal.Settings {
       this.terminalControl = terminalControl;
 
       viewModel = new(terminalControl);
+      DataContext = ViewModel;
+      InitializeComponent();
 
-      if (PInvoke.SetWindowLong(
-        new(WinRT.Interop.WindowNative.GetWindowHandle(this)),
-        WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE,
-        (int) (WINDOW_EX_STYLE.WS_EX_TOOLWINDOW | WINDOW_EX_STYLE.WS_EX_TOPMOST)
-      ) == 0) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+      string className = "SettingsWindow";
+      HMODULE hInstance = PInvoke.GetModuleHandle((PCWSTR) null);
+      WNDCLASSEXW wndClass;
+
+      if (settingsWindowProc is null) {
+        settingsWindowProc = new(SettingsWindowProc);
+
+        unsafe {
+          fixed (char* classNamePtr = "SettingsWindow") {
+            wndClass = new() {
+              cbSize = (uint) Marshal.SizeOf<WNDCLASSEXW>(),
+              lpfnWndProc = settingsWindowProc,
+              hInstance = hInstance,
+              lpszClassName = new(classNamePtr)
+            };
+          }
+        }
+
+        PInvoke.RegisterClassEx(wndClass);
       }
 
-      InitializeComponent();
-      Title = terminalControl.ResourceLoader.GetString("SettingsWindowTitle");
+      unsafe {
+        nativeHWnd = PInvoke.CreateWindowEx(
+          WINDOW_EX_STYLE.WS_EX_COMPOSITED
+          | WINDOW_EX_STYLE.WS_EX_LAYERED
+          | WINDOW_EX_STYLE.WS_EX_TOOLWINDOW
+          | WINDOW_EX_STYLE.WS_EX_TOPMOST,
+          className,
+          terminalControl.ResourceLoader.GetString("SettingsWindowTitle"),
+          WINDOW_STYLE.WS_OVERLAPPED
+          | WINDOW_STYLE.WS_CAPTION
+          | WINDOW_STYLE.WS_POPUPWINDOW,
+          0,
+          0,
+          preferredWidth,
+          preferredHeight,
+          HWND.Null,
+          null,
+          null,
+          null
+        );
+      }
+
+      DesktopWindowXamlSource xamlSource = new();
+      xamlSource.Initialize(Win32Interop.GetWindowIdFromWindow(nativeHWnd));
+      xamlSource.Content = this;
+
+      islandHWnd = new(Win32Interop.GetWindowFromWindowId(xamlSource.SiteBridge.WindowId));
 
       if (terminalControl.ShowSettingsSaveAsDefaultsButton) {
         SaveAsDefaultsContainer.Visibility = Visibility.Visible;
       }
+
+      int backdropType = 2;
+
+      unsafe {
+        PInvoke.DwmSetWindowAttribute(
+          nativeHWnd,
+          DWMWINDOWATTRIBUTE.DWMWA_SYSTEMBACKDROP_TYPE,
+          &backdropType,
+          sizeof(int)
+        );
+      }
+
+      ApplySystemTheme();
     }
 
     /// <summary>
@@ -58,9 +131,7 @@ namespace Terminal.Settings {
       // changes
       terminalControl.HasFocus = true;
 
-      HWND settingsWindowHWnd = new(Microsoft.UI.Win32Interop.GetWindowFromWindowId(AppWindow.Id));
-
-      if (!PInvoke.IsWindowVisible(settingsWindowHWnd)) {
+      if (!PInvoke.IsWindowVisible(islandHWnd)) {
         HWND terminalWindowHWnd = new(terminalControl.HWnd);
         RECT terminalWindowRect = new();
         HMONITOR terminalWindowMonitor;
@@ -89,8 +160,7 @@ namespace Terminal.Settings {
         int settingsWindowX = terminalWindowRect.X;
         int settingsWindowY = terminalWindowRect.Y;
 
-        // Activate() will activate the window
-        SET_WINDOW_POS_FLAGS settingsWindowFlags = SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE;
+        SET_WINDOW_POS_FLAGS settingsWindowFlags = SET_WINDOW_POS_FLAGS.SWP_NOZORDER;
 
         // Determine settings window position, in order of preference
         if ( // To the right
@@ -113,45 +183,109 @@ namespace Terminal.Settings {
         ) {
           settingsWindowX += (terminalWindowRect.Width / 2) - (preferredWidth / 2);
           settingsWindowY -= preferredHeight + preferredMargin;
-        } else { // No good way to position the window, so let Activate() do
-                 // it
+        } else { // No good way to position the window
           settingsWindowFlags |= SET_WINDOW_POS_FLAGS.SWP_NOMOVE;
         }
 
         if (!PInvoke.SetWindowPos(
-          settingsWindowHWnd,
-          HWND.HWND_TOPMOST,
+          nativeHWnd,
+          HWND.Null,
           settingsWindowX,
           settingsWindowY,
           preferredWidth,
           preferredHeight,
+          settingsWindowFlags | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW
+        )) {
+          throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
+        RECT nativeWindowClientArea = new();
+
+        if (!PInvoke.GetClientRect(
+          nativeHWnd,
+          out nativeWindowClientArea
+        )) {
+          throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
+        if (!PInvoke.SetWindowPos(
+          islandHWnd,
+          HWND.Null,
+          nativeWindowClientArea.X,
+          nativeWindowClientArea.Y,
+          nativeWindowClientArea.Width,
+          nativeWindowClientArea.Height,
           settingsWindowFlags
         )) {
           throw new Win32Exception(Marshal.GetLastWin32Error());
         }
+      } else {
+        if (PInvoke.SetActiveWindow(nativeHWnd) == HWND.Null) {
+          throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
       }
 
-      Activate();
-
-      // Occasionally the terminal's canvas clears at this point. Not sure why.
+      // Occasionally the terminal's canvas clears at this point. It has
+      // something to do with modifying the XAML tree, but I'm not quite sure
+      // what causes the canvas clear. In any case, work around it.
       terminalControl.TerminalEngine.MarkOffscreenBufferDirty();
     }
 
     /// <summary>
-    /// Invoked when the window is closed.
+    /// Handles <see cref="WNDPROC"/> callbacks for the native window.
     /// </summary>
-    /// <param name="sender"><inheritdoc
-    /// cref="TypedEventHandler{TSender, TResult}"
-    /// path="/param[@name='sender']"/></param>
-    /// <param name="args"><inheritdoc
-    /// cref="TypedEventHandler{TSender, TResult}"
-    /// path="/param[@name='args']"/></param>
-    private void Window_Closed(object sender, WindowEventArgs args) {
-      foreach (KeyValuePair<DependencyProperty, long> callbackToken in viewModel.CallbackTokens) {
-        terminalControl.UnregisterPropertyChangedCallback(callbackToken.Key, callbackToken.Value);
+    /// <param name="hWnd">The window handle.</param>
+    /// <param name="uMsg">The message.</param>
+    /// <param name="wParam">Additional message information.</param>
+    /// <param name="lParam">Additional message information.</param>
+    /// <returns>The result of a call to <see
+    /// cref="PInvoke.DefWindowProc"/>.</returns>
+    private LRESULT SettingsWindowProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam) {
+      switch (uMsg) {
+        case PInvoke.WM_SETTINGCHANGE:
+          ApplySystemTheme();
+
+          break;
+
+        case PInvoke.WM_CLOSE:
+          foreach (KeyValuePair<DependencyProperty, long> callbackToken in viewModel.CallbackTokens) {
+            terminalControl.UnregisterPropertyChangedCallback(callbackToken.Key, callbackToken.Value);
+          }
+
+          terminalControl.SettingsWindow = null;
+
+          break;
       }
 
-      terminalControl.SettingsWindow = null;
+      return PInvoke.DefWindowProc(hWnd, uMsg, wParam, lParam);
+    }
+
+    /// <summary>
+    /// Applies the current system theme (light or dark) to the native window's
+    /// backdrop.
+    /// </summary>
+    /// <remarks>Does nothing if the system theme did not change.</remarks>
+    private void ApplySystemTheme() {
+      using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(lightThemeKey)) {
+        object? value = key?.GetValue(lightThemeName);
+
+        if (value is int appsUseLightTheme) {
+          int darkMode = appsUseLightTheme == 0 ? 1 : 0;
+
+          if (lastDarkMode != darkMode) {
+            unsafe {
+              PInvoke.DwmSetWindowAttribute(
+                nativeHWnd,
+                DWMWINDOWATTRIBUTE.DWMWA_USE_IMMERSIVE_DARK_MODE,
+                &darkMode,
+                sizeof(int)
+              );
+            }
+
+            lastDarkMode = darkMode;
+          }
+        }
+      }
     }
 
     /// <summary>
@@ -170,6 +304,6 @@ namespace Terminal.Settings {
     /// path="/param[@name='sender']"/></param>
     /// <param name="e"><inheritdoc cref="RoutedEventHandler"
     /// path="/param[@name='e']"/></param>
-    private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+    private void CloseButton_Click(object sender, RoutedEventArgs e) => PInvoke.PostMessage(nativeHWnd, PInvoke.WM_CLOSE, 0, 0);
   }
 }
