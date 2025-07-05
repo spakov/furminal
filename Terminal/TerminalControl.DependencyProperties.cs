@@ -690,6 +690,18 @@ namespace Terminal {
       TerminalControl terminalControl = (TerminalControl) d;
 
       terminalControl.terminalEngine.CursorStyle = terminalControl.CursorStyle;
+
+      if (terminalControl.BlockCursorMenuItem is not null) {
+        terminalControl.BlockCursorMenuItem.IsChecked = terminalControl.CursorStyle == CursorStyles.Block;
+      }
+
+      if (terminalControl.UnderlineCursorMenuItem is not null) {
+        terminalControl.UnderlineCursorMenuItem.IsChecked = terminalControl.CursorStyle == CursorStyles.Underline;
+      }
+
+      if (terminalControl.BarCursorMenuItem is not null) {
+        terminalControl.BarCursorMenuItem.IsChecked = terminalControl.CursorStyle == CursorStyles.Bar;
+      }
     }
 
     /// <summary>
