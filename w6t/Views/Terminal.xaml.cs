@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Terminal;
 using w6t.Settings;
@@ -144,11 +145,8 @@ namespace w6t.Views {
       logger.LogInformation("--columns: {startColumns}", startColumns);
 #endif
 
-      jsonSerializerOptions = new() {
-        WriteIndented = true
-      };
+      jsonSerializerOptions = new(SettingsContext.Default.Options);
       jsonSerializerOptions.Converters.Add(new ColorJsonConverter());
-      jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
       settingsJsonPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, settingsJsonFilename);
 

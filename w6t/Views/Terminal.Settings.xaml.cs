@@ -6,12 +6,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Timers;
 using Terminal;
 using Terminal.Helpers;
 using Terminal.Settings;
 using w6t.Settings;
+using w6t.Settings.Json;
 using Windows.UI;
 
 namespace w6t.Views {
@@ -38,6 +40,9 @@ namespace w6t.Views {
     /// settings.</param>
     /// <param name="terminalIsInitialized">Whether the <see
     /// cref="TerminalControl"/> is ready.</param>
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Types are preserved")]
+#pragma warning restore IDE0079 // Remove unnecessary suppression
     public void LoadSettings(bool initialLoad = false, bool terminalIsInitialized = false) {
       if (startCommand is not null && startCommand.Length > 0 && initialLoad) {
         dependencyProperties.Command = string.Join(' ', startCommand);
@@ -581,6 +586,9 @@ namespace w6t.Views {
     /// Invoked when the user clicks the terminal's settings window's save as
     /// defaults button.
     /// </summary>
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Types are preserved")]
+#pragma warning restore IDE0079 // Remove unnecessary suppression
     private void TerminalControl_SaveSettingsAsDefaults() {
       Settings.Json.Settings settings = new() {
         Basics = new() {
