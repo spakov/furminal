@@ -88,6 +88,8 @@ namespace Terminal {
       logger = factory.CreateLogger<TerminalControl>();
 #endif
 
+      TrimRoots.PreserveTrimmableClasses();
+
       _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
       InitializeComponent();
