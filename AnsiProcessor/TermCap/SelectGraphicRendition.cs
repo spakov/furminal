@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AnsiProcessor.TermCap {
+namespace Spakov.AnsiProcessor.TermCap {
   /// <summary>
   /// Allows defining supported SGR escape sequences to handle via callbacks.
   /// </summary>

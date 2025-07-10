@@ -2,7 +2,7 @@
 using Windows.Win32.Security;
 using Windows.Win32.System.Threading;
 
-namespace ConPTY.Win32 {
+namespace Spakov.ConPTY.Win32 {
   internal unsafe static class Kernel32 {
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [return: MarshalAs(UnmanagedType.Bool)]

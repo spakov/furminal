@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Media;
 using System;
 using Windows.UI;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// Conversion to/from <see cref="Color"/> to <see cref="SolidColorBrush"/>.
   /// </summary>

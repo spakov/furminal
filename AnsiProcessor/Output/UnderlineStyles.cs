@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Output {
+﻿namespace Spakov.AnsiProcessor.Output {
   /// <summary>
   /// A list of underline styles as an extension to <see
   /// cref="Ansi.EscapeSequences.SGR.UNDERLINE"/>.

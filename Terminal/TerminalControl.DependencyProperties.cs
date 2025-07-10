@@ -1,13 +1,15 @@
-﻿using AnsiProcessor.AnsiColors;
-using AnsiProcessor.TermCap;
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.TermCap;
+using Spakov.Terminal.Helpers;
 using System.IO;
-using Terminal.Helpers;
 using Windows.UI;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   public sealed partial class TerminalControl : UserControl {
     /// <summary>
     /// <inheritdoc cref="ConsoleOutputProperty"/>

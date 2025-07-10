@@ -1,5 +1,5 @@
-﻿using ConPTY.Win32.Interop;
-using Microsoft.Win32.SafeHandles;
+﻿using Microsoft.Win32.SafeHandles;
+using Spakov.ConPTY.Win32.Interop;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Win32;
 
-namespace ConPTY {
+namespace Spakov.ConPTY {
   /// <summary>
   /// A psuedoconsole based on <see
   /// href="https://github.com/microsoft/terminal/tree/main/samples/ConPTY/GUIConsole/GUIConsole.ConPTY"

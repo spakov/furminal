@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences {
   /// <summary>
   /// The nF escape sequences, which are <see cref="C0.ESC"/> [followed by
   /// <c>0x20-0x2f</c>, followed by additional bytes], where the bracketed text

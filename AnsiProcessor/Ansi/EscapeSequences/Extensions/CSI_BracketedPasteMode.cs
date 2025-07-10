@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI bracketed paste mode escape sequences.
   /// </summary>

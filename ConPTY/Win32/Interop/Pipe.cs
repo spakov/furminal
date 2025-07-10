@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 
-namespace ConPTY.Win32.Interop {
+namespace Spakov.ConPTY.Win32.Interop {
   /// <summary>
   /// A psuedoconsole pipe.
   /// </summary>

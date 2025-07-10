@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A caption settings item, presented as a caption-styled <see
   /// cref="Microsoft.UI.Xaml.Controls.TextBlock"/>.

@@ -1,13 +1,13 @@
-﻿using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Output.EscapeSequences.Fe;
-using AnsiProcessor.Output.EscapeSequences.Fp;
-using AnsiProcessor.Output.EscapeSequences.Fs;
-using AnsiProcessor.Output.EscapeSequences.NF;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fp;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fs;
+using Spakov.AnsiProcessor.Output.EscapeSequences.NF;
+using Spakov.AnsiProcessor.TermCap;
 using System;
-using static AnsiProcessor.AnsiReader;
+using static Spakov.AnsiProcessor.AnsiReader;
 
-namespace AnsiProcessor.Output.EscapeSequences {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences {
   /// <summary>
   /// An ANSI escape sequence.
   /// </summary>

@@ -1,13 +1,12 @@
-﻿using AnsiProcessor.Input;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.Input;
+using Spakov.AnsiProcessor.TermCap;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using Windows.Win32;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 
-namespace AnsiProcessor.Helpers {
+namespace Spakov.AnsiProcessor.Helpers {
   /// <summary>
   /// Methods for converting keystrokes to ANSI.
   /// </summary>

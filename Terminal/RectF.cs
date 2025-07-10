@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A rectangle, used for <see cref="Cell"/> overfill tracking.
   /// </summary>

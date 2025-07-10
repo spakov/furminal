@@ -1,12 +1,12 @@
 ﻿using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Text;
+using Spakov.Terminal.Helpers;
+using Spakov.WideCharacter;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using Terminal.Helpers;
-using WideCharacter;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A cell to be drawn by the <see cref="TerminalRenderer"/>, plus metadata.
   /// </summary>

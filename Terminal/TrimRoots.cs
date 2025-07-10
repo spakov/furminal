@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Terminal.Settings;
+﻿using Spakov.Terminal.Settings;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// Prevents trimming of classes that are never instantiated with new().
   /// </summary>

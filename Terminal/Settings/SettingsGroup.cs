@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A settings group.
   /// </summary>

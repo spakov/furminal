@@ -1,23 +1,23 @@
-﻿using AnsiProcessor.Ansi.EscapeSequences;
-using AnsiProcessor.Ansi.EscapeSequences.Extensions;
-using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Helpers;
-using AnsiProcessor.Output;
-using AnsiProcessor.Output.EscapeSequences;
-#if DEBUG
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
 #endif
 using Microsoft.UI.Input;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.Output;
+using Spakov.AnsiProcessor.Output.EscapeSequences;
+using Spakov.WideCharacter;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using WideCharacter;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// The screen buffer and its state, which is analogous to a VT100.
   /// </summary>

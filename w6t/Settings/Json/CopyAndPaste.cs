@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class CopyAndPaste {
     public bool? CopyOnMouseUp { get; set; }
     public bool? PasteOnMiddleClick { get; set; }

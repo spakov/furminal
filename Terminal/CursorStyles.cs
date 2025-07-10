@@ -1,4 +1,4 @@
-﻿namespace Terminal {
+﻿namespace Spakov.Terminal {
   /// <summary>
   /// Supported cursor styles.
   /// </summary>

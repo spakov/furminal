@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.TermCap {
+﻿namespace Spakov.AnsiProcessor.TermCap {
   /// <summary>
   /// Terminal capabilities definition.
   /// </summary>

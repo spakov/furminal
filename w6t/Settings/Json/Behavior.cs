@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class Behavior {
     public bool? UseVisualBell { get; set; }
     public int? VisualBellDisplayTime { get; set; }

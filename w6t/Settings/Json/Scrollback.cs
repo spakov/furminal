@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class Scrollback {
     public int? ScrollbackLines { get; set; }
     public int? LinesPerScrollback { get; set; }

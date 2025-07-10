@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace EmojiGenerator {
+namespace Spakov.EmojiGenerator {
   internal class Generator {
     private const string emojiSequencesPath = @"..\EmojiGenerator\Unicode\emoji-sequences.txt";
     private const string emojiZwjSequencesPath = @"..\EmojiGenerator\Unicode\emoji-zwj-sequences.txt";
@@ -21,14 +21,14 @@ namespace EmojiGenerator {
       /* </auto-generated>                                                         */
       /*****************************************************************************/
 
-      namespace WideCharacter {
+      namespace {namespace} {
         internal static class Emoji {
           internal static readonly HashSet<string> emojiSequences = [
-            {0}
+            {emojiSequences}
           ];
 
           internal static readonly HashSet<string> emojiZwjSequences = [
-            {1}
+            {emojiZwjSequences}
           ];
         }
       }
@@ -37,11 +37,23 @@ namespace EmojiGenerator {
     private const string emojiDotCsContentIndent = "      ";
 
     private readonly string? outputPath;
+    private readonly string @namespace;
 
-    internal Generator(string? outputPath) {
+    /// <summary>
+    /// Initializes a <see cref="Generator"/>.
+    /// </summary>
+    /// <param name="outputPath">The generated code output path.</param>
+    /// <param name="namespace">The namespace to use for generated
+    /// code.</param>
+    internal Generator(string? outputPath, string @namespace) {
       this.outputPath = outputPath;
+      this.@namespace = @namespace;
     }
 
+    /// <summary>
+    /// Generates the emoji code.
+    /// </summary>
+    /// <returns>0 on success or non-zero on failure.</returns>
     internal int Generate() {
       HashSet<string> emojiSequences = [];
       HashSet<string> emojiZwjSequences = [];
@@ -83,10 +95,13 @@ namespace EmojiGenerator {
         using (StreamWriter emojiDotCsStream = new(outputFilePath, new FileStreamOptions() { Access = FileAccess.Write, Mode = FileMode.Create })) {
           emojiDotCsStream.Write(
             emojiDotCsContent.Replace(
-              "{0}",
+              "{namespace}",
+              @namespace
+            ).Replace(
+              "{emojiSequences}",
               emojiSequences.ToCode(emojiDotCsContentIndent)
             ).Replace(
-              "{1}",
+              "{emojiZwjSequences}",
               emojiZwjSequences.ToCode(emojiDotCsContentIndent)
             )
           );

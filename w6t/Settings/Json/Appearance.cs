@@ -1,7 +1,7 @@
-﻿using Terminal;
+﻿using Spakov.Terminal;
 using Windows.UI;
 
-namespace w6t.Settings.Json {
+namespace Spakov.W6t.Settings.Json {
   internal class Appearance {
     public WindowBackdrops? WindowBackdrop { get; set; }
     public Color? SolidColorWindowBackdropColor { get; set; }

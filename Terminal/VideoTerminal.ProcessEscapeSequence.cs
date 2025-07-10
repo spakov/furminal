@@ -1,20 +1,20 @@
-﻿using AnsiProcessor.Ansi.EscapeSequences;
-using AnsiProcessor.Ansi.EscapeSequences.Extensions;
-using AnsiProcessor.Helpers;
-using AnsiProcessor.Output.EscapeSequences;
-using AnsiProcessor.Output.EscapeSequences.Fe;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
-using AnsiProcessor.Output.EscapeSequences.Fe.OSC;
-using AnsiProcessor.Output.EscapeSequences.Fp;
-using AnsiProcessor.Output.EscapeSequences.Fs;
-#if DEBUG
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
 #endif
+using Spakov.AnsiProcessor.Ansi.EscapeSequences;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
+using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.Output.EscapeSequences;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.OSC;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fp;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fs;
 using System;
 using System.Text;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   internal partial class VideoTerminal {
     /// <summary>
     /// Processes <paramref name="escapeSequence"/>.

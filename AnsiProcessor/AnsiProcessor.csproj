@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>Spakov.AnsiProcessor</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>spakov.$(AssemblyName)</PackageId>
     <Authors>spakov</Authors>

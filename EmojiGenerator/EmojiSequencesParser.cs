@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace EmojiGenerator {
+namespace Spakov.EmojiGenerator {
   /// <summary>
   /// A parser for <c>emoji-sequences.txt</c>.
   /// </summary>

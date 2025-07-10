@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.Globalization.NumberFormatting;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A floating-point settings item, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.NumberBox"/> with a spinner.

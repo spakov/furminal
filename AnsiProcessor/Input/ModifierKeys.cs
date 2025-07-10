@@ -1,7 +1,7 @@
-﻿using AnsiProcessor.Helpers;
+﻿using Spakov.AnsiProcessor.Helpers;
 using System;
 
-namespace AnsiProcessor.Input {
+namespace Spakov.AnsiProcessor.Input {
   /// <summary>
   /// Keyboard modifier keys, for a standard US QWERTY 104-key keyboard.
   /// </summary>

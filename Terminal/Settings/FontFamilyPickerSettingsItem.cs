@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A font family picker settings item, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.ComboBox"/> and associated <see

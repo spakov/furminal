@@ -1,10 +1,12 @@
-﻿using AnsiProcessor.Output;
-#if DEBUG
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
 #endif
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI;
+using Spakov.AnsiProcessor.Output;
+using Spakov.Terminal.Helpers;
+using Spakov.WideCharacter;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,14 +15,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Terminal.Helpers;
-using WideCharacter;
 using Windows.UI;
 using Windows.UI.Text;
 using Windows.Win32;
 using Windows.Win32.Graphics.Gdi;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A terminal renderer, responsible for drawing operations.
   /// </summary>

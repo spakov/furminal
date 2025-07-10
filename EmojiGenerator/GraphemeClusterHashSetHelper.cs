@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace EmojiGenerator {
+namespace Spakov.EmojiGenerator {
   /// <summary>
   /// Extension methods on a <see cref="HashSet{T}"/> of <see
   /// langword="string"/> grapheme clusters.

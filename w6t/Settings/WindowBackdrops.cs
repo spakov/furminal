@@ -2,7 +2,7 @@
 using Windows.UI.Composition;
 using WinUIEx;
 
-namespace w6t {
+namespace Spakov.W6t.Settings {
   /// <summary>
   /// Supported window backdrops.
   /// </summary>

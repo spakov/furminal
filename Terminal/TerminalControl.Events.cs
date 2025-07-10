@@ -1,6 +1,4 @@
-﻿using AnsiProcessor.Input;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
-using Microsoft.Graphics.Canvas;
+﻿using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Dispatching;
@@ -10,11 +8,13 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Spakov.AnsiProcessor.Input;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
+using Spakov.Terminal.Helpers;
+using Spakov.Terminal.Settings;
 using System;
-using Terminal.Helpers;
-using Terminal.Settings;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   public sealed partial class TerminalControl : UserControl {
     /// <summary>
     /// Callback for receiving notification that the terminal dimensions

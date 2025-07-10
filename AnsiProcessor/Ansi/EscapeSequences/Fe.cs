@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences {
   /// <summary>
   /// The Fe escape sequences, which are <see cref="C0.ESC"/> followed by
   /// <c>0x40-0x5f</c> (the constants in <see cref="Fe"/>).

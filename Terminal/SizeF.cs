@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// Like <see cref="Windows.Foundation.Size"/>, but with <see
   /// langword="float"/>s.

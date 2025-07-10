@@ -4,15 +4,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Spakov.Terminal;
+using Spakov.W6t.Settings;
+using Spakov.W6t.Settings.Json;
+using Spakov.W6t.ViewModels;
 using System;
 using System.IO;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Terminal;
-using w6t.Settings;
-using w6t.Settings.Json;
-using w6t.ViewModels;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Storage;
@@ -20,7 +18,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using WinUIEx;
 
-namespace w6t.Views {
+namespace Spakov.W6t.Views {
   /// <summary>
   /// The w6t terminal.
   /// </summary>

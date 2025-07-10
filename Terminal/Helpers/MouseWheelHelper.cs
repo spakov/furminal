@@ -1,10 +1,10 @@
-﻿using AnsiProcessor.Ansi.EscapeSequences;
-using AnsiProcessor.Ansi.EscapeSequences.Extensions;
-using Microsoft.UI.Input;
+﻿using Microsoft.UI.Input;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
 using System;
 using System.Text;
 
-namespace Terminal.Helpers {
+namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Methods for responding to the mouse wheel.
   /// </summary>

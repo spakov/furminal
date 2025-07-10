@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI DSR extension escape sequences, which are <see
   /// cref="C0.ESC"/>, followed by <see cref="Fe.CSI"/>, followed by <see

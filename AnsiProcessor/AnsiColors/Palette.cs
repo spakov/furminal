@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace AnsiProcessor.AnsiColors {
+namespace Spakov.AnsiProcessor.AnsiColors {
   /// <summary>
   /// An ANSI color palette.
   /// </summary>

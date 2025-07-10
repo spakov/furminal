@@ -1,6 +1,6 @@
 ﻿using Windows.UI;
 
-namespace w6t.Settings.Json {
+namespace Spakov.W6t.Settings.Json {
   internal class BrightColors {
     public Color? BrightBlack { get; set; }
     public Color? BrightRed { get; set; }

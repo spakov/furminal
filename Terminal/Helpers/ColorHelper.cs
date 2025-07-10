@@ -1,4 +1,4 @@
-﻿namespace Terminal.Helpers {
+﻿namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Extension methods to <see cref="System.Drawing.Color"/>.
   /// </summary>

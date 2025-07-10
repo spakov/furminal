@@ -1,4 +1,4 @@
-﻿namespace Terminal {
+﻿namespace Spakov.Terminal {
   /// <summary>
   /// The mouse buttons <see cref="TerminalControl"/> cares about.
   /// </summary>

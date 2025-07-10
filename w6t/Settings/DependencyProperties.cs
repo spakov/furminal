@@ -1,10 +1,9 @@
 ﻿using Microsoft.UI.Xaml;
+using Spakov.Terminal;
 using System;
-using Terminal;
-using Terminal.Helpers;
 using Windows.UI;
 
-namespace w6t.Settings {
+namespace Spakov.W6t.Settings {
   /// <summary>
   /// A wrapper for <see cref="DependencyProperty"/>s, since <see
   /// href="https://github.com/microsoft/microsoft-ui-xaml/issues/7305">Window

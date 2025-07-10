@@ -1,7 +1,7 @@
 ﻿using Microsoft.Graphics.Canvas;
 using System;
 
-namespace Terminal.Helpers {
+namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Methods for manipulating the cursor.
   /// </summary>

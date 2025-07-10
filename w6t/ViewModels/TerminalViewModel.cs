@@ -1,14 +1,14 @@
-﻿using AnsiProcessor.AnsiColors;
-using CommunityToolkit.Mvvm.ComponentModel;
-using ConPTY;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.ConPTY;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace w6t.ViewModels {
+namespace Spakov.W6t.ViewModels {
   internal partial class TerminalViewModel : ObservableObject {
     private readonly Views.Terminal terminal;
 

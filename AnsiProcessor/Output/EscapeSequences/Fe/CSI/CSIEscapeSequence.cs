@@ -1,11 +1,11 @@
-﻿using AnsiProcessor.Ansi.EscapeSequences.Extensions;
-using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
+using Spakov.AnsiProcessor.TermCap;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AnsiProcessor.Output.EscapeSequences.Fe.CSI {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI {
   /// <summary>
   /// An ANSI <see cref="Ansi.EscapeSequences.CSI"/> escape sequence.
   /// </summary>

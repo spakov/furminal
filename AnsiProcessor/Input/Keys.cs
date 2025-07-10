@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Input {
+﻿namespace Spakov.AnsiProcessor.Input {
   /// <summary>
   /// Keyboard keys, for a standard US QWERTY 104-key keyboard.
   /// </summary>

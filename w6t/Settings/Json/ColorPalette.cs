@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class ColorPalette {
     public DefaultColors? DefaultColors { get; set; }
     public StandardColors? StandardColors { get; set; }

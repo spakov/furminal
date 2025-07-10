@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// An integer settings item, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.NumberBox"/> with a spinner.

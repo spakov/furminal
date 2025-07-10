@@ -1,4 +1,4 @@
-﻿namespace Terminal.Settings {
+﻿namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A Boolean settings item, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.RadioButton"/>.

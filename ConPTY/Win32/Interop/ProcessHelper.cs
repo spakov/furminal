@@ -5,7 +5,7 @@ using Windows.Win32;
 using Windows.Win32.Security;
 using Windows.Win32.System.Threading;
 
-namespace ConPTY.Win32.Interop {
+namespace Spakov.ConPTY.Win32.Interop {
   /// <summary>
   /// Process helper methods.
   /// </summary>

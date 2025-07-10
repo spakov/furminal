@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.UI;
 
-namespace w6t.Settings {
+namespace Spakov.W6t.Settings {
   /// <summary>
   /// Contains color-related conversion extension methods.
   /// </summary>

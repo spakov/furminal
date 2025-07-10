@@ -2,21 +2,19 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using Spakov.Terminal;
+using Spakov.Terminal.Helpers;
+using Spakov.Terminal.Settings;
+using Spakov.W6t.Settings;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Timers;
-using Terminal;
-using Terminal.Helpers;
-using Terminal.Settings;
-using w6t.Settings;
-using w6t.Settings.Json;
 using Windows.UI;
 
-namespace w6t.Views {
+namespace Spakov.W6t.Views {
   public sealed partial class Terminal : Window {
     private const int settleDelay = 100;
 
@@ -41,7 +39,7 @@ namespace w6t.Views {
     /// <param name="terminalIsInitialized">Whether the <see
     /// cref="TerminalControl"/> is ready.</param>
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Types are preserved")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "Types are preserved, reflection required")]
 #pragma warning restore IDE0079 // Remove unnecessary suppression
     public void LoadSettings(bool initialLoad = false, bool terminalIsInitialized = false) {
       if (startCommand is not null && startCommand.Length > 0 && initialLoad) {

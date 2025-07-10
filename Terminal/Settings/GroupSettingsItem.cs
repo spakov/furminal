@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A group of <see cref="SettingsItem"/>s, presented as a WinUI 3-style
   /// Card.

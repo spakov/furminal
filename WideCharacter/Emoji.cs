@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /* </auto-generated>                                                         */
 /*****************************************************************************/
 
-namespace WideCharacter {
+namespace Spakov.WideCharacter {
   internal static class Emoji {
     internal static readonly HashSet<string> emojiSequences = [
       "⏰",

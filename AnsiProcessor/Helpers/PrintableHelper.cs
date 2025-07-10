@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace AnsiProcessor.Helpers {
+namespace Spakov.AnsiProcessor.Helpers {
   /// <summary>
   /// Methods to facilitate printing strings containing control characters.
   /// </summary>

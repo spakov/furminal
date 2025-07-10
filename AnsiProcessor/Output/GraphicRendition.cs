@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Text;
 
-namespace AnsiProcessor.Output {
+namespace Spakov.AnsiProcessor.Output {
   /// <summary>
   /// A graphic rendition, which is what an SGR escape sequence modifies.
   /// </summary>

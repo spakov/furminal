@@ -1,10 +1,10 @@
-﻿using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI;
-using AnsiProcessor.Output.EscapeSequences.Fe.OSC;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.OSC;
+using Spakov.AnsiProcessor.TermCap;
 using System.Text;
 
-namespace AnsiProcessor.Output.EscapeSequences.Fe {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe {
   /// <summary>
   /// A representation of an ANSI <see cref="Ansi.EscapeSequences.Fe"/> escape
   /// sequence.

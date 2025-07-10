@@ -1,10 +1,10 @@
-﻿using AnsiProcessor.Output;
-using Microsoft.Graphics.Canvas.Text;
+﻿using Microsoft.Graphics.Canvas.Text;
 using Microsoft.UI;
+using Spakov.AnsiProcessor.Output;
 using System;
 using Windows.UI;
 
-namespace Terminal.Helpers {
+namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Methods for manipulating <see cref="GraphicRendition"/>s.
   /// </summary>

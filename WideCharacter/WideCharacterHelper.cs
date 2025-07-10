@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WideCharacter {
+namespace Spakov.WideCharacter {
   /// <summary>
   /// Contains extension methods on <see langword="string"/>? to calculate
   /// the wide-character width of grapheme clusters.

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace AnsiProcessor.Output.EscapeSequences.Fe.OSC {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.OSC {
   /// <summary>
   /// A representation of ANSI <see cref="Ansi.EscapeSequences.Fe.OSC"/> escape
   /// sequence.

@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.TermCap {
+﻿namespace Spakov.AnsiProcessor.TermCap {
   /// <summary>
   /// Allows defining supported CSI escape sequences to handle via callbacks.
   /// </summary>

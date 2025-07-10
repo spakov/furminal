@@ -1,12 +1,11 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI xterm window manipulation (XTWINOPS) escape sequences, which
   /// are <see cref="C0.ESC"/>, followed by <see cref="C1.CSI"/>, followed by a
   /// first parameter (which is optionally followed by <see
-  /// cref="CSI_XTWINOPS.XTWINOPS_SEPARATOR"/>, followed by a second parameter
-  /// [which is optionally followed by <see
-  /// cref="CSI_XTWINOPS.XTWINOPS_SEPARATOR"/>, followed by a third
-  /// parameter]), followed by <see cref="CSI.XTWINOPS"/>.
+  /// cref="XTWINOPS_SEPARATOR"/>, followed by a second parameter [which is
+  /// optionally followed by <see cref="XTWINOPS_SEPARATOR"/>, followed by a
+  /// third parameter]), followed by <see cref="CSI.XTWINOPS"/>.
   /// </summary>
   /// <remarks>
   /// Sources:

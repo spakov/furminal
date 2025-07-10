@@ -1,11 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿#if DEBUG
+using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
-using Terminal.Helpers;
-using Terminal.Settings;
+using Spakov.Terminal.Helpers;
+using Spakov.Terminal.Settings;
 using Windows.ApplicationModel.Resources;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   public sealed partial class TerminalControl : UserControl {
     #region "Public Properties"
 

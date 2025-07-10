@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Windows.UI;
 
-namespace w6t.Settings.Json {
+namespace Spakov.W6t.Settings.Json {
   /// <summary>
   /// A <c>System.Text.Json</c> converter for <see cref="Color"/>.
   /// </summary>

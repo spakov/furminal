@@ -1,4 +1,4 @@
-﻿namespace Terminal {
+﻿namespace Spakov.Terminal {
   /// <summary>
   /// Supported text antialiasing styles.
   /// </summary>

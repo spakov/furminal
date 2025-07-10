@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Input {
+﻿namespace Spakov.AnsiProcessor.Input {
   /// <summary>
   /// Represents a keystroke.
   /// </summary>

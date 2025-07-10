@@ -1,11 +1,10 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI xterm key modifier options (XTMODKEYS) escape sequences, which
   /// are <see cref="C0.ESC"/>, followed by <see cref="Fe.CSI"/>, followed by
-  /// <see cref="CSI_XTMODKEYS.XTMODKEYS"/>, followed by a first parameter
-  /// (which is optionally followed by <see
-  /// cref="CSI_XTMODKEYS.XTMODKEYS_SEPARATOR"/>, followed by a second
-  /// parameter), followed by <see cref="CSI.XTMODKEYS"/>.
+  /// <see cref="XTMODKEYS"/>, followed by a first parameter (which is
+  /// optionally followed by <see cref="XTMODKEYS_SEPARATOR"/>, followed by a
+  /// second parameter), followed by <see cref="CSI.XTMODKEYS"/>.
   /// </summary>
   /// <remarks>
   /// Sources:

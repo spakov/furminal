@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// Different mouse-tracking modes.
   /// </summary>

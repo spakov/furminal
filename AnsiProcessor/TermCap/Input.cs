@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.TermCap {
+﻿namespace Spakov.AnsiProcessor.TermCap {
   /// <summary>
   /// Allows defining input behavior.
   /// </summary>

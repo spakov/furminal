@@ -1,8 +1,8 @@
-﻿using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Output;
-using AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
+﻿using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Output;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
 
-namespace AnsiProcessor.Helpers {
+namespace Spakov.AnsiProcessor.Helpers {
   /// <summary>
   /// Extension methods for <see cref="GraphicRendition"/>.
   /// </summary>

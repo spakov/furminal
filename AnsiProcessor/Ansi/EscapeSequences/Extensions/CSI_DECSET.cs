@@ -1,10 +1,9 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI DECSET private mode escape sequences, which are <see
   /// cref="C0.ESC"/>, followed by <see cref="C1.CSI"/>, followed by <see
-  /// cref="CSI_DECSET.DECSET_LEADER"/>, followed by a DECSET sequence,
-  /// followed by either <see cref="CSI.DECSET_HIGH"/> (on) or <see
-  /// cref="CSI.DECSET_LOW"/> (off).
+  /// cref="DECSET_LEADER"/>, followed by a DECSET sequence, followed by either
+  /// <see cref="CSI.DECSET_HIGH"/> (on) or <see cref="CSI.DECSET_LOW"/> (off).
   /// </summary>
   /// <remarks>
   /// Sources:

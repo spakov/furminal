@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using System;
 
-namespace Terminal.Helpers {
+namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Methods to initialize and modify the context menu and menu items.
   /// </summary>

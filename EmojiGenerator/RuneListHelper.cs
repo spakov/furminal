@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace EmojiGenerator {
+namespace Spakov.EmojiGenerator {
   /// <summary>
   /// Extension methods on an <see cref="IEnumerable{T}"/> of <see
   /// cref="Rune"/>s.

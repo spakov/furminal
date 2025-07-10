@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class Settings {
     public Basics? Basics { get; set; }
     public Appearance? Appearance { get; set; }

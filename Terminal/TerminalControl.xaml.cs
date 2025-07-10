@@ -5,13 +5,13 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Spakov.Terminal.Helpers;
+using Spakov.Terminal.Settings;
 using System;
-using Terminal.Helpers;
-using Terminal.Settings;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A Win2D terminal control.
   /// </summary>

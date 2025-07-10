@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences {
   /// <summary>
   /// The control sequence introducer (CSI) escape sequences, which are <see
   /// cref="C0.ESC"/>, followed by <see cref="Fe.CSI"/>, followed by parameter

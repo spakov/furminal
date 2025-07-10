@@ -1,11 +1,11 @@
-﻿using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Helpers;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.TermCap;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR {
   /// <summary>
   /// Represents an <see cref="Ansi.EscapeSequences.SGR"/> escape sequence as
   /// a set of useful properties.

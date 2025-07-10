@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>Spakov.EmojiGenerator</RootNamespace>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>emojigenerator</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>

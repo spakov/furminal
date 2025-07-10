@@ -1,18 +1,16 @@
-﻿namespace AnsiProcessor.Ansi.EscapeSequences.Extensions {
+﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions {
   /// <summary>
   /// The CSI mouse tracking extension escape sequences, which are either (for
   /// X10/11) <see cref="C0.ESC"/>, followed by <see cref="C1.CSI"/>, followed
-  /// by <see cref="CSI_MouseTracking.MOUSE_TRACKING_LEADER"/>, followed by
-  /// <c>Cb</c>, followed by <c>Cx</c>, followed by <c>Cy</c>, or (for SGR)
-  /// <see cref="C0.ESC"/>, followed by <see cref="C1.CSI"/>, followed by <see
-  /// cref="CSI_MouseTracking.MOUSE_TRACKING_SGR_LEADER"/>, followed by
-  /// <c>Cb</c>, followed by <see
-  /// cref="CSI_MouseTracking.MOUSE_TRACKING_SGR_SEPARATOR"/>, followed by
-  /// <c>Cx</c>, followed by <see
-  /// cref="CSI_MouseTracking.MOUSE_TRACKING_SGR_SEPARATOR"/>, followed by
+  /// by <see cref="MOUSE_TRACKING_LEADER"/>, followed by <c>Cb</c>, followed
+  /// by <c>Cx</c>, followed by <c>Cy</c>, or (for SGR) <see cref="C0.ESC"/>,
+  /// followed by <see cref="C1.CSI"/>, followed by <see
+  /// cref="MOUSE_TRACKING_SGR_LEADER"/>, followed by <c>Cb</c>, followed by
+  /// <see cref="MOUSE_TRACKING_SGR_SEPARATOR"/>, followed by <c>Cx</c>,
+  /// followed by <see cref="MOUSE_TRACKING_SGR_SEPARATOR"/>, followed by
   /// <c>Cy</c>, followed by either <see
-  /// cref="CSI_MouseTracking.MOUSE_TRACKING_SGR_PRESS_TERMINATOR"/> or <see
-  /// cref="CSI_MouseTracking.MOUSE_TRACKING_SGR_RELEASE_TERMINATOR"/>.
+  /// cref="MOUSE_TRACKING_SGR_PRESS_TERMINATOR"/> or <see
+  /// cref="MOUSE_TRACKING_SGR_RELEASE_TERMINATOR"/>.
   /// </summary>
   /// <remarks>
   /// Sources:

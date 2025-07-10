@@ -1,7 +1,7 @@
-﻿using AnsiProcessor.Helpers;
-using AnsiProcessor.Input;
+﻿using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.Input;
 
-namespace Terminal.Helpers {
+namespace Spakov.Terminal.Helpers {
   /// <summary>
   /// Methods for responding to keystrokes.
   /// </summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.UI;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A <see cref="Color"/> settings item, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.Button"/> that reveals a <see

@@ -1,18 +1,20 @@
-﻿using AnsiProcessor;
-using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Input;
-using AnsiProcessor.Output.EscapeSequences;
-using AnsiProcessor.TermCap;
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
+using Spakov.AnsiProcessor;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Input;
+using Spakov.AnsiProcessor.Output.EscapeSequences;
+using Spakov.AnsiProcessor.TermCap;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// Manages interaction between the UI thread and <see
   /// cref="TerminalRenderer"/>.

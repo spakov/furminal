@@ -1,10 +1,10 @@
-﻿using AnsiProcessor.Helpers;
-using AnsiProcessor.Input;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.Input;
+using Spakov.AnsiProcessor.TermCap;
 using System.IO;
 using System.Text;
 
-namespace AnsiProcessor {
+namespace Spakov.AnsiProcessor {
   /// <summary>
   /// An ANSI writer.
   /// </summary>

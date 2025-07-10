@@ -1,4 +1,4 @@
-﻿namespace w6t.Settings.Json {
+﻿namespace Spakov.W6t.Settings.Json {
   internal class Basics {
     public string? Command { get; set; }
     public string? DefaultWindowTitle { get; set; }

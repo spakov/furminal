@@ -5,7 +5,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Console;
 
-namespace ConPTY.Win32.Interop {
+namespace Spakov.ConPTY.Win32.Interop {
   internal class PseudoConsole : IDisposable {
     internal static nuint PseudoConsoleThreadAttribute => PInvoke.PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE;
 

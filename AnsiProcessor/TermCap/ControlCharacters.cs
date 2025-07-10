@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AnsiProcessor.TermCap {
+namespace Spakov.AnsiProcessor.TermCap {
   /// <summary>
   /// Allows defining supported control characters to handle via callbacks.
   /// </summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// <see cref="Cell"/> coordinates.
   /// </summary>

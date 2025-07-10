@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A key binding settings item, presented as <see
   /// cref="Microsoft.UI.Xaml.Controls.TextBlock"/>s describing the key

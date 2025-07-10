@@ -1,12 +1,14 @@
-﻿using AnsiProcessor.Ansi.EscapeSequences;
-using AnsiProcessor.Ansi.EscapeSequences.Extensions;
+﻿#if DEBUG
 using Microsoft.Extensions.Logging;
+#endif
 using Microsoft.UI.Xaml.Controls;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences;
+using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
 using System;
 using System.Text;
 using Windows.ApplicationModel.DataTransfer;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   public sealed partial class TerminalControl : UserControl {
     /// <summary>
     /// Reports window focus state.

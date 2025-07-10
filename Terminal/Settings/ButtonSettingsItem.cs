@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A settings item button, presented as a <see
   /// cref="Microsoft.UI.Xaml.Controls.Button"/>.

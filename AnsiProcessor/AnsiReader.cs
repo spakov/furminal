@@ -1,16 +1,16 @@
-﻿using AnsiProcessor.Ansi;
-using AnsiProcessor.AnsiColors;
-using AnsiProcessor.Output.EscapeSequences;
-using AnsiProcessor.Output.EscapeSequences.Fe;
-using AnsiProcessor.Output.EscapeSequences.Fp;
-using AnsiProcessor.Output.EscapeSequences.Fs;
-using AnsiProcessor.Output.EscapeSequences.NF;
-using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.Ansi;
+using Spakov.AnsiProcessor.AnsiColors;
+using Spakov.AnsiProcessor.Output.EscapeSequences;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fe;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fp;
+using Spakov.AnsiProcessor.Output.EscapeSequences.Fs;
+using Spakov.AnsiProcessor.Output.EscapeSequences.NF;
+using Spakov.AnsiProcessor.TermCap;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnsiProcessor {
+namespace Spakov.AnsiProcessor {
   /// <summary>
   /// An ANSI reader.
   /// </summary>

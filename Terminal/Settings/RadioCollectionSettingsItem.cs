@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A settings item representing a collection of <see
   /// cref="RadioSettingsItem"/>s, presented as a <see

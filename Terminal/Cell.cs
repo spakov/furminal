@@ -1,8 +1,8 @@
-﻿using AnsiProcessor.Output;
+﻿using Spakov.AnsiProcessor.Output;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A terminal screen buffer cell.
   /// </summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Terminal.Settings {
+namespace Spakov.Terminal.Settings {
   public class SettingsViewModel {
     private const string windowsLineEnding = "\r\n";
     private const string unixLineEnding = "\n";

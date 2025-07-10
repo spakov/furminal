@@ -1,6 +1,6 @@
-﻿using AnsiProcessor.TermCap;
+﻿using Spakov.AnsiProcessor.TermCap;
 
-namespace AnsiProcessor.Output.EscapeSequences.NF {
+namespace Spakov.AnsiProcessor.Output.EscapeSequences.NF {
   /// <summary>
   /// A representation of an ANSI <see cref="Ansi.EscapeSequences.NF"/> escape
   /// sequence.

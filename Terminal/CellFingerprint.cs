@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Terminal {
+namespace Spakov.Terminal {
   /// <summary>
   /// A cell fingerprint, which uniquely identifies a <see cref="Cell"/>'s
   /// drawing shape.

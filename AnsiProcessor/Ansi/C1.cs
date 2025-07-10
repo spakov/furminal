@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Ansi {
+﻿namespace Spakov.AnsiProcessor.Ansi {
   /// <summary>
   /// The C1 control characters.
   /// </summary>

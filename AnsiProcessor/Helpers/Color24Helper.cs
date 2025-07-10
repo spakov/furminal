@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace AnsiProcessor.Helpers {
+namespace Spakov.AnsiProcessor.Helpers {
   /// <summary>
   /// Methods for converting an extended 24-bit SGR color to an RGB color.
   /// </summary>

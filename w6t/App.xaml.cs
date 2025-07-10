@@ -10,7 +10,7 @@ using Windows.Storage;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
-namespace w6t {
+namespace Spakov.W6t {
   /// <summary>
   /// Provides application-specific behavior to supplement the default
   /// Application class.

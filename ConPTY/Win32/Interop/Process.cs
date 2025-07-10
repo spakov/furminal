@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.System.Threading;
 
-namespace ConPTY.Win32.Interop {
+namespace Spakov.ConPTY.Win32.Interop {
   /// <summary>
   /// Represents a managed wrapper for a native process, providing access to
   /// its startup information and process details, and ensuring proper resource

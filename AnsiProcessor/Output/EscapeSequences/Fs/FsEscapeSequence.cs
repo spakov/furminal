@@ -1,4 +1,4 @@
-﻿namespace AnsiProcessor.Output.EscapeSequences.Fs {
+﻿namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fs {
   /// <summary>
   /// A representation of an ANSI <see cref="Ansi.EscapeSequences.Fs"/> escape
   /// sequence.
