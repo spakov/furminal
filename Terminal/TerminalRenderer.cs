@@ -454,7 +454,9 @@ namespace Spakov.Terminal {
         for (int row = 0; row < rows; row++) {
           for (int column = 0; column < columns; column++) {
             if (row < lastFrameBounds.Row && column < lastFrameBounds.Column) {
-              thisFrameCells[row, column] = terminalEngine.VideoTerminal[row][column];
+              thisFrameCells[row, column] = column < terminalEngine.VideoTerminal[row].Length
+                ? terminalEngine.VideoTerminal[row][column]
+                : new();
 
               if (lastFrameCells[row, column] != thisFrameCells[row, column]) {
                 if (!frameChanged) frameChanged = true;
@@ -470,6 +472,8 @@ namespace Spakov.Terminal {
         if (frameChanged) {
           for (int row = 0; row < rows; row++) {
             for (int column = 0; column < columns; column++) {
+              if (column >= terminalEngine.VideoTerminal[row].Length) continue;
+
               Caret caret = new(row, column);
 
               Vector2 point = new(column * CellSize.Width, row * CellSize.Height);

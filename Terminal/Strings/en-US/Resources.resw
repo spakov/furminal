@@ -313,7 +313,7 @@
     <value>Send US</value>
   </data>
   <data name="SettingsWindowTitle" xml:space="preserve">
-    <value>Settings</value>
+    <value>Terminal Settings</value>
   </data>
   <data name="SmallerTextName" xml:space="preserve">
     <value>Smaller text</value>
