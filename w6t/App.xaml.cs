@@ -9,6 +9,7 @@ using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Spakov.W6t {
   /// <summary>
@@ -25,6 +26,14 @@ namespace Spakov.W6t {
     /// </summary>
     public App() {
       InitializeComponent();
+      UnhandledException += (sender, e) => {
+        PInvoke.MessageBox(
+          HWND.Null,
+          $"Unhandled exception: {e.Exception}",
+          "Unhandled Exception",
+          MESSAGEBOX_STYLE.MB_OK
+        );
+      };
     }
 
     /// <summary>

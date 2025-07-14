@@ -36,8 +36,9 @@ namespace Spakov.Terminal.Settings {
 
     private readonly HWND nativeHWnd;
     private readonly HWND islandHWnd;
+    private readonly DesktopWindowXamlSource xamlSource;
 
-    private readonly WNDPROC? settingsWindowProc = null;
+    private static WNDPROC? settingsWindowProc = null;
     private int lastDarkMode = -1;
 
     /// <summary>
@@ -74,7 +75,9 @@ namespace Spakov.Terminal.Settings {
           }
         }
 
-        PInvoke.RegisterClassEx(wndClass);
+        if (PInvoke.RegisterClassEx(wndClass) == 0) {
+          throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
       }
 
       unsafe {
@@ -99,7 +102,17 @@ namespace Spakov.Terminal.Settings {
         );
       }
 
-      DesktopWindowXamlSource xamlSource = new();
+      if (nativeHWnd == HWND.Null) {
+        throw new Win32Exception(Marshal.GetLastWin32Error());
+      }
+
+      // Our Win32 window's cursor, at this point, is (probably) IDC_WAIT. It
+      // "bleeds through" when we do things like display context menus.
+      // Explanation from Raymond Chen:
+      // https://devblogs.microsoft.com/oldnewthing/20250424-00/?p=111114
+      PInvoke.SetCursor(PInvoke.LoadCursor((HMODULE) (nint) 0, PInvoke.IDC_ARROW));
+
+      xamlSource = new();
       xamlSource.Initialize(Win32Interop.GetWindowIdFromWindow(nativeHWnd));
       xamlSource.Content = this;
 
@@ -204,18 +217,6 @@ namespace Spakov.Terminal.Settings {
         if (!PInvoke.GetClientRect(
           nativeHWnd,
           out nativeWindowClientArea
-        )) {
-          throw new Win32Exception(Marshal.GetLastWin32Error());
-        }
-
-        if (!PInvoke.SetWindowPos(
-          islandHWnd,
-          HWND.Null,
-          nativeWindowClientArea.X,
-          nativeWindowClientArea.Y,
-          nativeWindowClientArea.Width,
-          nativeWindowClientArea.Height,
-          settingsWindowFlags
         )) {
           throw new Win32Exception(Marshal.GetLastWin32Error());
         }
