@@ -43,7 +43,7 @@ namespace Spakov.W6t.Views {
 #pragma warning restore IDE0079 // Remove unnecessary suppression
     public void LoadSettings(bool initialLoad = false, bool terminalIsInitialized = false) {
       if (startCommand is not null && startCommand.Length > 0 && initialLoad) {
-        dependencyProperties.Command = string.Join(' ', startCommand);
+        dependencyProperties.Command = startCommand;
       }
 
       if (startRows is not null && initialLoad && terminalIsInitialized) {

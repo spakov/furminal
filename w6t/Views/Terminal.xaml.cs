@@ -44,7 +44,7 @@ namespace Spakov.W6t.Views {
 
     private TerminalViewModel? viewModel;
 
-    private readonly string[]? startCommand;
+    private readonly string? startCommand;
     private readonly int? startRows;
     private readonly int? startColumns;
 
@@ -58,21 +58,6 @@ namespace Spakov.W6t.Views {
       get => viewModel;
       set => viewModel = value;
     }
-
-    /// <summary>
-    /// The start command provided on the command line.
-    /// </summary>
-    internal string[]? StartCommand => startCommand;
-
-    /// <summary>
-    /// The start number of rows provided on the command line.
-    /// </summary>
-    internal int? StartRows => startRows;
-
-    /// <summary>
-    /// The start number of columns provided on the command line.
-    /// </summary>
-    internal int? StartColumns => startColumns;
 
     /// <summary>
     /// A "lock", to prevent resizing from cascading out of control.
@@ -112,9 +97,10 @@ namespace Spakov.W6t.Views {
     /// <summary>
     /// Initializes a <see cref="Terminal"/>.
     /// </summary>
+    /// <param name="startCommand">The command to run in the terminal.</param>
     /// <param name="startRows">The number of terminal rows.</param>
     /// <param name="startColumns">The number of terminal columns.</param>
-    public Terminal(string[]? startCommand, int? startRows, int? startColumns) {
+    public Terminal(string? startCommand, int? startRows, int? startColumns) {
 #if DEBUG
       using ILoggerFactory factory = LoggerFactory.Create(
         builder => {
@@ -131,14 +117,7 @@ namespace Spakov.W6t.Views {
       this.startColumns = startColumns;
 
 #if DEBUG
-      if (startCommand is not null) {
-        logger.LogInformation("<command>:");
-
-        foreach (string startCommandPart in startCommand) {
-          logger.LogInformation("  {startCommandPart}", startCommandPart);
-        }
-      }
-
+      logger.LogInformation("<command>: {startCommand}", startCommand);
       logger.LogInformation("--rows: {startRows}", startRows);
       logger.LogInformation("--columns: {startColumns}", startColumns);
 #endif

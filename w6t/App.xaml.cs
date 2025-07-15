@@ -56,7 +56,7 @@ namespace Spakov.W6t {
       int? startRows = null;
       int? startColumns = null;
 
-      Argument<string[]> commandArgument = new("command") {
+      Argument<string[]?> commandArgument = new("command") {
         Description = resources.GetString("CommandArgumentDescription"),
         Arity = ArgumentArity.ZeroOrMore
       };
@@ -81,9 +81,9 @@ namespace Spakov.W6t {
         Output = commandLineOutput
       };
 
+      rootCommand.Arguments.Add(commandArgument);
       rootCommand.Options.Insert(0, rowsOption);
       rootCommand.Options.Insert(1, columnsOption);
-      rootCommand.Arguments.Add(commandArgument);
 
       rootCommand.SetAction(parseResult => {
         startCommand = parseResult.GetValue(commandArgument);
@@ -116,14 +116,18 @@ namespace Spakov.W6t {
           HWND.Null,
           commandLineMessage.ToString(),
           "w6t",
-          Windows.Win32.UI.WindowsAndMessaging.MESSAGEBOX_STYLE.MB_OK
+          MESSAGEBOX_STYLE.MB_OK
         );
 
         Exit();
         return;
       }
 
-      _window = new Views.Terminal(startCommand, startRows, startColumns);
+      _window = new Views.Terminal(
+        startCommand is not null ? string.Join(' ', startCommand) : null,
+        startRows,
+        startColumns
+      );
 
       int? width = (int?) (double?) ApplicationData.Current.LocalSettings.Values["WindowWidth"] ?? 600;
       int? height = (int?) (double?) ApplicationData.Current.LocalSettings.Values["WindowHeight"] ?? 400;
