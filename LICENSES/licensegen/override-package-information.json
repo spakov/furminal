@@ -1,0 +1,30 @@
+[
+  {
+    "Id": "Microsoft.Graphics.Win2D",
+    "ProjectUrl": "http://go.microsoft.com/fwlink/?LinkID=519078",
+    "Version": "1.3.2",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/microsoft/Win2D/raw/refs/heads/winappsdk/main/LICENSE.txt"
+  },
+  {
+    "Id": "Microsoft.Windows.SDK.Win32Metadata",
+    "ProjectUrl": "https://github.com/microsoft/win32metadata",
+    "Version": "61.0.15-preview",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/microsoft/win32metadata/raw/refs/heads/main/LICENSE"
+  },
+  {
+    "Id": "Microsoft.Windows.WDK.Win32Metadata",
+    "ProjectUrl": "https://github.com/microsoft/wdkmetadata",
+    "Version": "0.12.8-experimental",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/microsoft/wdkmetadata/raw/refs/heads/main/LICENSE"
+  },
+  {
+    "Id": "Microsoft.WindowsAppSDK",
+    "ProjectUrl": "https://github.com/microsoft/windowsappsdk",
+    "Version": "1.7.250606001",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/microsoft/windowsappsdk/raw/refs/heads/main/LICENSE"
+  }
+]
