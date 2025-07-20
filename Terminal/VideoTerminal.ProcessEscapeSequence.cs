@@ -344,8 +344,7 @@ namespace Spakov.Terminal {
               response.Append(CSI.XTTITLEPOS);
 
               terminalEngine.SendEscapeSequence(
-                Encoding.ASCII.GetBytes(response.ToString()),
-                brokenMode: true
+                Encoding.ASCII.GetBytes(response.ToString())
               );
 
               // This is an SU
@@ -790,588 +789,590 @@ namespace Spakov.Terminal {
           case CSI.DECSET_HIGH:
             if (csiEscapeSequence.Ps is null) break;
 
-            switch (csiEscapeSequence.Ps![0]) {
-              // Application Cursor Keys (DECCKM), VT100 (1)
-              case CSI_DECSET.DECSET_DECCKM:
-                terminalEngine.ApplicationCursorKeys = true;
+            foreach (int ps in csiEscapeSequence.Ps) {
+              switch (ps) {
+                // Application Cursor Keys (DECCKM), VT100 (1)
+                case CSI_DECSET.DECSET_DECCKM:
+                  terminalEngine.ApplicationCursorKeys = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Designate USASCII for character sets G0-G3 (DECANM), VT100,
-              // and set VT100 mode (2)
-              case CSI_DECSET.DECSET_DECANM:
-                // Not sure this is useful today. Do nothing.
+                // Designate USASCII for character sets G0-G3 (DECANM), VT100,
+                // and set VT100 mode (2)
+                case CSI_DECSET.DECSET_DECANM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // 132 Column Mode (DECCOLM), VT100 (3)
-              case CSI_DECSET.DECSET_DECCOLM:
-                // Not sure this is useful today. Do nothing.
+                // 132 Column Mode (DECCOLM), VT100 (3)
+                case CSI_DECSET.DECSET_DECCOLM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Smooth (Slow) Scroll (DECSCLM), VT100 (4)
-              case CSI_DECSET.DECSET_DECSCLM:
-                // Not sure this is useful today. Do nothing.
+                // Smooth (Slow) Scroll (DECSCLM), VT100 (4)
+                case CSI_DECSET.DECSET_DECSCLM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Reverse Video (DECSCNM), VT100 (5)
-              case CSI_DECSET.DECSET_DECSCNM:
-                graphicRendition.Inverse = true;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Origin Mode (DECOM), VT100 (6)
-              case CSI_DECSET.DECSET_DECOM:
-                originMode = true;
+                // Reverse Video (DECSCNM), VT100 (5)
+                case CSI_DECSET.DECSET_DECSCNM:
+                  graphicRendition.Inverse = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Auto-Wrap Mode (DECAWM), VT100 (7)
-              case CSI_DECSET.DECSET_DECAWM:
-                autoWrapMode = true;
+                // Origin Mode (DECOM), VT100 (6)
+                case CSI_DECSET.DECSET_DECOM:
+                  originMode = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Auto-Repeat Keys (DECARM), VT100 (8)
-              case CSI_DECSET.DECSET_DECARM:
-                terminalEngine.AutoRepeatKeys = true;
+                // Auto-Wrap Mode (DECAWM), VT100 (7)
+                case CSI_DECSET.DECSET_DECAWM:
+                  autoWrapMode = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Send Mouse X & Y on button press (X10) (9)
-              case CSI_DECSET.DECSET_XTERM_X10_MOUSE:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.X10;
+                // Auto-Repeat Keys (DECARM), VT100 (8)
+                case CSI_DECSET.DECSET_DECARM:
+                  terminalEngine.AutoRepeatKeys = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Show toolbar (rxvt) (10)
-              case CSI_DECSET.DECSET_RXVT_SHOW_TOOLBAR:
-                // rxvt-specific, plus toolbars have fallen out of favor. Do
-                // nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Start blinking cursor (AT&T 610) (12)
-              case CSI_DECSET.DECSET_ATT160:
-
-              // Start blinking cursor (set only via resource or menu) (13)
-              case CSI_DECSET.DECSET_XTERM_START_BLINKING_CURSOR:
-                terminalEngine.CursorBlink = true;
+                // Send Mouse X & Y on button press (X10) (9)
+                case CSI_DECSET.DECSET_XTERM_X10_MOUSE:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.X10;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable XOR of blinking cursor control sequence and menu (14)
-              case CSI_DECSET.DECSET_XTERM_XOR_BLINKING_CURSOR:
-
-              // Print Form Feed (DECPFF), VT220 (18)
-              case CSI_DECSET.DECSET_DECPFF:
-
-              // Set print extent to full screen (DECPEX), VT220 (19)
-              case CSI_DECSET.DECSET_DECPEX:
-                // Specialized, not sufficiently modern. Do nothing.
+                // Show toolbar (rxvt) (10)
+                case CSI_DECSET.DECSET_RXVT_SHOW_TOOLBAR:
+                  // rxvt-specific, plus toolbars have fallen out of favor. Do
+                  // nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Show cursor (DECTCEM), VT220 (25)
-              case CSI_DECSET.DECSET_DECTCEM:
-                terminalEngine.CursorVisible = true;
+                // Start blinking cursor (AT&T 610) (12)
+                case CSI_DECSET.DECSET_ATT160:
+
+                // Start blinking cursor (set only via resource or menu) (13)
+                case CSI_DECSET.DECSET_XTERM_START_BLINKING_CURSOR:
+                  terminalEngine.CursorBlink = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Show scrollbar (rxvt) (30)
-              case CSI_DECSET.DECSET_RXVT_SHOW_SCROLLBAR:
+                // Enable XOR of blinking cursor control sequence and menu (14)
+                case CSI_DECSET.DECSET_XTERM_XOR_BLINKING_CURSOR:
 
-              // Enable font-shifting functions (rxvt) (35)
-              case CSI_DECSET.DECSET_RXVT_ENABLE_FONT_SHIFTING:
-                // rxvt-specific. Do nothing.
+                // Print Form Feed (DECPFF), VT220 (18)
+                case CSI_DECSET.DECSET_DECPFF:
+
+                // Set print extent to full screen (DECPEX), VT220 (19)
+                case CSI_DECSET.DECSET_DECPEX:
+                  // Specialized, not sufficiently modern. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enter Tektronix mode (DECTEK), VT240, xterm (38)
-              case CSI_DECSET.DECSET_DECTEK:
-
-              // Allow 80 ⇒ 132 mode, xterm (40)
-              case CSI_DECSET.DECSET_XTERM_80_132:
-
-              // more(1) fix (41)
-              case CSI_DECSET.DECSET_XTERM_MORE_FIX:
-
-              // Enable National Replacement Character sets (DECNRCM), VT220
-              // (42)
-              case CSI_DECSET.DECSET_DECNRCM:
-
-              // Enable Graphic Expanded Print Mode (DECGEPM), VT340 (43)
-              case CSI_DECSET.DECSET_DECGEPM:
-
-              // Enable Graphic Print Color Mode (DECGPCM), VT340 (44), or Turn
-              // on margin bell, xterm (44)
-              case CSI_DECSET.DECSET_DECGPCM:
-
-              // Enable Graphic Print Color Syntax (DECGPCS), VT340 (45), or
-              // Reverse-wraparound mode (XTREVWRAP), xterm (45)
-              case CSI_DECSET.DECSET_DECGPCS:
-
-              // Graphic Print Background Mode, VT340 (46), or Start logging
-              // (XTLOGGING), xterm (46)
-              case CSI_DECSET.DECSET_GRAPHIC_PRINT_BACKGROUND_MODE:
-                // Very specialized. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Alternate Screen Buffer, xterm (47), or Enable Graphic
-              // Rotated Print Mode (DECGRPM), VT340 (47)
-              case CSI_DECSET.DECSET_ALTERNATE_SCREEN_BUFFER:
-                UseAlternateScreenBuffer = true;
+                // Show cursor (DECTCEM), VT220 (25)
+                case CSI_DECSET.DECSET_DECTCEM:
+                  terminalEngine.CursorVisible = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Application keypad mode (DECNKM), VT320 (66)
-              case CSI_DECSET.DECSET_DECNKM:
-                // Pretty much unused these days. Do nothing.
+                // Show scrollbar (rxvt) (30)
+                case CSI_DECSET.DECSET_RXVT_SHOW_SCROLLBAR:
+
+                // Enable font-shifting functions (rxvt) (35)
+                case CSI_DECSET.DECSET_RXVT_ENABLE_FONT_SHIFTING:
+                  // rxvt-specific. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Backarrow key sends backspace (DECBKM), VT340, VT420 (67)
-              case CSI_DECSET.DECSET_DECBKM:
-                // Subverts user expectations. Do nothing.
+                // Enter Tektronix mode (DECTEK), VT240, xterm (38)
+                case CSI_DECSET.DECSET_DECTEK:
+
+                // Allow 80 ⇒ 132 mode, xterm (40)
+                case CSI_DECSET.DECSET_XTERM_80_132:
+
+                // more(1) fix (41)
+                case CSI_DECSET.DECSET_XTERM_MORE_FIX:
+
+                // Enable National Replacement Character sets (DECNRCM), VT220
+                // (42)
+                case CSI_DECSET.DECSET_DECNRCM:
+
+                // Enable Graphic Expanded Print Mode (DECGEPM), VT340 (43)
+                case CSI_DECSET.DECSET_DECGEPM:
+
+                // Enable Graphic Print Color Mode (DECGPCM), VT340 (44), or Turn
+                // on margin bell, xterm (44)
+                case CSI_DECSET.DECSET_DECGPCM:
+
+                // Enable Graphic Print Color Syntax (DECGPCS), VT340 (45), or
+                // Reverse-wraparound mode (XTREVWRAP), xterm (45)
+                case CSI_DECSET.DECSET_DECGPCS:
+
+                // Graphic Print Background Mode, VT340 (46), or Start logging
+                // (XTLOGGING), xterm (46)
+                case CSI_DECSET.DECSET_GRAPHIC_PRINT_BACKGROUND_MODE:
+                  // Very specialized. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable left and right margin mode (DECLRMM), VT420 and up (69)
-              case CSI_DECSET.DECSET_DECLRMM:
-
-              // Enable Sixel Display Mode (DECSDM), VT330, VT340, VT382 (80)
-              case CSI_DECSET.DECSET_DECSDM:
-
-              // Do not clear screen when DECCOLM is set/reset (DECNCSM), VT510
-              // and up (95)
-              case CSI_DECSET.DECSET_DECNCSM:
-                // Highly specialized. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Send Mouse X & Y on button press and release (X11) (1000)
-              case CSI_DECSET.DECSET_XTERM_X11_MOUSE:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.X11;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Hilite Mouse Tracking, xterm (1001)
-              case CSI_DECSET.DECSET_XTERM_HILITE_MOUSE_TRACKING:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Cell Motion Mouse Tracking, xterm (1002)
-              case CSI_DECSET.DECSET_XTERM_CELL_MOTION_MOUSE_TRACKING:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.CellMotion;
+                // Use Alternate Screen Buffer, xterm (47), or Enable Graphic
+                // Rotated Print Mode (DECGRPM), VT340 (47)
+                case CSI_DECSET.DECSET_ALTERNATE_SCREEN_BUFFER:
+                  UseAlternateScreenBuffer = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Use All Motion Mouse Tracking, xterm (1003)
-              case CSI_DECSET.DECSET_XTERM_ALL_MOTION_MOUSE_TRACKING:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.AllMotion;
+                // Application keypad mode (DECNKM), VT320 (66)
+                case CSI_DECSET.DECSET_DECNKM:
+                  // Pretty much unused these days. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Backarrow key sends backspace (DECBKM), VT340, VT420 (67)
+                case CSI_DECSET.DECSET_DECBKM:
+                  // Subverts user expectations. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable left and right margin mode (DECLRMM), VT420 and up (69)
+                case CSI_DECSET.DECSET_DECLRMM:
+
+                // Enable Sixel Display Mode (DECSDM), VT330, VT340, VT382 (80)
+                case CSI_DECSET.DECSET_DECSDM:
+
+                // Do not clear screen when DECCOLM is set/reset (DECNCSM), VT510
+                // and up (95)
+                case CSI_DECSET.DECSET_DECNCSM:
+                  // Highly specialized. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Send Mouse X & Y on button press and release (X11) (1000)
+                case CSI_DECSET.DECSET_XTERM_X11_MOUSE:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.X11;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Send FocusIn/FocusOut events, xterm (1004)
-              case CSI_DECSET.DECSET_XTERM_FOCUSIN_FOCUSOUT:
-                // Do nothing. This is always enabled because that's what
-                // ConPTY expects. See TerminalControl.HasFocus for more on
-                // this.
+                // Use Hilite Mouse Tracking, xterm (1001)
+                case CSI_DECSET.DECSET_XTERM_HILITE_MOUSE_TRACKING:
+                  // Not widely used. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable UTF-8 Mouse Mode, xterm (1005)
-              case CSI_DECSET.DECSET_XTERM_UTF8_MOUSE_MODE:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable SGR Mouse Mode, xterm (1006)
-              case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_MODE:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.SGR;
+                // Use Cell Motion Mouse Tracking, xterm (1002)
+                case CSI_DECSET.DECSET_XTERM_CELL_MOTION_MOUSE_TRACKING:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.CellMotion;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable Alternate Scroll Mode, xterm (1007)
-              case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCROLL_MODE:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Scroll to bottom on tty output (rxvt) (1010)
-              case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_OUTPUT:
-
-              // Scroll to bottom on key press (rxvt) (1011)
-              case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_KEY_PRESS:
-                // These are always active. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable fastScroll resource, xterm (1014)
-              case CSI_DECSET.DECSET_XTERM_FAST_SCROLL:
-                // Not really needed on modern computers. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable urxvt Mouse Mode (1015)
-              case CSI_DECSET.DECSET_URXVT_MOUSE_MODE:
-                // From Mr. Dickey: "The 1015 control is not recommended; it is
-                // not an improvement over 1006." Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable SGR Mouse PixelMode, xterm (1016)
-              case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_PIXEL_MODE:
-                terminalEngine.MouseTrackingMode |= MouseTrackingModes.Pixel;
+                // Use All Motion Mouse Tracking, xterm (1003)
+                case CSI_DECSET.DECSET_XTERM_ALL_MOTION_MOUSE_TRACKING:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.AllMotion;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Interpret "meta" key, xterm (1034)
-              case CSI_DECSET.DECSET_XTERM_INTERPRET_META_KEY:
-                // For all practical intents and purposes, Alt and Meta are the
-                // same thing these days. Do nothing.
+                // Send FocusIn/FocusOut events, xterm (1004)
+                case CSI_DECSET.DECSET_XTERM_FOCUSIN_FOCUSOUT:
+                  // Do nothing. This is always enabled because that's what
+                  // ConPTY expects. See TerminalControl.HasFocus for more on
+                  // this.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable special modifiers for Alt and NumLock keys, xterm
-              // (1035)
-              case CSI_DECSET.DECSET_XTERM_SPECIAL_MODIFIERS:
-                // Sounds fairly Sun-specific, and I do not believe this is
-                // widely used. Do nothing.
+                // Enable UTF-8 Mouse Mode, xterm (1005)
+                case CSI_DECSET.DECSET_XTERM_UTF8_MOUSE_MODE:
+                  // Not widely used. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Send ESC when Meta modifies a key, xterm (1036)
-              case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_META:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Send DEL from the editing-keypad Delete key, xterm (1037)
-              case CSI_DECSET.DECSET_XTERM_SEND_DEL:
-                // Modern systems do not have an editing-keypad Delete key. Do
-                // nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Send ESC when Alt modifies a key, xterm (1039)
-              case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_ALT:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Keep selection even if not highlighted, xterm (1040)
-              case CSI_DECSET.DECSET_XTERM_KEEP_SELECTION:
-
-              // Use the CLIPBOARD selection, xterm (1041)
-              case CSI_DECSET.DECSET_XTERM_SELECT_TO_CLIPBOARD:
-                // Subverts user expectations and handled by TerminalControl.
-                // Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable Urgency window manager hint when Control - G is
-              // received, xterm (1042)
-              case CSI_DECSET.DECSET_XTERM_BELL_IS_URGENT:
-
-              // Enable raising of the window when Control-G is received, xterm
-              // (1043)
-              case CSI_DECSET.DECSET_XTERM_POP_ON_BELL:
-                // X-specific and/or have the potential for abuse (or at least
-                // annoyance). Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Reuse the most recent data copied to CLIPBOARD, xterm (1044)
-              case CSI_DECSET.DECSET_XTERM_KEEP_CLIPBOARD:
-                // Subverts user expectations and handled by TerminalControl.
-                // Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Extended Reverse-wraparound mode (XTREVWRAP2), xterm (1045)
-              case CSI_DECSET.DECSET_XTREVWRAP2:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable switching to/from Alternate Screen Buffer, xterm (1046)
-              case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCREEN_BUFFER:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Alternate Screen Buffer, xterm (1047)
-              case CSI_DECSET.DECSET_XTERM_USE_ALTERNATE_SCREEN_BUFFER:
-                UseAlternateScreenBuffer = true;
-                ClearScreen(ScreenClearTypes.Entire);
+                // Enable SGR Mouse Mode, xterm (1006)
+                case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_MODE:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.SGR;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Save cursor as in DECSC, xterm (1048)
-              case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR:
-                savedCursorState = new(this);
+                // Enable Alternate Scroll Mode, xterm (1007)
+                case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCROLL_MODE:
+                  // Not widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Scroll to bottom on tty output (rxvt) (1010)
+                case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_OUTPUT:
+
+                // Scroll to bottom on key press (rxvt) (1011)
+                case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_KEY_PRESS:
+                  // These are always active. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable fastScroll resource, xterm (1014)
+                case CSI_DECSET.DECSET_XTERM_FAST_SCROLL:
+                  // Not really needed on modern computers. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable urxvt Mouse Mode (1015)
+                case CSI_DECSET.DECSET_URXVT_MOUSE_MODE:
+                  // From Mr. Dickey: "The 1015 control is not recommended; it is
+                  // not an improvement over 1006." Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable SGR Mouse PixelMode, xterm (1016)
+                case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_PIXEL_MODE:
+                  terminalEngine.MouseTrackingMode |= MouseTrackingModes.Pixel;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Save cursor as in DECSC, xterm. After saving the cursor,
-              // switch to the Alternate Screen Buffer, clearing it first. This
-              // control combines the effects of the 1 0 4 7 and 1 0 4 8 modes.
-              // (1049)
-              case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR_AND_USE_ASB:
-                savedCursorState = new(this);
-                UseAlternateScreenBuffer = true;
-                ClearScreen(ScreenClearTypes.Entire);
+                // Interpret "meta" key, xterm (1034)
+                case CSI_DECSET.DECSET_XTERM_INTERPRET_META_KEY:
+                  // For all practical intents and purposes, Alt and Meta are the
+                  // same thing these days. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable special modifiers for Alt and NumLock keys, xterm
+                // (1035)
+                case CSI_DECSET.DECSET_XTERM_SPECIAL_MODIFIERS:
+                  // Sounds fairly Sun-specific, and I do not believe this is
+                  // widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Send ESC when Meta modifies a key, xterm (1036)
+                case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_META:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Send DEL from the editing-keypad Delete key, xterm (1037)
+                case CSI_DECSET.DECSET_XTERM_SEND_DEL:
+                  // Modern systems do not have an editing-keypad Delete key. Do
+                  // nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Send ESC when Alt modifies a key, xterm (1039)
+                case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_ALT:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Keep selection even if not highlighted, xterm (1040)
+                case CSI_DECSET.DECSET_XTERM_KEEP_SELECTION:
+
+                // Use the CLIPBOARD selection, xterm (1041)
+                case CSI_DECSET.DECSET_XTERM_SELECT_TO_CLIPBOARD:
+                  // Subverts user expectations and handled by TerminalControl.
+                  // Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable Urgency window manager hint when Control - G is
+                // received, xterm (1042)
+                case CSI_DECSET.DECSET_XTERM_BELL_IS_URGENT:
+
+                // Enable raising of the window when Control-G is received, xterm
+                // (1043)
+                case CSI_DECSET.DECSET_XTERM_POP_ON_BELL:
+                  // X-specific and/or have the potential for abuse (or at least
+                  // annoyance). Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Reuse the most recent data copied to CLIPBOARD, xterm (1044)
+                case CSI_DECSET.DECSET_XTERM_KEEP_CLIPBOARD:
+                  // Subverts user expectations and handled by TerminalControl.
+                  // Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Extended Reverse-wraparound mode (XTREVWRAP2), xterm (1045)
+                case CSI_DECSET.DECSET_XTREVWRAP2:
+                  // Not widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable switching to/from Alternate Screen Buffer, xterm (1046)
+                case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCREEN_BUFFER:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Use Alternate Screen Buffer, xterm (1047)
+                case CSI_DECSET.DECSET_XTERM_USE_ALTERNATE_SCREEN_BUFFER:
+                  UseAlternateScreenBuffer = true;
+                  ClearScreen(ScreenClearTypes.Entire);
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Set terminfo/termcap function-key mode, xterm (1050)
-              case CSI_DECSET.DECSET_XTERM_SET_TERMINFO_TERMCAP_F_KEY:
-
-              // Set Sun function-key mode, xterm (1051)
-              case CSI_DECSET.DECSET_XTERM_SET_SUN_F_KEY:
-
-              // Set HP function-key mode, xterm (1052)
-              case CSI_DECSET.DECSET_XTERM_SET_HP_F_KEY:
-
-              // Set SCO function-key mode, xterm (1053)
-              case CSI_DECSET.DECSET_XTERM_SET_SCO_F_KEY:
-
-              // Set legacy keyboard emulation, i.e, X11R6, xterm (1060)
-              case CSI_DECSET.DECSET_XTERM_LEGACY_KEYBOARD_EMULATION:
-
-              // Set VT220 keyboard emulation, xterm (1061)
-              case CSI_DECSET.DECSET_XTERM_VT220_KEYBOARD_EMULATION:
-                // These are highly specialized and not relevant to
-                // modern/Windows systems. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Enable readline mouse button-1, xterm (2001)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_1:
-
-              // Enable readline mouse button-2, xterm (2002)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_2:
-
-              // Enable readline mouse button-3, xterm (2003)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_3:
-                // Not really seeing the utility in this. See
-                // https://github.com/termux/termux-app/issues/4302#issuecomment-2563385400
-                // for an explanation of what these actually do. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Set bracketed paste mode, xterm (2004)
-              case CSI_DECSET.DECSET_XTERM_BRACKETED_PASTE_MODE:
-                terminalEngine.BracketedPasteMode = true;
+                // Save cursor as in DECSC, xterm (1048)
+                case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR:
+                  savedCursorState = new(this);
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Enable readline character-quoting, xterm (2005)
-              case CSI_DECSET.DECSET_XTERM_READLINE_CHARACTER_QUOTING:
-
-              // Enable readline newline pasting, xterm (2006)
-              case CSI_DECSET.DECSET_XTERM_READLINE_NEWLINE_PASTING:
-                // Not really seeing the utility in this. Presumably works with
-                // the same use case as 2001-2003. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Theme change notification (2031)
-              case CSI_DECSET.DECSET_THEME_CHANGE:
-                reportPaletteUpdate = true;
+                // Save cursor as in DECSC, xterm. After saving the cursor,
+                // switch to the Alternate Screen Buffer, clearing it first. This
+                // control combines the effects of the 1 0 4 7 and 1 0 4 8 modes.
+                // (1049)
+                case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR_AND_USE_ASB:
+                  savedCursorState = new(this);
+                  UseAlternateScreenBuffer = true;
+                  ClearScreen(ScreenClearTypes.Entire);
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // In-band window resize notification (2048)
-              case CSI_DECSET.DECSET_WINDOW_RESIZE:
-                terminalEngine.ReportResize = true;
+                // Set terminfo/termcap function-key mode, xterm (1050)
+                case CSI_DECSET.DECSET_XTERM_SET_TERMINFO_TERMCAP_F_KEY:
+
+                // Set Sun function-key mode, xterm (1051)
+                case CSI_DECSET.DECSET_XTERM_SET_SUN_F_KEY:
+
+                // Set HP function-key mode, xterm (1052)
+                case CSI_DECSET.DECSET_XTERM_SET_HP_F_KEY:
+
+                // Set SCO function-key mode, xterm (1053)
+                case CSI_DECSET.DECSET_XTERM_SET_SCO_F_KEY:
+
+                // Set legacy keyboard emulation, i.e, X11R6, xterm (1060)
+                case CSI_DECSET.DECSET_XTERM_LEGACY_KEYBOARD_EMULATION:
+
+                // Set VT220 keyboard emulation, xterm (1061)
+                case CSI_DECSET.DECSET_XTERM_VT220_KEYBOARD_EMULATION:
+                  // These are highly specialized and not relevant to
+                  // modern/Windows systems. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Enable readline mouse button-1, xterm (2001)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_1:
+
+                // Enable readline mouse button-2, xterm (2002)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_2:
+
+                // Enable readline mouse button-3, xterm (2003)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_3:
+                  // Not really seeing the utility in this. See
+                  // https://github.com/termux/termux-app/issues/4302#issuecomment-2563385400
+                  // for an explanation of what these actually do. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Set bracketed paste mode, xterm (2004)
+                case CSI_DECSET.DECSET_XTERM_BRACKETED_PASTE_MODE:
+                  terminalEngine.BracketedPasteMode = true;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // ConPTY win32-input-mode (9001)
-              case CSI_DECSET.DECSET_WIN32_INPUT_MODE:
-                // Do nothing. This is a Windows Terminal-ism and is safe to
-                // disregard. See CSI.DECSET_WIN32_INPUT_MODE for more on this.
+                // Enable readline character-quoting, xterm (2005)
+                case CSI_DECSET.DECSET_XTERM_READLINE_CHARACTER_QUOTING:
+
+                // Enable readline newline pasting, xterm (2006)
+                case CSI_DECSET.DECSET_XTERM_READLINE_NEWLINE_PASTING:
+                  // Not really seeing the utility in this. Presumably works with
+                  // the same use case as 2001-2003. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
+
+                // Theme change notification (2031)
+                case CSI_DECSET.DECSET_THEME_CHANGE:
+                  reportPaletteUpdate = true;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // In-band window resize notification (2048)
+                case CSI_DECSET.DECSET_WINDOW_RESIZE:
+                  terminalEngine.ReportResize = true;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // ConPTY win32-input-mode (9001)
+                case CSI_DECSET.DECSET_WIN32_INPUT_MODE:
+                  // Do nothing. This is a Windows Terminal-ism and is safe to
+                  // disregard. See CSI.DECSET_WIN32_INPUT_MODE for more on this.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+              }
             }
 
             break;
@@ -1380,611 +1381,613 @@ namespace Spakov.Terminal {
           case CSI.DECSET_LOW:
             if (csiEscapeSequence.Ps is null) break;
 
-            switch (csiEscapeSequence.Ps![0]) {
-              // Normal Cursor Keys (DECCKM), VT100 (1)
-              case CSI_DECSET.DECSET_DECCKM:
-                terminalEngine.ApplicationCursorKeys = false;
+            foreach (int ps in csiEscapeSequence.Ps) {
+              switch (ps) {
+                // Normal Cursor Keys (DECCKM), VT100 (1)
+                case CSI_DECSET.DECSET_DECCKM:
+                  terminalEngine.ApplicationCursorKeys = false;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Designate VT52 mode (DECANM), VT100 (2)
-              case CSI_DECSET.DECSET_DECANM:
-                // Not sure this is useful today. Do nothing.
+                // Designate VT52 mode (DECANM), VT100 (2)
+                case CSI_DECSET.DECSET_DECANM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // 80 Column Mode (DECCOLM), VT100 (3)
-              case CSI_DECSET.DECSET_DECCOLM:
-                // Not sure this is useful today. Do nothing.
+                // 80 Column Mode (DECCOLM), VT100 (3)
+                case CSI_DECSET.DECSET_DECCOLM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Jump (Fast) Scroll (DECSCLM) (4)
-              case CSI_DECSET.DECSET_DECSCLM:
-                // Not sure this is useful today. Do nothing.
+                // Jump (Fast) Scroll (DECSCLM) (4)
+                case CSI_DECSET.DECSET_DECSCLM:
+                  // Not sure this is useful today. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Normal Video (DECSCNM), VT100 (5)
-              case CSI_DECSET.DECSET_DECSCNM:
-                graphicRendition.Inverse = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Normal Cursor Mode (DECOM), VT100 (6)
-              case CSI_DECSET.DECSET_DECOM:
-                originMode = false;
+                // Normal Video (DECSCNM), VT100 (5)
+                case CSI_DECSET.DECSET_DECSCNM:
+                  graphicRendition.Inverse = false;
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // No Auto-Wrap Mode (DECAWM), VT100 (7)
-              case CSI_DECSET.DECSET_DECAWM:
-                autoWrapMode = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // No Auto-Repeat Keys (DECARM), VT100 (8)
-              case CSI_DECSET.DECSET_DECARM:
-                terminalEngine.AutoRepeatKeys = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't send Mouse X & Y on button press, xterm (9)
-              case CSI_DECSET.DECSET_XTERM_X10_MOUSE:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.X10)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.X10;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Hide toolbar (rxvt) (10)
-              case CSI_DECSET.DECSET_RXVT_SHOW_TOOLBAR:
-                // rxvt-specific, plus toolbars have fallen out of favor. Do
-                // nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Stop blinking cursor (AT&T 610) (12)
-              case CSI_DECSET.DECSET_ATT160:
-
-              // Disable blinking cursor (set only via resource or menu) (13)
-              case CSI_DECSET.DECSET_XTERM_START_BLINKING_CURSOR:
-                terminalEngine.CursorBlink = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable XOR of blinking cursor control sequence and menu (14)
-              case CSI_DECSET.DECSET_XTERM_XOR_BLINKING_CURSOR:
-
-              // Don't Print Form Feed (DECPFF), VT220 (18)
-              case CSI_DECSET.DECSET_DECPFF:
-
-              // Limit print to scrolling region (DECPEX), VT220 (19)
-              case CSI_DECSET.DECSET_DECPEX:
-                // Specialized, not sufficiently modern. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Hide cursor (DECTCEM), VT220 (25)
-              case CSI_DECSET.DECSET_DECTCEM:
-                terminalEngine.CursorVisible = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't show scrollbar (rxvt) (30)
-              case CSI_DECSET.DECSET_RXVT_SHOW_SCROLLBAR:
-
-              // Disable font-shifting functions (rxvt) (35)
-              case CSI_DECSET.DECSET_RXVT_ENABLE_FONT_SHIFTING:
-                // rxvt-specific. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disallow 80 ⇒ 132 mode, xterm (40)
-              case CSI_DECSET.DECSET_XTERM_80_132:
-
-              // No more(1) fix (41)
-              case CSI_DECSET.DECSET_XTERM_MORE_FIX:
-
-              // Disable National Replacement Character sets (DECNRCM), VT220
-              // (42)
-              case CSI_DECSET.DECSET_DECNRCM:
-
-              // Disable Graphic Expanded Print Mode (DECGEPM), VT340 (43)
-              case CSI_DECSET.DECSET_DECGEPM:
-
-              // Disable Graphic Print Color Mode (DECGPCM), VT340 (44), or
-              // Turn off margin bell, xterm (44)
-              case CSI_DECSET.DECSET_DECGPCM:
-
-              // Disable Graphic Print Color Syntax (DECGPCS), VT340 (45), or
-              // No Reverse-wraparound mode (XTREVWRAP), xterm (45)
-              case CSI_DECSET.DECSET_DECGPCS:
-
-              // Stop logging (XTLOGGING), xterm (46)
-              case CSI_DECSET.DECSET_XTLOGGING:
-                // Very specialized. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Normal Screen Buffer, xterm (47), or Disable Graphic
-              // Rotated Print Mode (DECGRPM), VT340 (47)
-              case CSI_DECSET.DECSET_ALTERNATE_SCREEN_BUFFER:
-                UseAlternateScreenBuffer = false;
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Numeric keypad mode (DECNKM), VT320 (66)
-              case CSI_DECSET.DECSET_DECNKM:
-                // Pretty much unused these days. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Backarrow key sends delete (DECBKM), VT340, VT420 (67)
-              case CSI_DECSET.DECSET_DECBKM:
-                // Subverts user expectations. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable left and right margin mode (DECLRMM), VT420 and up
-              // (69)
-              case CSI_DECSET.DECSET_DECLRMM:
-
-              // Disable Sixel Display Mode (DECSDM), VT330, VT340, VT382 (80)
-              case CSI_DECSET.DECSET_DECSDM:
-
-              // Clear screen when DECCOLM is set/reset (DECNCSM), VT510 and up
-              // (95)
-              case CSI_DECSET.DECSET_DECNCSM:
-                // Highly specialized. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't send Mouse X & Y on button press and release (X11)
-              // (1000)
-              case CSI_DECSET.DECSET_XTERM_X11_MOUSE:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.X11)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.X11;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't use Hilite Mouse Tracking, xterm (1001)
-              case CSI_DECSET.DECSET_XTERM_HILITE_MOUSE_TRACKING:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't use Cell Motion Mouse Tracking, xterm (1002)
-              case CSI_DECSET.DECSET_XTERM_CELL_MOTION_MOUSE_TRACKING:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.CellMotion)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.CellMotion;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't use All Motion Mouse Tracking, xterm (1003)
-              case CSI_DECSET.DECSET_XTERM_ALL_MOTION_MOUSE_TRACKING:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.AllMotion)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.AllMotion;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't send FocusIn/FocusOut events, xterm (1004)
-              case CSI_DECSET.DECSET_XTERM_FOCUSIN_FOCUSOUT:
-                // Do nothing. This is always enabled because that's what
-                // ConPTY expects. See TerminalControl.HasFocus for more on
-                // this.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable UTF-8 Mouse Mode, xterm (1005)
-              case CSI_DECSET.DECSET_XTERM_UTF8_MOUSE_MODE:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable SGR Mouse Mode, xterm (1006)
-              case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_MODE:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.SGR)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.SGR;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable Alternate Scroll Mode, xterm (1007)
-              case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCROLL_MODE:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't scroll to bottom on tty output (rxvt) (1010)
-              case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_OUTPUT:
-
-              // Don't scroll to bottom on key press (rxvt) (1011)
-              case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_KEY_PRESS:
-                // These are always active. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable fastScroll resource, xterm (1014)
-              case CSI_DECSET.DECSET_XTERM_FAST_SCROLL:
-                // Not really needed on modern computers. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable urxvt Mouse Mode (1015)
-              case CSI_DECSET.DECSET_URXVT_MOUSE_MODE:
-                // From Mr. Dickey: "The 1015 control is not recommended; it is
-                // not an improvement over 1006." Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable SGR Mouse Pixel-Mode, xterm (1016)
-              case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_PIXEL_MODE:
-                if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.Pixel)) {
-                  terminalEngine.MouseTrackingMode -= MouseTrackingModes.Pixel;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't interpret "meta" key, xterm (1034)
-              case CSI_DECSET.DECSET_XTERM_INTERPRET_META_KEY:
-                // For all practical intents and purposes, Alt and Meta are the
-                // same thing these days. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable special modifiers for Alt and NumLock keys, xterm
-              // (1035)
-              case CSI_DECSET.DECSET_XTERM_SPECIAL_MODIFIERS:
-                // Sounds fairly Sun-specific, and I do not believe this is
-                // widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't send ESC when Meta modifies a key, xterm (1036)
-              case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_META:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Send VT220 Remove from the editing-keypad Delete key, xterm
-              // (1037)
-              case CSI_DECSET.DECSET_XTERM_SEND_DEL:
-                // Modern systems do not have an editing-keypad Delete key. Do
-                // nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Don't send ESC when Alt modifies a key, xterm (1039)
-              case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_ALT:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Do not keep selection when not highlighted, xterm (1040)
-              case CSI_DECSET.DECSET_XTERM_KEEP_SELECTION:
-
-              // Use the PRIMARY selection, xterm (1041)
-              case CSI_DECSET.DECSET_XTERM_SELECT_TO_CLIPBOARD:
-                // Subverts user expectations and handled by TerminalControl.
-                // Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable Urgency window manager hint when Control - G is
-              // received, xterm (1042)
-              case CSI_DECSET.DECSET_XTERM_BELL_IS_URGENT:
-
-              // Disable raising of the window when Control-G is received,
-              // xterm (1043)
-              case CSI_DECSET.DECSET_XTERM_POP_ON_BELL:
-                // X-specific and/or have the potential for abuse. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // No Extended Reverse-wraparound mode (XTREVWRAP2), xterm (1045)
-              case CSI_DECSET.DECSET_XTREVWRAP2:
-                // Not widely used. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Disable switching to/from Alternate Screen Buffer, xterm
-              // (1046)
-              case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCREEN_BUFFER:
-                // This is always enabled. Do nothing.
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Use Normal Screen Buffer, xterm. Clear the screen first if in
-              // the Alternate Screen Buffer. (1047)
-              case CSI_DECSET.DECSET_XTERM_USE_ALTERNATE_SCREEN_BUFFER:
-                if (UseAlternateScreenBuffer) {
-                  ClearScreen(ScreenClearTypes.Entire);
-                  UseAlternateScreenBuffer = false;
-                }
-
-#if DEBUG
-                handled = true;
-#endif
-
-                break;
-
-              // Restore cursor as in DECRC, xterm (1048)
-              case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR:
-                if (savedCursorState is not null) {
-                  ((CursorState) savedCursorState).Restore(this);
-                  savedCursorState = null;
-                } else {
-                  Row = 0;
-                  Column = 0;
+                // Normal Cursor Mode (DECOM), VT100 (6)
+                case CSI_DECSET.DECSET_DECOM:
                   originMode = false;
-                  graphicRendition.InitializeFromPalette(palette);
-                }
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Use Normal Screen Buffer and restore cursor as in DECRC,
-              // xterm. This combines the effects of the 1 0 4 7 and 1 0 4 8
-              // modes. (1049)
-              case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR_AND_USE_ASB:
-                if (UseAlternateScreenBuffer) {
-                  ClearScreen(ScreenClearTypes.Entire);
+                // No Auto-Wrap Mode (DECAWM), VT100 (7)
+                case CSI_DECSET.DECSET_DECAWM:
+                  autoWrapMode = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // No Auto-Repeat Keys (DECARM), VT100 (8)
+                case CSI_DECSET.DECSET_DECARM:
+                  terminalEngine.AutoRepeatKeys = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't send Mouse X & Y on button press, xterm (9)
+                case CSI_DECSET.DECSET_XTERM_X10_MOUSE:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.X10)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.X10;
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Hide toolbar (rxvt) (10)
+                case CSI_DECSET.DECSET_RXVT_SHOW_TOOLBAR:
+                  // rxvt-specific, plus toolbars have fallen out of favor. Do
+                  // nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Stop blinking cursor (AT&T 610) (12)
+                case CSI_DECSET.DECSET_ATT160:
+
+                // Disable blinking cursor (set only via resource or menu) (13)
+                case CSI_DECSET.DECSET_XTERM_START_BLINKING_CURSOR:
+                  terminalEngine.CursorBlink = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable XOR of blinking cursor control sequence and menu (14)
+                case CSI_DECSET.DECSET_XTERM_XOR_BLINKING_CURSOR:
+
+                // Don't Print Form Feed (DECPFF), VT220 (18)
+                case CSI_DECSET.DECSET_DECPFF:
+
+                // Limit print to scrolling region (DECPEX), VT220 (19)
+                case CSI_DECSET.DECSET_DECPEX:
+                  // Specialized, not sufficiently modern. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Hide cursor (DECTCEM), VT220 (25)
+                case CSI_DECSET.DECSET_DECTCEM:
+                  terminalEngine.CursorVisible = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't show scrollbar (rxvt) (30)
+                case CSI_DECSET.DECSET_RXVT_SHOW_SCROLLBAR:
+
+                // Disable font-shifting functions (rxvt) (35)
+                case CSI_DECSET.DECSET_RXVT_ENABLE_FONT_SHIFTING:
+                  // rxvt-specific. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disallow 80 ⇒ 132 mode, xterm (40)
+                case CSI_DECSET.DECSET_XTERM_80_132:
+
+                // No more(1) fix (41)
+                case CSI_DECSET.DECSET_XTERM_MORE_FIX:
+
+                // Disable National Replacement Character sets (DECNRCM), VT220
+                // (42)
+                case CSI_DECSET.DECSET_DECNRCM:
+
+                // Disable Graphic Expanded Print Mode (DECGEPM), VT340 (43)
+                case CSI_DECSET.DECSET_DECGEPM:
+
+                // Disable Graphic Print Color Mode (DECGPCM), VT340 (44), or
+                // Turn off margin bell, xterm (44)
+                case CSI_DECSET.DECSET_DECGPCM:
+
+                // Disable Graphic Print Color Syntax (DECGPCS), VT340 (45), or
+                // No Reverse-wraparound mode (XTREVWRAP), xterm (45)
+                case CSI_DECSET.DECSET_DECGPCS:
+
+                // Stop logging (XTLOGGING), xterm (46)
+                case CSI_DECSET.DECSET_XTLOGGING:
+                  // Very specialized. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Use Normal Screen Buffer, xterm (47), or Disable Graphic
+                // Rotated Print Mode (DECGRPM), VT340 (47)
+                case CSI_DECSET.DECSET_ALTERNATE_SCREEN_BUFFER:
                   UseAlternateScreenBuffer = false;
-                }
-
-                if (savedCursorState is not null) {
-                  ((CursorState) savedCursorState).Restore(this);
-                  savedCursorState = null;
-                } else {
-                  Row = 0;
-                  Column = 0;
-                  originMode = false;
-                  graphicRendition.InitializeFromPalette(palette);
-                }
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Reset terminfo/termcap function-key mode, xterm (1050)
-              case CSI_DECSET.DECSET_XTERM_SET_TERMINFO_TERMCAP_F_KEY:
-
-              // Reset Sun function-key mode, xterm (1051)
-              case CSI_DECSET.DECSET_XTERM_SET_SUN_F_KEY:
-
-              // Reset HP function-key mode, xterm (1052)
-              case CSI_DECSET.DECSET_XTERM_SET_HP_F_KEY:
-
-              // Reset SCO function-key mode, xterm (1053)
-              case CSI_DECSET.DECSET_XTERM_SET_SCO_F_KEY:
-
-              // Reset legacy keyboard emulation, i.e, X11R6, xterm (1060)
-              case CSI_DECSET.DECSET_XTERM_LEGACY_KEYBOARD_EMULATION:
-
-              // Reset keyboard emulation to Sun/PC style, xterm (1061)
-              case CSI_DECSET.DECSET_XTERM_VT220_KEYBOARD_EMULATION:
-                // These are highly specialized and not relevant to
-                // modern/Windows systems. Do nothing.
+                // Numeric keypad mode (DECNKM), VT320 (66)
+                case CSI_DECSET.DECSET_DECNKM:
+                  // Pretty much unused these days. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Disable readline mouse button-1, xterm (2001)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_1:
-
-              // Disable readline mouse button-2, xterm (2002)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_2:
-
-              // Disable readline mouse button-3, xterm (2003)
-              case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_3:
-                // Not really seeing the utility in this. See
-                // https://github.com/termux/termux-app/issues/4302#issuecomment-2563385400
-                // for an explanation of what these actually do. Do nothing.
+                // Backarrow key sends delete (DECBKM), VT340, VT420 (67)
+                case CSI_DECSET.DECSET_DECBKM:
+                  // Subverts user expectations. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Reset bracketed paste mode, xterm (2004)
-              case CSI_DECSET.DECSET_XTERM_BRACKETED_PASTE_MODE:
-                terminalEngine.BracketedPasteMode = false;
+                // Disable left and right margin mode (DECLRMM), VT420 and up
+                // (69)
+                case CSI_DECSET.DECSET_DECLRMM:
+
+                // Disable Sixel Display Mode (DECSDM), VT330, VT340, VT382 (80)
+                case CSI_DECSET.DECSET_DECSDM:
+
+                // Clear screen when DECCOLM is set/reset (DECNCSM), VT510 and up
+                // (95)
+                case CSI_DECSET.DECSET_DECNCSM:
+                  // Highly specialized. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't send Mouse X & Y on button press and release (X11)
+                // (1000)
+                case CSI_DECSET.DECSET_XTERM_X11_MOUSE:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.X11)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.X11;
+                  }
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Disable readline character-quoting, xterm (2005)
-              case CSI_DECSET.DECSET_XTERM_READLINE_CHARACTER_QUOTING:
-
-              // Disable readline newline pasting, xterm (2006)
-              case CSI_DECSET.DECSET_XTERM_READLINE_NEWLINE_PASTING:
-                // Not really seeing the utility in this. Presumably works with
-                // the same use case as 2001-2003. Do nothing.
+                // Don't use Hilite Mouse Tracking, xterm (1001)
+                case CSI_DECSET.DECSET_XTERM_HILITE_MOUSE_TRACKING:
+                  // Not widely used. Do nothing.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Disable theme change notification (2031)
-              case CSI_DECSET.DECSET_THEME_CHANGE:
-                reportPaletteUpdate = false;
+                // Don't use Cell Motion Mouse Tracking, xterm (1002)
+                case CSI_DECSET.DECSET_XTERM_CELL_MOTION_MOUSE_TRACKING:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.CellMotion)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.CellMotion;
+                  }
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Disable in-band window resize notification (2048)
-              case CSI_DECSET.DECSET_WINDOW_RESIZE:
-                terminalEngine.ReportResize = false;
+                // Don't use All Motion Mouse Tracking, xterm (1003)
+                case CSI_DECSET.DECSET_XTERM_ALL_MOTION_MOUSE_TRACKING:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.AllMotion)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.AllMotion;
+                  }
 
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
 
-              // Disable ConPTY win32-input-mode (9001)
-              case CSI_DECSET.DECSET_WIN32_INPUT_MODE:
-                // Do nothing. This is a Windows Terminal-ism and is safe
-                // to disregard. See
-                // CSI.DECSET_WIN32_INPUT_MODE
-                // for more on this.
+                // Don't send FocusIn/FocusOut events, xterm (1004)
+                case CSI_DECSET.DECSET_XTERM_FOCUSIN_FOCUSOUT:
+                  // Do nothing. This is always enabled because that's what
+                  // ConPTY expects. See TerminalControl.HasFocus for more on
+                  // this.
 #if DEBUG
-                handled = true;
+                  handled = true;
 #endif
 
-                break;
+                  break;
+
+                // Disable UTF-8 Mouse Mode, xterm (1005)
+                case CSI_DECSET.DECSET_XTERM_UTF8_MOUSE_MODE:
+                  // Not widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable SGR Mouse Mode, xterm (1006)
+                case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_MODE:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.SGR)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.SGR;
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable Alternate Scroll Mode, xterm (1007)
+                case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCROLL_MODE:
+                  // Not widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't scroll to bottom on tty output (rxvt) (1010)
+                case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_OUTPUT:
+
+                // Don't scroll to bottom on key press (rxvt) (1011)
+                case CSI_DECSET.DECSET_RXVT_SCROLL_TO_BOTTOM_ON_KEY_PRESS:
+                  // These are always active. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable fastScroll resource, xterm (1014)
+                case CSI_DECSET.DECSET_XTERM_FAST_SCROLL:
+                  // Not really needed on modern computers. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable urxvt Mouse Mode (1015)
+                case CSI_DECSET.DECSET_URXVT_MOUSE_MODE:
+                  // From Mr. Dickey: "The 1015 control is not recommended; it is
+                  // not an improvement over 1006." Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable SGR Mouse Pixel-Mode, xterm (1016)
+                case CSI_DECSET.DECSET_XTERM_SGR_MOUSE_PIXEL_MODE:
+                  if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.Pixel)) {
+                    terminalEngine.MouseTrackingMode -= MouseTrackingModes.Pixel;
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't interpret "meta" key, xterm (1034)
+                case CSI_DECSET.DECSET_XTERM_INTERPRET_META_KEY:
+                  // For all practical intents and purposes, Alt and Meta are the
+                  // same thing these days. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable special modifiers for Alt and NumLock keys, xterm
+                // (1035)
+                case CSI_DECSET.DECSET_XTERM_SPECIAL_MODIFIERS:
+                  // Sounds fairly Sun-specific, and I do not believe this is
+                  // widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't send ESC when Meta modifies a key, xterm (1036)
+                case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_META:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Send VT220 Remove from the editing-keypad Delete key, xterm
+                // (1037)
+                case CSI_DECSET.DECSET_XTERM_SEND_DEL:
+                  // Modern systems do not have an editing-keypad Delete key. Do
+                  // nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Don't send ESC when Alt modifies a key, xterm (1039)
+                case CSI_DECSET.DECSET_XTERM_SEND_ESC_ON_ALT:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Do not keep selection when not highlighted, xterm (1040)
+                case CSI_DECSET.DECSET_XTERM_KEEP_SELECTION:
+
+                // Use the PRIMARY selection, xterm (1041)
+                case CSI_DECSET.DECSET_XTERM_SELECT_TO_CLIPBOARD:
+                  // Subverts user expectations and handled by TerminalControl.
+                  // Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable Urgency window manager hint when Control - G is
+                // received, xterm (1042)
+                case CSI_DECSET.DECSET_XTERM_BELL_IS_URGENT:
+
+                // Disable raising of the window when Control-G is received,
+                // xterm (1043)
+                case CSI_DECSET.DECSET_XTERM_POP_ON_BELL:
+                  // X-specific and/or have the potential for abuse. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // No Extended Reverse-wraparound mode (XTREVWRAP2), xterm (1045)
+                case CSI_DECSET.DECSET_XTREVWRAP2:
+                  // Not widely used. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable switching to/from Alternate Screen Buffer, xterm
+                // (1046)
+                case CSI_DECSET.DECSET_XTERM_ALTERNATE_SCREEN_BUFFER:
+                  // This is always enabled. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Use Normal Screen Buffer, xterm. Clear the screen first if in
+                // the Alternate Screen Buffer. (1047)
+                case CSI_DECSET.DECSET_XTERM_USE_ALTERNATE_SCREEN_BUFFER:
+                  if (UseAlternateScreenBuffer) {
+                    ClearScreen(ScreenClearTypes.Entire);
+                    UseAlternateScreenBuffer = false;
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Restore cursor as in DECRC, xterm (1048)
+                case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR:
+                  if (savedCursorState is not null) {
+                    ((CursorState) savedCursorState).Restore(this);
+                    savedCursorState = null;
+                  } else {
+                    Row = 0;
+                    Column = 0;
+                    originMode = false;
+                    graphicRendition.InitializeFromPalette(palette);
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Use Normal Screen Buffer and restore cursor as in DECRC,
+                // xterm. This combines the effects of the 1 0 4 7 and 1 0 4 8
+                // modes. (1049)
+                case CSI_DECSET.DECSET_XTERM_SAVE_CURSOR_AND_USE_ASB:
+                  if (UseAlternateScreenBuffer) {
+                    ClearScreen(ScreenClearTypes.Entire);
+                    UseAlternateScreenBuffer = false;
+                  }
+
+                  if (savedCursorState is not null) {
+                    ((CursorState) savedCursorState).Restore(this);
+                    savedCursorState = null;
+                  } else {
+                    Row = 0;
+                    Column = 0;
+                    originMode = false;
+                    graphicRendition.InitializeFromPalette(palette);
+                  }
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Reset terminfo/termcap function-key mode, xterm (1050)
+                case CSI_DECSET.DECSET_XTERM_SET_TERMINFO_TERMCAP_F_KEY:
+
+                // Reset Sun function-key mode, xterm (1051)
+                case CSI_DECSET.DECSET_XTERM_SET_SUN_F_KEY:
+
+                // Reset HP function-key mode, xterm (1052)
+                case CSI_DECSET.DECSET_XTERM_SET_HP_F_KEY:
+
+                // Reset SCO function-key mode, xterm (1053)
+                case CSI_DECSET.DECSET_XTERM_SET_SCO_F_KEY:
+
+                // Reset legacy keyboard emulation, i.e, X11R6, xterm (1060)
+                case CSI_DECSET.DECSET_XTERM_LEGACY_KEYBOARD_EMULATION:
+
+                // Reset keyboard emulation to Sun/PC style, xterm (1061)
+                case CSI_DECSET.DECSET_XTERM_VT220_KEYBOARD_EMULATION:
+                  // These are highly specialized and not relevant to
+                  // modern/Windows systems. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable readline mouse button-1, xterm (2001)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_1:
+
+                // Disable readline mouse button-2, xterm (2002)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_2:
+
+                // Disable readline mouse button-3, xterm (2003)
+                case CSI_DECSET.DECSET_XTERM_READLINE_MOUSE_BUTTON_3:
+                  // Not really seeing the utility in this. See
+                  // https://github.com/termux/termux-app/issues/4302#issuecomment-2563385400
+                  // for an explanation of what these actually do. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Reset bracketed paste mode, xterm (2004)
+                case CSI_DECSET.DECSET_XTERM_BRACKETED_PASTE_MODE:
+                  terminalEngine.BracketedPasteMode = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable readline character-quoting, xterm (2005)
+                case CSI_DECSET.DECSET_XTERM_READLINE_CHARACTER_QUOTING:
+
+                // Disable readline newline pasting, xterm (2006)
+                case CSI_DECSET.DECSET_XTERM_READLINE_NEWLINE_PASTING:
+                  // Not really seeing the utility in this. Presumably works with
+                  // the same use case as 2001-2003. Do nothing.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable theme change notification (2031)
+                case CSI_DECSET.DECSET_THEME_CHANGE:
+                  reportPaletteUpdate = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable in-band window resize notification (2048)
+                case CSI_DECSET.DECSET_WINDOW_RESIZE:
+                  terminalEngine.ReportResize = false;
+
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+
+                // Disable ConPTY win32-input-mode (9001)
+                case CSI_DECSET.DECSET_WIN32_INPUT_MODE:
+                  // Do nothing. This is a Windows Terminal-ism and is safe
+                  // to disregard. See
+                  // CSI.DECSET_WIN32_INPUT_MODE
+                  // for more on this.
+#if DEBUG
+                  handled = true;
+#endif
+
+                  break;
+              }
             }
 
             break;

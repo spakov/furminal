@@ -273,7 +273,10 @@ namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI {
           or Ansi.EscapeSequences.CSI.DECSET_LOW
         ) {
           if (rawCSIEscapeSequence.Length > 2 && rawCSIEscapeSequence[1] == CSI_DECSET.DECSET_LEADER) {
-            if (int.TryParse(rawCSIEscapeSequence[2..^1], out int decsetSequence)) {
+            if (stringPs.Length > 1) {
+              // Remove ? from the first private mode
+              stringPs[0] = stringPs[0][1..];
+            } else if (int.TryParse(rawCSIEscapeSequence[2..^1], out int decsetSequence)) {
               return new(rawCSIEscapeSequence, [decsetSequence], type, rawCSIEscapeSequence[1]);
             }
 
