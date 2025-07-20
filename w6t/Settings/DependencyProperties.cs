@@ -50,7 +50,7 @@ namespace Spakov.W6t.Settings {
       nameof(StartDirectory),
       typeof(string),
       typeof(TerminalControl),
-      new PropertyMetadata(null)
+      new PropertyMetadata("%USERPROFILE%")
     );
 
     /// <summary>
