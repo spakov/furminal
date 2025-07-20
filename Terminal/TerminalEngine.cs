@@ -379,6 +379,9 @@ namespace Spakov.Terminal {
       set => videoTerminal.SelectionMode = value;
     }
 
+    /// <inheritdoc cref="VideoTerminal.UseAlternateScreenBuffer"/>
+    internal bool UseAlternateScreenBuffer => videoTerminal.UseAlternateScreenBuffer;
+
     /// <summary>
     /// The <see cref="AnsiProcessor.AnsiReader"/> associated with the
     /// terminal.
@@ -540,8 +543,8 @@ namespace Spakov.Terminal {
     }
 
     /// <inheritdoc cref="AnsiWriter.SendEscapeSequence"/>
-    internal void SendEscapeSequence(byte[] escapeSequence, bool brokenMode = false) {
-      AnsiWriter?.SendEscapeSequence(escapeSequence, brokenMode);
+    internal void SendEscapeSequence(byte[] escapeSequence) {
+      AnsiWriter?.SendEscapeSequence(escapeSequence);
 
 #if DEBUG
       logger.LogInformation("Sent escape sequence \"{escapeSequence}\"", AnsiProcessor.Helpers.PrintableHelper.MakePrintable(Encoding.ASCII.GetString(escapeSequence)));

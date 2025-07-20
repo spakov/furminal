@@ -174,6 +174,21 @@ namespace Spakov.Terminal {
     }
 
     /// <summary>
+    /// Whether to use the alternate screen buffer.
+    /// </summary>
+    internal bool UseAlternateScreenBuffer {
+      get => _useAlternateScreenBuffer;
+
+      private set {
+        if (_useAlternateScreenBuffer != value) {
+          _useAlternateScreenBuffer = value;
+
+          SwapBuffers(screenBuffer, alternateScreenBuffer);
+        }
+      }
+    }
+
+    /// <summary>
     /// The caret row.
     /// </summary>
     private int Row {
@@ -187,21 +202,6 @@ namespace Spakov.Terminal {
     private int Column {
       get => Caret.Column;
       set => _caret.Column = value;
-    }
-
-    /// <summary>
-    /// Whether to use the alternate screen buffer.
-    /// </summary>
-    private bool UseAlternateScreenBuffer {
-      get => _useAlternateScreenBuffer;
-
-      set {
-        if (_useAlternateScreenBuffer != value) {
-          _useAlternateScreenBuffer = value;
-
-          SwapBuffers(screenBuffer, alternateScreenBuffer);
-        }
-      }
     }
 
     /// <summary>
@@ -411,7 +411,7 @@ namespace Spakov.Terminal {
       ScrollbackMode = false;
 
 #if DEBUG
-      logger.LogDebug("Handling grapheme cluster {graphemeCluster}", PrintableHelper.MakePrintable(graphemeCluster));
+      logger.LogTrace("Handling grapheme cluster {graphemeCluster}", PrintableHelper.MakePrintable(graphemeCluster));
 #endif
 
       if (graphemeCluster is not null) {
@@ -573,8 +573,7 @@ namespace Spakov.Terminal {
                 cb,
                 (byte) (column + 1 + 0x20),
                 (byte) (row + 1 + 0x20)
-              ],
-              brokenMode: true
+              ]
             );
           }
         } else {
@@ -618,14 +617,13 @@ namespace Spakov.Terminal {
           }
 
           terminalEngine.AnsiWriter?.SendEscapeSequence(
-            Encoding.ASCII.GetBytes(mouseReport.ToString()),
-            brokenMode: true
+            Encoding.ASCII.GetBytes(mouseReport.ToString())
           );
         }
       }
 
       // Handle selection changes
-      if (pointerPoint.Properties.IsLeftButtonPressed) {
+      if (!UseAlternateScreenBuffer && pointerPoint.Properties.IsLeftButtonPressed) {
         lastSelection.Column = column;
         lastSelection.Row = row;
 
@@ -698,8 +696,7 @@ namespace Spakov.Terminal {
                   cb,
                   (byte) (column + 1 + 0x20),
                   (byte) (row + 1 + 0x20)
-                ],
-                brokenMode: true
+                ]
               );
             }
           } else {
@@ -723,7 +720,6 @@ namespace Spakov.Terminal {
             StringBuilder mouseReport = new();
 
             if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.SGR)) {
-              mouseReport.Append(AnsiProcessor.Ansi.C0.ESC);
               mouseReport.Append(Fe.CSI);
               mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_LEADER);
               mouseReport.Append(cb);
@@ -733,7 +729,6 @@ namespace Spakov.Terminal {
               mouseReport.Append(row + 1);
               mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_PRESS_TERMINATOR);
             } else if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.Pixel)) {
-              mouseReport.Append(AnsiProcessor.Ansi.C0.ESC);
               mouseReport.Append(Fe.CSI);
               mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_LEADER);
               mouseReport.Append(cb);
@@ -745,8 +740,7 @@ namespace Spakov.Terminal {
             }
 
             terminalEngine.AnsiWriter?.SendEscapeSequence(
-              Encoding.ASCII.GetBytes(mouseReport.ToString()),
-              brokenMode: true
+              Encoding.ASCII.GetBytes(mouseReport.ToString())
             );
           }
         }
@@ -817,8 +811,7 @@ namespace Spakov.Terminal {
                 cb,
                 (byte) (column + 1 + 0x20),
                 (byte) (row + 1 + 0x20)
-              ],
-              brokenMode: true
+              ]
             );
           }
         } else {
@@ -836,7 +829,6 @@ namespace Spakov.Terminal {
           StringBuilder mouseReport = new();
 
           if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.SGR)) {
-            mouseReport.Append(AnsiProcessor.Ansi.C0.ESC);
             mouseReport.Append(Fe.CSI);
             mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_LEADER);
             mouseReport.Append(cb);
@@ -846,7 +838,6 @@ namespace Spakov.Terminal {
             mouseReport.Append(row + 1);
             mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_RELEASE_TERMINATOR);
           } else if (terminalEngine.MouseTrackingMode.HasFlag(MouseTrackingModes.Pixel)) {
-            mouseReport.Append(AnsiProcessor.Ansi.C0.ESC);
             mouseReport.Append(Fe.CSI);
             mouseReport.Append(CSI_MouseTracking.MOUSE_TRACKING_SGR_LEADER);
             mouseReport.Append(cb);
@@ -858,8 +849,7 @@ namespace Spakov.Terminal {
           }
 
           terminalEngine.AnsiWriter?.SendEscapeSequence(
-            Encoding.ASCII.GetBytes(mouseReport.ToString()),
-            brokenMode: true
+            Encoding.ASCII.GetBytes(mouseReport.ToString())
           );
         }
       }
