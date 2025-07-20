@@ -69,8 +69,7 @@ namespace Spakov.Terminal.Helpers {
                 cb,
                 (byte) (column + 1 + 0x20),
                 (byte) (row + 1 + 0x20)
-              ],
-              brokenMode: true
+              ]
             );
           }
         } else {
@@ -106,8 +105,7 @@ namespace Spakov.Terminal.Helpers {
           }
 
           terminalControl.TerminalEngine.AnsiWriter?.SendEscapeSequence(
-            Encoding.ASCII.GetBytes(mouseReport.ToString()),
-            brokenMode: true
+            Encoding.ASCII.GetBytes(mouseReport.ToString())
           );
         }
       }
