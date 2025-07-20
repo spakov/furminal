@@ -1039,7 +1039,11 @@ namespace Spakov.Terminal {
     private void DrawBackground(CanvasDrawingSession drawingSession, System.Drawing.Color defaultBackgroundColor, bool backgroundIsInvisible, DrawableCell drawableCell) {
       Color calculatedColor = drawableCell.Cell.GraphicRendition.Inverse ^ drawableCell.Cell.Selected
         ? drawableCell.Cell.GraphicRendition.CalculatedForegroundColor()
-        : drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(defaultBackgroundColor, backgroundIsInvisible);
+        : drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(
+            defaultBackgroundColor,
+            backgroundIsInvisible,
+            honorBackgroundIsInvisible: !terminalEngine.UseAlternateScreenBuffer
+          );
 
       drawingSession.Blend = CanvasBlend.Copy;
 
@@ -1096,10 +1100,11 @@ namespace Spakov.Terminal {
       logger.LogTrace("Drawing character {character}", drawnGraphemeCluster.ToString());
 #endif
 
-      // Always present box-drawing characters (U+2500 through U+257F) as aliased
+      // Always present box-drawing characters (U+2500 through U+257f) and
+      // block elements (U+2580 through U+259f) as aliased
       drawingSession.TextAntialiasing = drawableCell.Cell.GraphemeCluster.Length == 1
         && drawableCell.Cell.GraphemeCluster[0] >= '─'
-        && drawableCell.Cell.GraphemeCluster[0] <= '╿'
+        && drawableCell.Cell.GraphemeCluster[0] <= '▟'
         ? CanvasTextAntialiasing.Aliased
         : textAntialiasing switch {
           (TextAntialiasingStyles) (-1) => CanvasTextAntialiasing.Aliased,
