@@ -1175,7 +1175,7 @@ namespace Spakov.Terminal {
 #else
     internal void ShiftToScrollback(uint rows = 1, bool force = false) {
 #endif
-      bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && !UseAlternateScreenBuffer;
+      bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && terminalEngine.Scrollback > 0 && !UseAlternateScreenBuffer;
 
       SelectionMode = false;
 
@@ -1190,6 +1190,8 @@ namespace Spakov.Terminal {
 #if DEBUG
       logger.LogInformation("{callerMemberName} => ShiftToScrollback({rows}, force: {force})", callerMemberName, rows, force);
 #endif
+
+      if (!useScrollback && !force) return;
 
       for (int row = 0; row < rows; row++) {
         if (useScrollback) {
@@ -1244,7 +1246,7 @@ namespace Spakov.Terminal {
 #else
     internal void ShiftFromScrollback(uint rows = 1, bool force = false) {
 #endif
-      bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && !UseAlternateScreenBuffer;
+      bool useScrollback = scrollbackBuffer is not null && scrollforwardBuffer is not null && terminalEngine.Scrollback > 0 && !UseAlternateScreenBuffer;
 
       SelectionMode = false;
 
@@ -1259,6 +1261,8 @@ namespace Spakov.Terminal {
 #if DEBUG
       logger.LogInformation("{callerMemberName} => ShiftFromScrollback({rows}, force: {force})", callerMemberName, rows, force);
 #endif
+
+      if (!useScrollback && !force) return;
 
       for (int row = 0; row < rows; row++) {
         if (useScrollback) {
