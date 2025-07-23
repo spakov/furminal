@@ -5,7 +5,7 @@ namespace Spakov.Terminal.Settings {
   /// <summary>
   /// A settings item representing a collection of <see
   /// cref="RadioSettingsItem"/>s, presented as a <see
-  /// cref="Microsoft.UI.Xaml.Controls.ToggleSwitch"/>.
+  /// cref="Microsoft.UI.Xaml.Controls.RadioButtons"/>.
   /// </summary>
   public partial class RadioCollectionSettingsItem : SettingsItem {
     /// <summary>

@@ -173,8 +173,8 @@ namespace Spakov.Terminal {
     /// </summary>
     /// <remarks>This differs from <see cref="CursorDisplayed"/> in that it is
     /// controlled via CSI DECSET escape sequence <see
-    /// cref="AnsiProcessor.Ansi.EscapeSequences.CSI.DECSET_DECTCEM"/> and
-    /// overrides <see cref="CursorDisplayed"/>.</remarks>
+    /// cref="AnsiProcessor.Ansi.EscapeSequences.Extensions.CSI_DECSET.DECSET_DECTCEM"
+    /// /> and overrides <see cref="CursorDisplayed"/>.</remarks>
     internal bool CursorVisible {
       get => _cursorVisible;
       set => _cursorVisible = value;
@@ -1204,7 +1204,7 @@ namespace Spakov.Terminal {
     /// <param name="drawingSession"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='drawingSession']"/></param>
     /// <param name="drawableCell"><inheritdoc cref="DrawDecoration"
-    /// path="/param[@name='cell']"/></param>
+    /// path="/param[@name='drawableCell']"/></param>
     /// <param name="underlineY">The Y location at which to draw the
     /// underline.</param>
     /// <param name="useUnderlineColor">Whether to use the underline color
@@ -1231,7 +1231,7 @@ namespace Spakov.Terminal {
     /// <param name="drawingSession"><inheritdoc cref="DrawDecoration"
     /// path="/param[@name='drawingSession']"/></param>
     /// <param name="drawableCell"><inheritdoc cref="DrawDecoration"
-    /// path="/param[@name='cell']"/></param>
+    /// path="/param[@name='drawableCell']"/></param>
     private void DrawUndercurl(CanvasDrawingSession drawingSession, DrawableCell drawableCell) {
       // The top-left point of our w
       Vector2 pointA = new(

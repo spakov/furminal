@@ -16,7 +16,7 @@ namespace Spakov.AnsiProcessor.Helpers {
     /// Converts <paramref name="parameters"/> to a <see cref="Color"/>.
     /// </summary>
     /// <param name="parameters">The SGR parameters, which are separated by
-    /// either <c>;</c> or <c>;</c>, split.</param>
+    /// either <c>;</c> or <c>:</c>, split.</param>
     /// <param name="palette">The <see cref="Palette"/> to use for ANSI
     /// colors.</param>
     /// <returns>A <see cref="Color"/> representing <paramref

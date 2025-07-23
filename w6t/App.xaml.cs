@@ -1,10 +1,13 @@
 ﻿using Microsoft.UI.Xaml;
+using Spakov.W6t.Settings;
+using Spakov.W6t.Settings.Json;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
 using Windows.Win32;
@@ -18,6 +21,13 @@ namespace Spakov.W6t {
   /// </summary>
   public partial class App : Application {
     private Window? _window;
+
+    private static ResourceLoader? resources;
+
+    /// <summary>
+    /// App resources.
+    /// </summary>
+    internal static ResourceLoader ResourceLoader => resources!;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line
@@ -42,7 +52,17 @@ namespace Spakov.W6t {
     /// <param name="args">Details about the launch request and
     /// process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args) {
-      ResourceLoader resources = ResourceLoader.GetForViewIndependentUse();
+      resources = ResourceLoader.GetForViewIndependentUse();
+
+      SettingsHelper.JsonSerializerOptions.Converters.Add(new ColorJsonConverter());
+
+#if DEBUG
+      if (Environment.CommandLine.Contains("GenerateSchema")) {
+        Directory.SetCurrentDirectory(Environment.GetEnvironmentVariable("USERPROFILE")!);
+        SettingsHelper.GenerateSchema();
+        Current.Exit();
+      }
+#endif
 
       StringWriter commandLineOutput = new();
       string[] rawCommandLineArgs = Environment.GetCommandLineArgs();

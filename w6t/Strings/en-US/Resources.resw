@@ -237,6 +237,9 @@
   <data name="RowsOptionDescription" xml:space="preserve">
     <value>The number of terminal rows</value>
   </data>
+  <data name="SchemaHasBeenGenerated" xml:space="preserve">
+    <value>Schema has been generated at {0}.</value>
+  </data>
   <data name="SettingsJsonLocationExplanation" xml:space="preserve">
     <value>The w6t settings.json file is located at {0}. While the Settings window is open, w6t will automatically load it when the file is written.</value>
   </data>
@@ -263,6 +266,9 @@
   </data>
   <data name="VisualBellDisplayTimeName" xml:space="preserve">
     <value>Visual bell display time</value>
+  </data>
+  <data name="W6tSchemaGenerated" xml:space="preserve">
+    <value>w6t Schema Generated</value>
   </data>
   <data name="WhiteBrightColorName" xml:space="preserve">
     <value>Bright white</value>

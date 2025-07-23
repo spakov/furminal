@@ -13,6 +13,7 @@ namespace Spakov.Terminal {
     /// <summary>
     /// Initializes a <see cref="SizeF"/> with <paramref name="width"/> and
     /// <paramref name="height"/>.
+    /// </summary>
     /// <param name="width">The width.</param>
     /// <param name="height">The height.</param>
     public SizeF(float width, float height) {

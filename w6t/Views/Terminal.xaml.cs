@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Spakov.Terminal;
 using Spakov.W6t.Settings;
-using Spakov.W6t.Settings.Json;
 using Spakov.W6t.ViewModels;
 using System;
 using System.IO;
@@ -122,14 +121,9 @@ namespace Spakov.W6t.Views {
       logger.LogInformation("--columns: {startColumns}", startColumns);
 #endif
 
-      jsonSerializerOptions = new(SettingsContext.Default.Options);
-      jsonSerializerOptions.Converters.Add(new ColorJsonConverter());
-
-      settingsJsonPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, settingsJsonFilename);
-
       settingsJsonWatcher = new() {
         Path = ApplicationData.Current.LocalFolder.Path,
-        Filter = settingsJsonFilename,
+        Filter = SettingsHelper.SettingsPath,
         NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
         EnableRaisingEvents = true
       };

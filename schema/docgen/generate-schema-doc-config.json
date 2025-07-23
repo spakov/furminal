@@ -1,0 +1,13 @@
+{
+  "template_name": "md",
+  "template_md_options": {
+    "show_heading_numbers": false,
+    "show_array_restrictions": false,
+    "properties_table_columns": [
+      "Property",
+      "Type",
+      "Title/Description"
+    ]
+  },
+  "footer_show_time": false
+}

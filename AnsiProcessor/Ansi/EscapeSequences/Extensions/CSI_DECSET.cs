@@ -71,7 +71,7 @@
     public const int DECSET_DECARM = 8;
 
     /// <summary>
-    /// The xterm send mouse X & Y on button press value.
+    /// The xterm send mouse X &amp; Y on button press value.
     /// </summary>
     public const int DECSET_XTERM_X10_MOUSE = 9;
 
@@ -211,7 +211,7 @@
     public const int DECSET_DECNCSM = 95;
 
     /// <summary>
-    /// The xterm send mouse X & Y on button press and release (X11) value.
+    /// The xterm send mouse X &amp; Y on button press and release (X11) value.
     /// </summary>
     public const int DECSET_XTERM_X11_MOUSE = 1000;
 
@@ -441,8 +441,8 @@
     /// href="https://github.com/microsoft/terminal/blob/main/doc/specs/%234999%20-%20Improved%20keyboard%20handling%20in%20Conpty.md"
     /// /> for background on this.</para>
     /// <para>Also be sure to see <see
-    /// href="https://invisible-island.net/xterm/modified-keys.html"> and <see
-    /// href="https://www.leonerd.org.uk/hacks/fixterms/"> for more on this.
+    /// href="https://invisible-island.net/xterm/modified-keys.html"/> and <see
+    /// href="https://www.leonerd.org.uk/hacks/fixterms/"/> for more on this.
     /// (It's fascinating to me that Microsoft developed yet another standard
     /// for keystroke encoding when there are already at least three others. I
     /// mean, I get why, but still.)</para>

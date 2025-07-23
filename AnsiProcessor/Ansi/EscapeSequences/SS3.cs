@@ -15,7 +15,7 @@
   /// /></item>
   /// </list></para>
   /// </remarks>
-  internal class SS3 {
+  public static class SS3 {
     /// <summary>
     /// The cursor up (CUU) character.
     /// </summary>

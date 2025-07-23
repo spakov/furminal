@@ -34,9 +34,6 @@ namespace Spakov.AnsiProcessor {
     /// <summary>
     /// Sends <paramref name="escapeSequence"/> to the console input stream.
     /// </summary>
-    /// <remarks>Regarding <paramref name="brokenMode"/>, I have <em>absolutely
-    /// no idea</em> what is going on. I'm assuming this must be a
-    /// ConPTY-ism.</remarks>
     /// <param name="escapeSequence">The escape sequence (as 7-bit ASCII, with
     /// no leading ESC) to send to the console input stream.</param>
     public void SendEscapeSequence(byte[] escapeSequence) {

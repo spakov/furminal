@@ -102,7 +102,7 @@ namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI {
   public class CSIEscapeSequence : FeEscapeSequence {
     /// <summary>
     /// <c>Ps</c>, as in <see
-    /// href="https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands"
+    /// href="https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Functions-using-CSI-_-ordered-by-the-final-character_s_"
     /// />.
     /// </summary>
     /// <remarks><see langword="null"/> if the OSC sequence is

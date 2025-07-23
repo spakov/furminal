@@ -5,7 +5,7 @@ namespace Spakov.Terminal {
   /// <summary>
   /// A rectangle, used for <see cref="Cell"/> overfill tracking.
   /// </summary>
-  public struct RectF {
+  internal struct RectF {
     public float Top;
     public float Left;
     public float Right;

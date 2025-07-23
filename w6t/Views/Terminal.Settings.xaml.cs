@@ -22,17 +22,12 @@ namespace Spakov.W6t.Views {
     private const string explorer = "explorer";
     private const string explorerSelect = "/select,\"{0}\"";
 
-    private readonly JsonSerializerOptions jsonSerializerOptions;
-
-    private const string settingsJsonFilename = "settings.json";
-    private readonly string settingsJsonPath;
-
     private readonly FileSystemWatcher settingsJsonWatcher;
     private readonly Timer settingsSaveTimer;
 
     /// <summary>
     /// Loads and applies settings, including from the command line and from
-    /// <see cref="settingsJsonPath"/>.
+    /// <see cref="SettingsHelper.SettingsPath"/>.
     /// </summary>
     /// <param name="initialLoad">Whether this is the initial loading of
     /// settings.</param>
@@ -54,14 +49,14 @@ namespace Spakov.W6t.Views {
         TerminalControl.Columns = (int) startColumns;
       }
 
-      if (!File.Exists(settingsJsonPath)) return;
+      if (!File.Exists(SettingsHelper.SettingsPath)) return;
 
       Settings.Json.Settings? settings = null;
       bool readSucceeded = false;
 
       try {
-        using (StreamReader settingsJsonFile = new(settingsJsonPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open })) {
-          settings = JsonSerializer.Deserialize<Settings.Json.Settings>(settingsJsonFile.BaseStream, jsonSerializerOptions)!;
+        using (StreamReader settingsJsonFile = new(SettingsHelper.SettingsPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open })) {
+          settings = JsonSerializer.Deserialize<Settings.Json.Settings>(settingsJsonFile.BaseStream, SettingsHelper.JsonSerializerOptions)!;
           readSucceeded = true;
         }
       } catch (IOException e) {
@@ -298,16 +293,16 @@ namespace Spakov.W6t.Views {
             Key = "OpenSettingsJsonLocation",
             Name = resources.GetString("OpenSettingsJsonLocationName"),
             Click = (_, _) => {
-              if (!File.Exists(settingsJsonPath)) {
+              if (!File.Exists(SettingsHelper.SettingsPath)) {
                 Process.Start(explorer, Windows.Storage.ApplicationData.Current.LocalFolder.Path);
               } else {
-                Process.Start(explorer, string.Format(explorerSelect, settingsJsonPath));
+                Process.Start(explorer, string.Format(explorerSelect, SettingsHelper.SettingsPath));
               }
             }
           },
           new CaptionSettingsItem() {
             Key = "SettingsJsonLocationCaption",
-            Getter = () => string.Format(resources.GetString("SettingsJsonLocationExplanation"), settingsJsonPath)
+            Getter = () => string.Format(resources.GetString("SettingsJsonLocationExplanation"), SettingsHelper.SettingsPath)
           }
         ]
       };
@@ -672,8 +667,8 @@ namespace Spakov.W6t.Views {
       bool writeSucceeded = false;
 
       try {
-        using (StreamWriter settingsJsonFile = new(settingsJsonPath, new FileStreamOptions() { Access = FileAccess.Write, Mode = FileMode.Create })) {
-          settingsJsonFile.Write(JsonSerializer.Serialize(settings, jsonSerializerOptions));
+        using (StreamWriter settingsJsonFile = new(SettingsHelper.SettingsPath, new FileStreamOptions() { Access = FileAccess.Write, Mode = FileMode.Create })) {
+          settingsJsonFile.Write(JsonSerializer.Serialize(settings, SettingsHelper.JsonSerializerOptions));
           settingsSaveTimer.Enabled = true;
           writeSucceeded = true;
         }

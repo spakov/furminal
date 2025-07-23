@@ -3,7 +3,7 @@
   /// Keyboard keys, for a standard US QWERTY 104-key keyboard.
   /// </summary>
   /// <remarks>
-  /// <para>Based on <see cref="Windows.System.VirtualKey"/>, which is, in
+  /// <para>Based on <c>Windows.System.VirtualKey</c>, which is, in
   /// turn, based on <see
   /// href="https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes"
   /// />.</para>

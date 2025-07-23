@@ -96,10 +96,11 @@ namespace Spakov.Terminal {
     /// Callback for reading escape sequences.
     /// </summary>
     /// <param name="escapeSequence">The escape sequence, not including the
-    /// leading <see cref="C0.ESC"/>.</param>
+    /// leading <see cref="AnsiProcessor.Ansi.C0.ESC"/>.</param>
     /// <param name="sgrEscapeSequence">An <see cref="SGREscapeSequence"/>, if
     /// the escape sequence is an <see
-    /// cref="Ansi.EscapeSequences.SGR"/> escape sequence.</param>
+    /// cref="AnsiProcessor.Ansi.EscapeSequences.SGR"/> escape
+    /// sequence.</param>
     private delegate void EscapeSequenceCallback(string escapeSequence, SGREscapeSequence? sgrEscapeSequence = null);
 
     /// <summary>
@@ -563,7 +564,7 @@ namespace Spakov.Terminal {
     /// <summary>
     /// Invoked when the cursor should change its blink state.
     /// </summary>
-    /// <param name="sender"><see cref="cursorTimer"/></param>
+    /// <param name="sender"><see cref="_cursorTimer"/></param>
     /// <param name="args">Unused.</param>
     internal void CursorTimer_Tick(DispatcherQueueTimer sender, object args) => terminalEngine.CursorDisplayed = !terminalEngine.CursorDisplayed;
 

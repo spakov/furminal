@@ -23,7 +23,7 @@ namespace Spakov.AnsiProcessor.Helpers {
     /// <remarks>We ignore the ODA colorspace ID, since its behavior is
     /// undefined, which is what Mr. Dickey does as well.</remarks>
     /// <param name="parameters">The SGR parameters, which are separated by
-    /// either <c>;</c> or <c>;</c>, split.</param>
+    /// either <c>;</c> or <c>:</c>, split.</param>
     /// <returns>A <see cref="Color"/> representing <paramref
     /// name="parameters"/>.</returns>
     /// <exception cref="ArgumentException">Unable to convert <paramref

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../../",
+          "files": [
+            "**/*.csproj"
+          ]
+        }
+      ],
+      "output": "api",
+      "filter": "api-filter.yml",
+      "shouldSkipMarkup": true,
+      "includePrivateMembers": true
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "api-filter.yml"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "src": "../../",
+        "files": [
+          "logos/logo-thumb.png"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appLogoPath": "logos/logo-thumb.png",
+      "_appName": "w6t",
+      "_appTitle": "w6t",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}

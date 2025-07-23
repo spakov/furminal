@@ -205,7 +205,7 @@ namespace Spakov.Terminal {
     }
 
     /// <summary>
-    /// Whether a wrap is pending, for CSI DECSET DECAWM
+    /// Whether a wrap is pending, for CSI DECSET DECAWM.
     /// </summary>
     private bool WrapPending {
       get => _wrapPending;
@@ -1690,7 +1690,7 @@ namespace Spakov.Terminal {
       public readonly Caret Caret;
 
       /// <summary>
-      /// A snapshot of <see cref="TerminalControl.CursorVisible"/>.
+      /// A snapshot of <see cref="TerminalEngine.CursorVisible"/>.
       /// </summary>
       public readonly bool CursorVisible;
 

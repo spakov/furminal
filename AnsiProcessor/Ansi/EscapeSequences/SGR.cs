@@ -293,16 +293,16 @@
     /// <summary>
     /// The SGR parameter for 8-bit colors.
     /// </summary>
-    internal const string COLOR_8 = "5";
+    public const string COLOR_8 = "5";
 
     /// <summary>
     /// The SGR parameter for 24-bit colors.
     /// </summary>
-    internal const string COLOR_24 = "2";
+    public const string COLOR_24 = "2";
 
     /// <summary>
     /// The SGR termination character sequence.
     /// </summary>
-    internal const string TERMINATOR = "m";
+    public const string TERMINATOR = "m";
   }
 }

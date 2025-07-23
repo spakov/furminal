@@ -1,0 +1,7 @@
+apiRules:
+- include:
+    uidRegex: ^Spakov\.
+- exclude:
+    uidRegex: ^Microsoft\.
+    uidRegex: ^WinRT\.
+    uidRegex: ^Windows\.

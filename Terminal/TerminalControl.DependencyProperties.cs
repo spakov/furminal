@@ -147,7 +147,7 @@ namespace Spakov.Terminal {
 
     /// <summary>
     /// Invoked when the <see
-    /// cref="AnsiProcessor.TermCap.TerminalCapabilities"> changes.
+    /// cref="AnsiProcessor.TermCap.TerminalCapabilities"/> changes.
     /// </summary>
     /// <param name="d"><inheritdoc
     /// cref="DependencyPropertyChangedEventHandler"
