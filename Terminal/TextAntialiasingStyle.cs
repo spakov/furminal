@@ -2,7 +2,7 @@
   /// <summary>
   /// Supported text antialiasing styles.
   /// </summary>
-  public enum TextAntialiasingStyles {
+  public enum TextAntialiasingStyle {
     /// <summary>
     /// Aliased text.
     /// </summary>

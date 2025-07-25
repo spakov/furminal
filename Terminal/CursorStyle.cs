@@ -2,7 +2,7 @@
   /// <summary>
   /// Supported cursor styles.
   /// </summary>
-  public enum CursorStyles {
+  public enum CursorStyle {
     /// <summary>
     /// A block cursor, like █.
     /// </summary>

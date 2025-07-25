@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Spakov.EmojiGenerator {
-  internal class Generator {
-    private const string emojiSequencesPath = @"..\EmojiGenerator\Unicode\emoji-sequences.txt";
-    private const string emojiZwjSequencesPath = @"..\EmojiGenerator\Unicode\emoji-zwj-sequences.txt";
+namespace Spakov.EmojiGenerator
+{
+    internal class Generator
+    {
+        private const string EmojiSequencesPath = @"..\EmojiGenerator\Unicode\emoji-sequences.txt";
+        private const string EmojiZwjSequencesPath = @"..\EmojiGenerator\Unicode\emoji-zwj-sequences.txt";
 
-    private const string emojiDotCsPath = "Emoji.cs";
+        private const string EmojiDotCsPath = "Emoji.cs";
 
-    private const string emojiDotCsContent = """
+        private const string EmojiDotCsContent = """
       using System.Collections.Generic;
 
       /*****************************************************************************/
@@ -21,97 +23,118 @@ namespace Spakov.EmojiGenerator {
       /* </auto-generated>                                                         */
       /*****************************************************************************/
 
-      namespace {namespace} {
-        internal static class Emoji {
-          internal static readonly HashSet<string> emojiSequences = [
-            {emojiSequences}
-          ];
+      namespace {namespace}
+      {
+          internal static class Emoji
+          {
+              internal static readonly HashSet<string> s_emojiSequences =
+              [
+                  {emojiSequences}
+              ];
 
-          internal static readonly HashSet<string> emojiZwjSequences = [
-            {emojiZwjSequences}
-          ];
-        }
+              internal static readonly HashSet<string> s_emojiZwjSequences =
+              [
+                  {emojiZwjSequences}
+              ];
+          }
       }
       """;
 
-    private const string emojiDotCsContentIndent = "      ";
+        private const string EmojiDotCsContentIndent = "            ";
 
-    private readonly string? outputPath;
-    private readonly string @namespace;
+        private readonly string? _outputPath;
+        private readonly string _namespace;
 
-    /// <summary>
-    /// Initializes a <see cref="Generator"/>.
-    /// </summary>
-    /// <param name="outputPath">The generated code output path.</param>
-    /// <param name="namespace">The namespace to use for generated
-    /// code.</param>
-    internal Generator(string? outputPath, string @namespace) {
-      this.outputPath = outputPath;
-      this.@namespace = @namespace;
+        /// <summary>
+        /// Initializes a <see cref="Generator"/>.
+        /// </summary>
+        /// <param name="outputPath">The generated code output path.</param>
+        /// <param name="namespace">The namespace to use for generated
+        /// code.</param>
+        internal Generator(string? outputPath, string @namespace)
+        {
+            _outputPath = outputPath;
+            _namespace = @namespace;
+        }
+
+        /// <summary>
+        /// Generates the emoji code.
+        /// </summary>
+        /// <returns>0 on success or non-zero on failure.</returns>
+        internal int Generate()
+        {
+            HashSet<string> emojiSequences = [];
+            HashSet<string> emojiZwjSequences = [];
+
+            if (_outputPath is not null)
+            {
+                if (!Directory.Exists(_outputPath))
+                {
+                    Console.Error.WriteLine("Output directory does not exist.");
+                    return 1;
+                }
+            }
+
+            try
+            {
+                using StreamReader emojiSequencesStream = new(EmojiSequencesPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open });
+
+                emojiSequences = new EmojiSequencesParser(emojiSequencesStream).Parse();
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine($"Unable to read from {EmojiSequencesPath}. {e.Message}");
+                return 2;
+            }
+            catch (FormatException e)
+            {
+                Console.Error.WriteLine($"Parse error encountered in {EmojiSequencesPath}. {e.Message}");
+                return 3;
+            }
+
+            try
+            {
+                using StreamReader emojiZwjSequencesStream = new(EmojiZwjSequencesPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open });
+
+                emojiZwjSequences = new EmojiZwjSequencesParser(emojiZwjSequencesStream).Parse();
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine($"Unable to read from {EmojiZwjSequencesPath}. {e.Message}");
+                return 4;
+            }
+            catch (FormatException e)
+            {
+                Console.Error.WriteLine($"Parse error encountered in {EmojiSequencesPath}. {e.Message}");
+                return 5;
+            }
+
+            string outputFilePath = Path.Join(_outputPath, EmojiDotCsPath);
+
+            try
+            {
+                using StreamWriter emojiDotCsStream = new(outputFilePath, new FileStreamOptions() { Access = FileAccess.Write, Mode = FileMode.Create });
+
+                emojiDotCsStream.Write(
+                    EmojiDotCsContent.Replace(
+                        "{namespace}",
+                        _namespace
+                    ).Replace(
+                        "{emojiSequences}",
+                        emojiSequences.ToCode(EmojiDotCsContentIndent)
+                    ).Replace(
+                        "{emojiZwjSequences}",
+                        emojiZwjSequences.ToCode(EmojiDotCsContentIndent)
+                    )
+                );
+            }
+            catch (IOException e)
+            {
+                Console.Error.WriteLine($"Unable to write to {outputFilePath}. {e.Message}");
+                return 6;
+            }
+
+            return 0;
+        }
     }
-
-    /// <summary>
-    /// Generates the emoji code.
-    /// </summary>
-    /// <returns>0 on success or non-zero on failure.</returns>
-    internal int Generate() {
-      HashSet<string> emojiSequences = [];
-      HashSet<string> emojiZwjSequences = [];
-
-      if (outputPath is not null) {
-        if (!Directory.Exists(outputPath)) {
-          Console.Error.WriteLine("Output directory does not exist.");
-          return 1;
-        }
-      }
-
-      try {
-        using (StreamReader emojiSequencesStream = new(emojiSequencesPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open })) {
-          emojiSequences = new EmojiSequencesParser(emojiSequencesStream).Parse();
-        }
-      } catch (IOException e) {
-        Console.Error.WriteLine($"Unable to read from {emojiSequencesPath}. {e.Message}");
-        return 2;
-      } catch (FormatException e) {
-        Console.Error.WriteLine($"Parse error encountered in {emojiSequencesPath}. {e.Message}");
-        return 3;
-      }
-
-      try {
-        using (StreamReader emojiZwjSequencesStream = new(emojiZwjSequencesPath, new FileStreamOptions() { Access = FileAccess.Read, Mode = FileMode.Open })) {
-          emojiZwjSequences = new EmojiZwjSequencesParser(emojiZwjSequencesStream).Parse();
-        }
-      } catch (IOException e) {
-        Console.Error.WriteLine($"Unable to read from {emojiZwjSequencesPath}. {e.Message}");
-        return 4;
-      } catch (FormatException e) {
-        Console.Error.WriteLine($"Parse error encountered in {emojiSequencesPath}. {e.Message}");
-        return 5;
-      }
-
-      string outputFilePath = Path.Join(outputPath, emojiDotCsPath);
-
-      try {
-        using (StreamWriter emojiDotCsStream = new(outputFilePath, new FileStreamOptions() { Access = FileAccess.Write, Mode = FileMode.Create })) {
-          emojiDotCsStream.Write(
-            emojiDotCsContent.Replace(
-              "{namespace}",
-              @namespace
-            ).Replace(
-              "{emojiSequences}",
-              emojiSequences.ToCode(emojiDotCsContentIndent)
-            ).Replace(
-              "{emojiZwjSequences}",
-              emojiZwjSequences.ToCode(emojiDotCsContentIndent)
-            )
-          );
-        }
-      } catch (IOException e) {
-        Console.Error.WriteLine($"Unable to write to {outputFilePath}. {e.Message}");
-        return 6;
-      }
-
-      return 0;
-    }
-  }
 }

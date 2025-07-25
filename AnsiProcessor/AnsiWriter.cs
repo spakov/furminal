@@ -4,54 +4,67 @@ using Spakov.AnsiProcessor.TermCap;
 using System.IO;
 using System.Text;
 
-namespace Spakov.AnsiProcessor {
-  /// <summary>
-  /// An ANSI writer.
-  /// </summary>
-  /// <param name="consoleInStream">The input stream to which to process
-  /// ANSI.</param>
-  /// <param name="terminalCapabilities">A <see cref="TerminalCapabilities"/>
-  /// configuration.</param>
-  public class AnsiWriter(FileStream consoleInStream, TerminalCapabilities terminalCapabilities) {
+namespace Spakov.AnsiProcessor
+{
     /// <summary>
-    /// Sends <paramref name="text"/> to the console input stream.
+    /// An ANSI writer.
     /// </summary>
     /// <remarks>
-    /// <para>Does nothing if <paramref name="text"/> is <see
-    /// langword="null"/>.</para>
+    /// <para>Processes input received via <see cref="SendText"/>, <see
+    /// cref="SendEscapeSequence"/>, and <see cref="SendKeystroke"/>,
+    /// converting to ANSI and writing to <paramref
+    /// name="consoleInStream"/>.</para>
     /// </remarks>
-    /// <param name="text">The text to send to the console input
-    /// stream.</param>
-    public void SendText(string? text) {
-      if (text is not null) {
-        byte[] toSend = Encoding.UTF8.GetBytes(text);
+    /// <param name="consoleInStream">The input stream to which to process
+    /// ANSI.</param>
+    /// <param name="terminalCapabilities">A <see cref="TerminalCapabilities"/>
+    /// configuration.</param>
+    public class AnsiWriter(FileStream consoleInStream, TerminalCapabilities terminalCapabilities)
+    {
+        /// <summary>
+        /// Sends <paramref name="text"/> to the console input stream.
+        /// </summary>
+        /// <remarks>
+        /// <para>Does nothing if <paramref name="text"/> is <see
+        /// langword="null"/>.</para>
+        /// </remarks>
+        /// <param name="text">The text to send to the console input
+        /// stream.</param>
+        public void SendText(string? text)
+        {
+            if (text is not null)
+            {
+                byte[] toSend = Encoding.UTF8.GetBytes(text);
 
-        consoleInStream.Write(toSend, 0, toSend.Length);
-        consoleInStream.Flush();
-      }
+                consoleInStream.Write(toSend, 0, toSend.Length);
+                consoleInStream.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Sends <paramref name="escapeSequence"/> to the console input
+        /// stream.
+        /// </summary>
+        /// <param name="escapeSequence">The escape sequence (as 7-bit ASCII,
+        /// with no leading ESC) to send to the console input stream.</param>
+        public void SendEscapeSequence(byte[] escapeSequence)
+        {
+            byte[] toSend = new byte[1 + escapeSequence.Length];
+            toSend[0] = (byte)Ansi.C0.ESC;
+            System.Buffer.BlockCopy(escapeSequence, 0, toSend, 1, escapeSequence.Length);
+
+            consoleInStream.Write(toSend, 0, toSend.Length);
+            consoleInStream.Flush();
+        }
+
+        /// <summary>
+        /// Sends a <paramref name="keystroke"/> to the console input stream.
+        /// </summary>
+        /// <param name="keystroke">A keystroke.</param>
+        public void SendKeystroke(Keystroke keystroke)
+        {
+            string? toSend = KeystrokeHelper.KeystrokeToAnsi(keystroke, terminalCapabilities);
+            SendText(toSend);
+        }
     }
-
-    /// <summary>
-    /// Sends <paramref name="escapeSequence"/> to the console input stream.
-    /// </summary>
-    /// <param name="escapeSequence">The escape sequence (as 7-bit ASCII, with
-    /// no leading ESC) to send to the console input stream.</param>
-    public void SendEscapeSequence(byte[] escapeSequence) {
-      byte[] toSend = new byte[1 + escapeSequence.Length];
-      toSend[0] = (byte) Ansi.C0.ESC;
-      System.Buffer.BlockCopy(escapeSequence, 0, toSend, 1, escapeSequence.Length);
-
-      consoleInStream.Write(toSend, 0, toSend.Length);
-      consoleInStream.Flush();
-    }
-
-    /// <summary>
-    /// Sends a <paramref name="keystroke"/> to the console input stream.
-    /// </summary>
-    /// <param name="keystroke">A keystroke.</param>
-    public void SendKeystroke(Keystroke keystroke) {
-      string? toSend = KeystrokeHelper.KeystrokeToAnsi(keystroke, terminalCapabilities);
-      SendText(toSend);
-    }
-  }
 }
