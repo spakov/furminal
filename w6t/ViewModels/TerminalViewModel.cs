@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Spakov.W6t.ViewModels
 {
+    /// <summary>
+    /// The Terminal viewmodel.
+    /// </summary>
     internal partial class TerminalViewModel : ObservableObject
     {
         private readonly Views.Terminal _terminal;

@@ -6,11 +6,24 @@ namespace Spakov.EmojiGenerator
 {
     internal class Generator
     {
+        /// <summary>
+        /// The path to <c>emoji-sequences.txt</c>.
+        /// </summary>
         private const string EmojiSequencesPath = @"..\EmojiGenerator\Unicode\emoji-sequences.txt";
+
+        /// <summary>
+        /// The path to <c>emoji-zwj-sequences.txt</c>.
+        /// </summary>
         private const string EmojiZwjSequencesPath = @"..\EmojiGenerator\Unicode\emoji-zwj-sequences.txt";
 
+        /// <summary>
+        /// The name of the generated <c>Emoji.cs</c>.
+        /// </summary>
         private const string EmojiDotCsPath = "Emoji.cs";
 
+        /// <summary>
+        /// The content of the generated <c>Emoji.cs</c>.
+        /// </summary>
         private const string EmojiDotCsContent = """
       using System.Collections.Generic;
 
@@ -25,13 +38,22 @@ namespace Spakov.EmojiGenerator
 
       namespace {namespace}
       {
+          /// <summary>
+          /// Contains <see cref="HashSet"/>s containing emoji defined by Unicode.
+          /// </summary>
           internal static class Emoji
           {
+              /// <summary>
+              /// Emoji sequences defined by Unicode.
+              /// </summary>
               internal static readonly HashSet<string> s_emojiSequences =
               [
                   {emojiSequences}
               ];
 
+              /// <summary>
+              /// Emoji zero-width joiner (ZWJ) sequences defined by Unicode.
+              /// </summary>
               internal static readonly HashSet<string> s_emojiZwjSequences =
               [
                   {emojiZwjSequences}

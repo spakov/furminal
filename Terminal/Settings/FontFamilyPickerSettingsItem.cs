@@ -14,6 +14,10 @@ namespace Spakov.Terminal.Settings
     /// </summary>
     public partial class FontFamilyPickerSettingsItem : SettingsItem
     {
+        /// <summary>
+        /// Consider differences between the width of <c>M</c> and <c>.</c>
+        /// less than this value to be equal.
+        /// </summary>
         private const float Epsilon = 0.01f;
 
         private string? _boundValue = string.Empty;
@@ -59,7 +63,7 @@ namespace Spakov.Terminal.Settings
         public required string DefaultFontFamily { get; set; }
 
         /// <summary>
-        /// Whether only monospace fonts should be displayed.
+        /// Whether only monospaced fonts should be displayed.
         /// </summary>
         public bool MonospaceOnly
         {

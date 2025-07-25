@@ -17,13 +17,16 @@ namespace Spakov.Terminal.Settings
     /// <summary>
     /// The settings window.
     /// </summary>
-    /// <remarks>Why not just use a <see cref="Window"/>? Well, if we do, we're
+    /// <remarks>
+    /// <para>This is a native window presenting a XAML island.</para>
+    /// <para>Why not just use a <see cref="Window"/>? Well, if we do, we're
     /// relying on the assumption that the consumer of <see
     /// cref="TerminalControl"/> is running in a <see cref="Window"/>. For
     /// TermBar, that's not the case—it's running in a <see
     /// cref="DesktopWindowXamlSource"/>. If we use a <see cref="Window"/>,
     /// closing the settings window closes the entire hosting application,
-    /// which is obviously not desired behavior.</remarks>
+    /// which is obviously not desired behavior.</para>
+    /// </remarks>
     public sealed partial class SettingsWindow : UserControl
     {
         private const int PreferredWidth = 400;
@@ -328,7 +331,7 @@ namespace Spakov.Terminal.Settings
         }
 
         /// <summary>
-        /// Invoked when the user clicks the save as defaults button.
+        /// Saves the current settings as the default settings.
         /// </summary>
         /// <param name="sender"><inheritdoc cref="RoutedEventHandler"
         /// path="/param[@name='sender']"/></param>
@@ -337,7 +340,7 @@ namespace Spakov.Terminal.Settings
         private void SaveAsDefaultsButton_Click(object sender, RoutedEventArgs e) => _terminalControl.InvokeSaveSettingsAsDefault();
 
         /// <summary>
-        /// Invoked when the user clicks the close button.
+        /// Closes the window.
         /// </summary>
         /// <param name="sender"><inheritdoc cref="RoutedEventHandler"
         /// path="/param[@name='sender']"/></param>

@@ -1,7 +1,7 @@
 ﻿namespace Spakov.AnsiProcessor.Ansi.EscapeSequences
 {
     /// <summary>
-    /// The SS3 (SS3) escape sequences, which are <see
+    /// The single-shift 3 (SS3) escape sequences, which are <see
     /// cref="C0.ESC"/>, followed by <see cref="Fe.SS3"/>, followed by a
     /// keycode.
     /// </summary>

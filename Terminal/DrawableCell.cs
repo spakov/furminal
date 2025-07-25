@@ -55,6 +55,8 @@ namespace Spakov.Terminal
         /// <param name="drawingSession"><paramref name="terminalRenderer"/>'s
         /// draw loop's <see cref="CanvasDrawingSession"/>.</param>
         /// <param name="caret"><paramref name="cell"/>'s location.</param>
+        /// <param name="point">The location at which to draw the <see
+        /// cref="DrawableCell"/>.</param>
         /// <param name="cell">A <see cref="Terminal.Cell"/>.</param>
         public DrawableCell(TerminalRenderer terminalRenderer, CanvasDrawingSession drawingSession, Caret caret, Vector2 point, Cell cell)
         {

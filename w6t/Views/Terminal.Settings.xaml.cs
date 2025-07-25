@@ -18,10 +18,26 @@ namespace Spakov.W6t.Views
 {
     public sealed partial class Terminal : Window
     {
+        /// <summary>
+        /// The delay (in milliseconds) after being notified the settings file
+        /// was written to wait before attempting to read it.
+        /// </summary>
         private const int SettleDelay = 100;
 
+        /// <summary>
+        /// The default start directory.
+        /// </summary>
         private const string DefaultStartDirectory = "%USERPROFILE%";
+
+        /// <summary>
+        /// The Explorer process name.
+        /// </summary>
         private const string Explorer = "explorer";
+
+        /// <summary>
+        /// The string to pass to <see cref="Explorer"/> to facilitate
+        /// selecting a file in a folder.
+        /// </summary>
         private const string ExplorerSelect = "/select,\"{0}\"";
 
         private readonly FileSystemWatcher _settingsJsonWatcher;

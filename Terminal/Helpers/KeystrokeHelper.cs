@@ -9,7 +9,7 @@ namespace Spakov.Terminal.Helpers
     internal static class KeystrokeHelper
     {
         /// <summary>
-        /// Handles a <see cref="Keystroke"/>.
+        /// Handles <paramref name="keystroke"/>.
         /// </summary>
         /// <param name="terminalControl">A <see
         /// cref="TerminalControl"/>.</param>

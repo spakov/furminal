@@ -10,6 +10,9 @@ namespace Spakov.EmojiGenerator
     /// </summary>
     internal class EmojiZwjSequencesParser
     {
+        /// <summary>
+        /// Base 16.
+        /// </summary>
         private const int Base16 = 0x10;
 
         private readonly TextReader _emojiZwjSequencesStream;

@@ -16,7 +16,14 @@ namespace Spakov.W6t.Settings
     /// </summary>
     internal static partial class SettingsHelper
     {
+        /// <summary>
+        /// The name of the settings file.
+        /// </summary>
         private const string SettingsFile = "settings.json";
+
+        /// <summary>
+        /// The JSON Schema metaschema to reference in the settings file.
+        /// </summary>
         private const string Metaschema = "https://json-schema.org/draft/2020-12/schema";
 
         private static readonly JsonSerializerOptions s_jsonSerializerOptions = new(SettingsContext.Default.Options);

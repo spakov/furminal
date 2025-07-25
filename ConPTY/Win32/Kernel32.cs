@@ -4,6 +4,9 @@ using Windows.Win32.System.Threading;
 
 namespace Spakov.ConPTY.Win32
 {
+    /// <summary>
+    /// Defines <see cref="CreateProcessW"/>.
+    /// </summary>
     internal unsafe static class Kernel32
     {
         /// <summary>

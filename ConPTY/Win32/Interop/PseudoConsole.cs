@@ -7,6 +7,9 @@ using Windows.Win32.System.Console;
 
 namespace Spakov.ConPTY.Win32.Interop
 {
+    /// <summary>
+    /// A pseudoconsole, abstracting Win32 into a managed object.
+    /// </summary>
     internal class PseudoConsole : IDisposable
     {
         internal static nuint PseudoConsoleThreadAttribute => PInvoke.PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE;

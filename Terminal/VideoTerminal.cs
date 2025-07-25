@@ -1424,6 +1424,8 @@ namespace Spakov.Terminal
         /// <param name="rows">The number of rows to shift.</param>
         /// <param name="force">Whether to force the shift to scrollback, even
         /// if it will result in empty lines.</param>
+        /// <param name="callerMemberName">The member that invoked <see
+        /// cref="ShiftToScrollback"/>, used for debug logging.</param>
         internal void ShiftToScrollback(uint rows = 1, bool force = false, [System.Runtime.CompilerServices.CallerMemberName] string? callerMemberName = null)
         {
             bool useScrollback = _scrollbackBuffer is not null && _scrollforwardBuffer is not null && _terminalEngine.Scrollback > 0 && !UseAlternateScreenBuffer;
@@ -1506,6 +1508,8 @@ namespace Spakov.Terminal
         /// <param name="rows">The number of rows to shift.</param>
         /// <param name="force">Whether to force the shift to scrollforward,
         /// even if it will result in empty lines.</param>
+        /// <param name="callerMemberName">The member that invoked <see
+        /// cref="ShiftFromScrollback"/>, used for debug logging.</param>
         internal void ShiftFromScrollback(uint rows = 1, bool force = false, [System.Runtime.CompilerServices.CallerMemberName] string? callerMemberName = null)
         {
             bool useScrollback = _scrollbackBuffer is not null && _scrollforwardBuffer is not null && _terminalEngine.Scrollback > 0 && !UseAlternateScreenBuffer;

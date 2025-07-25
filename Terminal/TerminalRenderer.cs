@@ -127,7 +127,7 @@ namespace Spakov.Terminal
         /// The terminal text formats.
         /// </summary>
         /// <remarks>
-        /// <para>This is an array of seven <see
+        /// <para>This is an array of eight <see
         /// cref="CanvasTextFormat"/>s:</para>
         /// <list type="bullet">
         /// <item><c>0x00</c>: plain</item>

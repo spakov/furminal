@@ -31,8 +31,19 @@ namespace Spakov.AnsiProcessor
         /// </summary>
         private enum State
         {
+            /// <summary>
+            /// Reading text.
+            /// </summary>
             Text,
+
+            /// <summary>
+            /// Read an ESC.
+            /// </summary>
             EscapeSequenceStart,
+
+            /// <summary>
+            /// Reading an escape sequence.
+            /// </summary>
             EscapeSequence
         }
 
@@ -41,9 +52,28 @@ namespace Spakov.AnsiProcessor
         /// </summary>
         internal enum EscapeSequenceState
         {
+            /// <summary>
+            /// Reading an <see cref="Ansi.EscapeSequences.Fe"/> escape
+            /// sequence.
+            /// </summary>
             Fe,
+
+            /// <summary>
+            /// Reading an <see cref="Ansi.EscapeSequences.Fp"/> escape
+            /// sequence.
+            /// </summary>
             Fp,
+
+            /// <summary>
+            /// Reading an <see cref="Ansi.EscapeSequences.Fs"/> escape
+            /// sequence.
+            /// </summary>
             Fs,
+
+            /// <summary>
+            /// Reading an <see cref="Ansi.EscapeSequences.NF"/> escape
+            /// sequence.
+            /// </summary>
             nF
         }
 

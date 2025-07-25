@@ -16,7 +16,7 @@ namespace Spakov.AnsiProcessor.Helpers
         /// <summary>
         /// Types of keystrokes.
         /// </summary>
-        private enum KeystrokeTypes
+        private enum KeystrokeType
         {
             /// <summary>
             /// An easily-representable plain-text keystroke.
@@ -52,31 +52,31 @@ namespace Spakov.AnsiProcessor.Helpers
                 return null;
             }
 
-            KeystrokeTypes? keyType = keystroke.Key switch
+            KeystrokeType? keyType = keystroke.Key switch
             {
-                Key.Up => KeystrokeTypes.ComplexKeystroke,
-                Key.Down => KeystrokeTypes.ComplexKeystroke,
-                Key.Right => KeystrokeTypes.ComplexKeystroke,
-                Key.Left => KeystrokeTypes.ComplexKeystroke,
-                Key.Home => KeystrokeTypes.ComplexKeystroke,
-                Key.Insert => KeystrokeTypes.ComplexKeystroke,
-                Key.Delete => KeystrokeTypes.ComplexKeystroke,
-                Key.End => KeystrokeTypes.ComplexKeystroke,
-                Key.PageUp => KeystrokeTypes.ComplexKeystroke,
-                Key.PageDown => KeystrokeTypes.ComplexKeystroke,
-                Key.F1 => KeystrokeTypes.ComplexKeystroke,
-                Key.F2 => KeystrokeTypes.ComplexKeystroke,
-                Key.F3 => KeystrokeTypes.ComplexKeystroke,
-                Key.F4 => KeystrokeTypes.ComplexKeystroke,
-                Key.F5 => KeystrokeTypes.ComplexKeystroke,
-                Key.F6 => KeystrokeTypes.ComplexKeystroke,
-                Key.F7 => KeystrokeTypes.ComplexKeystroke,
-                Key.F8 => KeystrokeTypes.ComplexKeystroke,
-                Key.F9 => KeystrokeTypes.ComplexKeystroke,
-                Key.F10 => KeystrokeTypes.ComplexKeystroke,
-                Key.F11 => KeystrokeTypes.ComplexKeystroke,
-                Key.F12 => KeystrokeTypes.ComplexKeystroke,
-                Key.Tab => KeystrokeTypes.ComplexKeystroke,
+                Key.Up => KeystrokeType.ComplexKeystroke,
+                Key.Down => KeystrokeType.ComplexKeystroke,
+                Key.Right => KeystrokeType.ComplexKeystroke,
+                Key.Left => KeystrokeType.ComplexKeystroke,
+                Key.Home => KeystrokeType.ComplexKeystroke,
+                Key.Insert => KeystrokeType.ComplexKeystroke,
+                Key.Delete => KeystrokeType.ComplexKeystroke,
+                Key.End => KeystrokeType.ComplexKeystroke,
+                Key.PageUp => KeystrokeType.ComplexKeystroke,
+                Key.PageDown => KeystrokeType.ComplexKeystroke,
+                Key.F1 => KeystrokeType.ComplexKeystroke,
+                Key.F2 => KeystrokeType.ComplexKeystroke,
+                Key.F3 => KeystrokeType.ComplexKeystroke,
+                Key.F4 => KeystrokeType.ComplexKeystroke,
+                Key.F5 => KeystrokeType.ComplexKeystroke,
+                Key.F6 => KeystrokeType.ComplexKeystroke,
+                Key.F7 => KeystrokeType.ComplexKeystroke,
+                Key.F8 => KeystrokeType.ComplexKeystroke,
+                Key.F9 => KeystrokeType.ComplexKeystroke,
+                Key.F10 => KeystrokeType.ComplexKeystroke,
+                Key.F11 => KeystrokeType.ComplexKeystroke,
+                Key.F12 => KeystrokeType.ComplexKeystroke,
+                Key.Tab => KeystrokeType.ComplexKeystroke,
                 _ => null
             };
 
@@ -86,19 +86,19 @@ namespace Spakov.AnsiProcessor.Helpers
               || (keystroke.ModifierKeys & ModifierKeys.RightControl) != 0
               || (keystroke.ModifierKeys & ModifierKeys.LeftMeta) != 0
               || (keystroke.ModifierKeys & ModifierKeys.RightMeta) != 0
-              ? KeystrokeTypes.ControlCharacter
-              : KeystrokeTypes.Text;
+              ? KeystrokeType.ControlCharacter
+              : KeystrokeType.Text;
 
-            if (keyType == KeystrokeTypes.Text && (int)keystroke.Key < 0x20)
+            if (keyType == KeystrokeType.Text && (int)keystroke.Key < 0x20)
             {
-                keyType = KeystrokeTypes.ControlCharacter;
+                keyType = KeystrokeType.ControlCharacter;
             }
 
             return keyType switch
             {
-                KeystrokeTypes.Text => keystroke.ToStringRepresentation(),
-                KeystrokeTypes.ControlCharacter => ControlCharacterKeystrokeToAnsi(keystroke, terminalCapabilities),
-                KeystrokeTypes.ComplexKeystroke => ComplexKeystrokeToAnsiEscapeSequence(keystroke, terminalCapabilities),
+                KeystrokeType.Text => keystroke.ToStringRepresentation(),
+                KeystrokeType.ControlCharacter => ControlCharacterKeystrokeToAnsi(keystroke, terminalCapabilities),
+                KeystrokeType.ComplexKeystroke => ComplexKeystrokeToAnsiEscapeSequence(keystroke, terminalCapabilities),
                 _ => throw new InvalidOperationException(),
             };
         }

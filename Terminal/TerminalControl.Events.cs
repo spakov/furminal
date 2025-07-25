@@ -463,7 +463,7 @@ namespace Spakov.Terminal
         /// Handles focus losses.
         /// </summary>
         /// <remarks>Pretends we maintain focus when the settings window is
-        /// open so the user can live-preview their changes</remarks>
+        /// open so the user can live-preview their changes.</remarks>
         /// <param name="sender"><inheritdoc cref="RoutedEventHandler"
         /// path="/param[@name='sender']"/></param>
         /// <param name="e"><inheritdoc cref="RoutedEventHandler"

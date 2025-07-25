@@ -18,7 +18,7 @@ using WinUIEx;
 namespace Spakov.W6t.Views
 {
     /// <summary>
-    /// The w6t terminal.
+    /// The Terminal view.
     /// </summary>
     /// <remarks>
     /// <para><c>Terminal.Settings.xaml.cs</c> contains code related to
@@ -28,8 +28,11 @@ namespace Spakov.W6t.Views
     {
         private readonly ILogger? _logger;
 
-        // I have no idea why we're off by 3 pixels, but it seems to be
-        // consistent, at least
+        /// <summary>
+        /// A mystery offset of three pixels.
+        /// </summary>
+        /// <remarks>I have no idea why we're off by 3 pixels, but it seems to
+        /// be consistent, at least.</remarks>
         private const int MysteryOffset = 3;
 
         private readonly ResourceLoader _resources;

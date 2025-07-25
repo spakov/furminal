@@ -8,11 +8,16 @@ namespace Spakov.Terminal
     /// </summary>
     internal static class LoggerHelper
     {
+        /// <summary>
+        /// The control logging level to use.
+        /// </summary>
         internal static readonly LogLevel s_logLevel = LogLevel.None;
 
         /// <summary>
         /// Creates a logger for <typeparamref name="T"/>.
         /// </summary>
+        /// <remarks>Generates output in <see cref="AppContext.BaseDirectory"/>
+        /// in a file named <c>typeof(T).Name</c>.</remarks>
         /// <typeparam name="T">A class to associate with the
         /// logger.</typeparam>
         /// <returns>An <see cref="ILogger"/>, if this is a debug build, or

@@ -6,7 +6,14 @@ namespace Spakov.Terminal.Settings
 {
     public class SettingsViewModel
     {
+        /// <summary>
+        /// The Windows line ending sequence.
+        /// </summary>
         private const string WindowsLineEnding = "\r\n";
+
+        /// <summary>
+        /// The UNIX line ending sequence.
+        /// </summary>
         private const string UnixLineEnding = "\n";
 
         private readonly Dictionary<DependencyProperty, long> _callbackTokens;
