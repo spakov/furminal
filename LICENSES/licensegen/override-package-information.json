@@ -1,5 +1,12 @@
 [
   {
+    "Id": "Karambolo.Extensions.Logging.File",
+    "ProjectUrl": "https://github.com/adams85/filelogger",
+    "Version": "3.6.3",
+    "License": "MIT",
+    "LicenseUrl": "https://github.com/adams85/filelogger/raw/refs/heads/master/LICENSE"
+  },
+  {
     "Id": "Microsoft.Graphics.Win2D",
     "ProjectUrl": "http://go.microsoft.com/fwlink/?LinkID=519078",
     "Version": "1.3.2",

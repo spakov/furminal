@@ -1,14 +1,14 @@
 # Furminal
-Furminal is a terminal emulator for Windows, based on the Terminal WinUI 3 control. It uses the Microsoft pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
+**Furminal** is a terminal emulator for Windows, based on **Terminal**'s' WinUI 3 **TerminalControl**. It uses the Windows pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
 
-Terminal is a C# WinUI 3 user control based on the Win2D CanvasControl. Furminal is a WinUI 3 application for .NET 8.0 and is available as pre-built x64 and ARM64 packaged app releases, signed with a self-signed certificate. It runs on Windows 11 and should support Windows 10 as well, though I haven't tested it.
+**Furminal** is a WinUI 3 application for .NET 8.0 and is available as pre-built x64 and ARM64 packaged app releases, signed with a self-signed certificate. It runs on Windows 11 and should support Windows 10 as well, though I haven't tested it. **Terminal** provides **TerminalControl**, a C# WinUI 3 user control based on the Win2D CanvasControl.
 
-![A screenshot of Furminal on the desktop, running [hyfetch](https://github.com/hykilpikonna/hyfetch).](screenshots/Furminal.png)
+![A screenshot of **Furminal** on the desktop, running [hyfetch](https://github.com/hykilpikonna/hyfetch).](screenshots/Furminal.png)
 
-![A screenshot of Furminal on the desktop, running the ncurses dots example program.](screenshots/Furminal-ncurses-dots.png)
+![A screenshot of **Furminal** on the desktop, running the ncurses `dots` example program.](screenshots/Furminal-ncurses-dots.png)
 
 ## Features
-Terminal implements most commonly used terminal emulator features. It aims to be roughly compatible with Windows Terminal and implements a lot of xterm-like behavior. Modern terminal emulators are much more than VT100 emulators—it is difficult to definitively declare which standards are "fully" implemented, due to a lack of standardization and a lack of mass adoption of niche features across the board.
+**Terminal** implements most commonly used terminal emulator features. It aims to be roughly compatible with Windows Terminal and implements a lot of xterm-like behavior. Modern terminal emulators are much more than VT100 emulators—it is difficult to definitively declare which standards are "fully" implemented, due to a lack of standardization and a lack of mass adoption of niche features across the board.
 
 That being said, here's a smattering of features worth pointing out:
 - 24-bit color via type-2 SGR escape sequences (and also 8-bit color via type-5 sequences)
@@ -20,10 +20,10 @@ That being said, here's a smattering of features worth pointing out:
 - A paw print logo
 - Color palette customization
 - GPU-accelerated drawing via Win2D
-- Pretty Good vttest pass rate (see link)
+- Pretty Good vttest pass rate (see [vttest-results.md](docs/vttest-results.md))
 - Pretty Good performance
 
-Additionally, Furminal implements the following features:
+Additionally, **Furminal** implements the following features:
 - Several choices of window backdrop types to choose from, from solid colors to complete transparency
 - A minimalist appearance
 - Some basic command-line options
@@ -57,35 +57,44 @@ The other major players, but not for Windows/ConPTY:
 - [kitty](https://sw.kovidgoyal.net/kitty/)
 - [Konsole](https://konsole.kde.org/)
 - [Mintty](https://mintty.github.io/)
-- [Terminal](https://en.wikipedia.org/wiki/Terminal_(macOS))
+- [Terminal (for Mac)](https://en.wikipedia.org/wiki/Terminal_(macOS))
 - The one that started it all, [xterm](https://invisible-island.net/xterm/)
 - [xterm.js](https://xtermjs.org/)
 
 ## License
-Furminal is released under the MIT license. It utilizes third-party licensed components; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for details.
+**Furminal** and **Terminal** are released under the MIT license. They utilize third-party licensed components; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for details.
 
 ## Why?
 Why create another terminal emulator when there are already so many? Well, I needed a WinUI 3 terminal control to work with TermBar (link). At first, I thought Windows Terminal would work perfectly and I could just pop an instance of it in there. But then I started reading about Windows Terminal and the fact that the terminal emulator bits are actually written in C++ and are thoroughly native, and more importantly, the reasons those decisions were made. Could I have worked in a Windows Terminal instead of writing my own? Yes. Would it have been as much fun? Absolutely not.
 
-Microsoft has a great explanation about this in the [Windows Terminal GitHub repository](https://github.com/microsoft/terminal?tab=readme-ov-file#creating-the-new-windows-terminal). (Side note: I really like Microsoft's use of `CA5CAD1A` in their Windows Terminal project GUIDs.) I also highly recommended the five-part [Windows Command-Line blog post series](https://devblogs.microsoft.com/commandline/windows-command-line-backgrounder/) by Rich Turner for an explanation of the **immense** complexity of all the layers that come together and had to be updated to make terminal emulators possible on Windows.
+Microsoft has a great explanation about this in the [Windows Terminal GitHub repository](https://github.com/microsoft/terminal?tab=readme-ov-file#creating-the-new-windows-terminal). (Side note: I really like Microsoft's use of `CA5CAD1A` in their Windows Terminal project GUIDs.) I also highly recommended the five-part [Windows Command-Line blog post series](https://devblogs.microsoft.com/commandline/windows-command-line-backgrounder/) by Rich Turner for an explanation of the *immense* complexity of all the layers that come together and had to be updated to make terminal emulators possible on Windows.
 
-I'm not sure there are any other terminal emulators written in C#/.NET, and I was frankly concerned that I'd encounter insurmountable roadblocks, either through requiring too many native APIs or performance penalties. However, that's really not the case—obviously, Terminal/Furminal can't match C++-based terminal emulators in terms of raw speed, but it is *thoroughly* competitive.
+I'm not sure there are any other terminal emulators written in C#/.NET, and I was frankly concerned that I'd encounter insurmountable roadblocks, either through requiring too many native APIs or performance penalties. However, that's really not the case—obviously, **Terminal**/**Furminal** can't match C++-based terminal emulators in terms of raw speed, but it is *thoroughly* competitive.
 
 If you've been toying with the idea of writing a terminal emulator, I say go for it. You'll learn about escape sequences. You'll learn why all those control characters exist. You'll learn about character encodings. You'll learn more about Unicode than you ever wanted to know. You'll learn why there are so many different keyboard input schemes and why none of them are perfect. You'll memorize DECSET/DECRST private mode numbers. You'll learn why scrollback is always configured in lines, not bytes. You'll learn that Thomas Dickey is perhaps one of the most influential individuals in the way power users interact with computers today.
 
 Anyway, long story short: drop-in WinUI 3 terminal emulator control.
 
 ## Configuration
-I'm going to break this into two subsections: one for Terminal, and one for Furminal.
+I'm going to break this into two subsections: one for **Furminal** and one for **Terminal**.
+
+### Furminal
+**Furminal** uses a JSON configuration file. It does not write the configuration file by default, though this can be accomplished in the settings window. If the context menu is enabled (which it is, by default), right click the terminal to open its settings and see the location of this file. **Furminal** never writes to the configuration file unless you click "Save as defaults." It does, however, automatically load settings from the configuration file when it is saved, as long as the settings window is open.
+
+The vast majority of the **Furminal** settings are simply bound directly to **TerminalControl**'s dependency properties.
+
+![A screenshot of the **Furminal** settings window.](screenshots/Furminal-Settings.png)
+
+In the [schema](schema/) directory, the **Furminal** configuration schema is available, including descriptions, defaults, and allowed ranges. A markdown file containing a human-readable description of the schema is also available.
 
 ### Terminal
-Being a WinUI 3 control, Terminal leverages the humble [DependencyProperty](https://learn.microsoft.com/en-us/uwp/api/windows.ui.xaml.dependencyproperty?view=winrt-26100) for configuration. Long story short, if you're not a XAML expert, these are what you're interacting with behind the scenes when you have something like this:
+Being a WinUI 3 control, **Terminal** leverages the [DependencyProperty](https://learn.microsoft.com/en-us/uwp/api/windows.ui.xaml.dependencyproperty?view=winrt-26100) for configuration. Long story short, if you're not a XAML expert, these are what you're interacting with behind the scenes when you have something like this:
 
 ```xml
 <Button Background="Blue" Foreground="Red" Content="This is a button"/>
 ```
 
-Or, for Terminal:
+Or, for **Terminal**:
 
 ```xml
 <terminal:TerminalControl
@@ -103,7 +112,7 @@ Or, for Terminal:
   Grid.Column="0"/>
 ```
 
-Here's a description of Terminal dependency properties:
+Here's a description of **Terminal** properties handled by dependency properties:
 
 #### ConsoleOutput
 The output [FileStream](https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream?view=net-8.0) from the underlying ConPTY-provided console host process.
@@ -126,17 +135,17 @@ A low-level configuration for supported ANSI features, like which SGR sequences 
 The default settings work out of the box and I recommend avoiding changing them unless there's a specific issue you're trying to work around.
 
 #### DefaultWindowTitle
-The default window title associated with the Terminal.
+The default window title associated with the terminal.
 
 The default is `TerminalControl`.
 
 #### Rows
-The number of rows in the Terminal.
+The number of rows in the terminal.
 
 The default is 24.
 
 #### Columns
-The number of columns in the Terminal.
+The number of columns in the terminal.
 
 The default is 80.
 
@@ -260,15 +269,6 @@ Whether to display the "Save as defaults" button in the settings window. This bu
 
 The default is false.
 
-### Furminal
-Furminal uses a JSON configuration file. It does not write the configuration file by default, though this can be accomplished in the settings window. If the context menu is enabled (which it is, by default), right click the terminal to open its settings and see the location of this file. Furminal never writes to the configuration file unless you click "Save as defaults." It does, however, automatically load settings from the configuration file when it is saved, as long as the settings window is open.
-
-The vast majority of the Furminal settings are simply bound directly to Terminal's dependency properties.
-
-![A screenshot of the Furminal settings window.](screenshots/Furminal-Settings.png)
-
-In the [schema](schema/) directory, the Furminal configuration schema is available, including descriptions, defaults, and allowed ranges. A markdown file containing a human-readable description of the schema is also available.
-
 ## Installing
 1. Install the latest code-signing certificate from
    [certificates](certificates/) into **Current User** > **Trusted People**.
@@ -277,7 +277,7 @@ In the [schema](schema/) directory, the Furminal configuration schema is availab
 3. Double click the MSIX package and install it.
 
 ## Command-line Options
-Furminal supports two command-line options and a command to run:
+**Furminal** supports two command-line options and a command to run:
 
 ```
 Description:
@@ -297,59 +297,53 @@ Options:
 ```
 
 ## Architecture
-There are several major components of Furminal:
-- **Terminal**, which provides `TerminalControl`
+There are several major components of **Furminal**:
+- **Terminal**, which provides **TerminalControl**
   - **AnsiProcessor**, responsible for translating ANSI into events (and vice versa)
   - **ConPTY**, an interface with the Windows pseudoconsole API
   - **WideCharacter**, a Unicode character width calculation library
     - **utf8proc**, a Windows build of [utf8proc](https://github.com/JuliaStrings/utf8proc)
 
+API documentation, plus a guide for getting started with **Terminal**, is available (link).
+
 ### Terminal
-Terminal is a WinUI 3 user control called `TerminalControl`, written in C#, targeting .NET 8.0 and Windows 10 10.0.19041.0 ("20H1") or newer, supporting the x64 and ARM64 architectures. It uses the following NuGet packages:
+**Terminal** provides a WinUI 3 user control called **TerminalControl**, written in C#, targeting .NET 8.0 and Windows 10 10.0.19041.0 ("20H1") or newer, supporting the x64 and ARM64 architectures. It uses the following NuGet packages:
 - Community.Toolkit.Mvvm
-- Microsoft.Extensions.Logging (debug builds only)
-- Microsoft.Extensions.Logging.Debug (debug builds only)
+- Karambolo.Extensions.Logging.File
+- Microsoft.Extensions.Logging
 - Microsoft.Graphics.Win2D
 - Microsoft.Windows.CsWin32
 - Microsoft.Windows.SDK.BuildTools
 - Microsoft.WindowsAppSDK
-- Nerdbank.GitVersioning
 - System.Windows.Extensions
 
 ### AnsiProcessor
-AnsiProcessor is a library that exposes data received from ConPTY as a series of events that are to be processed by Terminal. It also accepts data from Terminal and translates it to data to be sent to ConPTY. It also includes classes useful to encapsulate these abstractions, plus the ANSI color palette.
+**AnsiProcessor** is a library that exposes data received from **ConPTY** as a series of events that are to be processed by **Terminal**. It also accepts data from **Terminal** and translates it to data to be sent to **ConPTY**. It includes classes useful to encapsulate these abstractions, plus the ANSI color palette.
 
-AnsiProcessor uses the following NuGet packages:
+**AnsiProcessor** uses the following NuGet packages:
 - Microsoft.Windows.CsWin32
-- Nerdbank.GitVersioning
 
 ### ConPTY
-ConPTY, based on Microsoft's [example code](https://github.com/microsoft/terminal/tree/main/samples/ConPTY), handles interaction with the Windows pseudoconsole API.
+**ConPTY**, based on Microsoft's [example code](https://github.com/microsoft/terminal/tree/main/samples/ConPTY), handles interaction with the Windows pseudoconsole API.
 
-ConPTY uses the following NuGet packages:
+**ConPTY** uses the following NuGet packages:
 - Microsoft.Windows.CsWin32
-- Nerdbank.GitVersioning
 - System.Memory
 
 ### WideCharacter
-WideCharacter is a library that exposes [utf8proc](https://github.com/JuliaStrings/utf8proc)'s `utf8proc_charwidth()` function, along with emoji tables generated by **EmojiGenerator** from the [Unicode 16.0.0 Data Files](https://unicode.org/Public/emoji/16.0/), to enable calculation of Unicode cell widths.
-
-WideCharacter uses the following NuGet packages:
-- Nerdbank.GitVersioning
+**WideCharacter** is a library that exposes [utf8proc](https://github.com/JuliaStrings/utf8proc)'s `utf8proc_charwidth()` function, along with emoji tables generated by **EmojiGenerator** from the [Unicode 16.0.0 Data Files](https://unicode.org/Public/emoji/16.0/), to enable calculation of Unicode cell widths.
 
 ## Building
-1. Clone this repository with `git clone --recurse-submodules URL`.
+1. Clone this repository with `git clone --recurse-submodules URL (link)`.
 2. Open `Furminal.sln` in Visual Studio.
-3. Build `utf8proc.dll` using Visual Studio's CMake for the target architecture.
-   [uft8proc](https://github.com/JuliaStrings/utf8proc/) is a Furminal submodule.
-6. Build Furminal.
+3. Build **Furminal**.
 
 ### Packaging as MSIX
-Right click the Furminal project in Visual Studio and select **Package and
+Right click the **Furminal** project in Visual Studio and select **Package and
 Publish** > **Create App Packages…**.
 
 ## Certificate Information
-Certificates that have been used by Furminal are listed below. These are located
+Certificates that have been used by **Furminal** are listed below. These are located
 in [certificates](certificates/).
 
 These certificates are the public portion of certificates generated with the following command:
