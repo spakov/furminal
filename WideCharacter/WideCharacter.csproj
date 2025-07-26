@@ -14,16 +14,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" />
 
-  <PropertyGroup>
-    <HostArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">x64</HostArchitecture>
-    <HostArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'ARM64'">arm64</HostArchitecture>
-    <HostPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'x64'">x64</HostPlatform>
-    <HostPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'arm64'">arm64</HostPlatform>
-  </PropertyGroup>
-
   <Target Name="GenerateEmoji" BeforeTargets="BeforeCompile">
-    <Exec Command="dotnet build -c $(Configuration) -a $(HostArchitecture) --no-self-contained" />
-    <Exec Command="dotnet exec ..\EmojiGenerator\bin\$(Configuration)\$(Platform)\EmojiGenerator.dll -- --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
+    <Exec Command="dotnet new tool-manifest" />
+    <Exec Command="dotnet tool install emojigenerator --add-source ..\EmojiGenerator\nupkg" />
+    <Exec Command="dotnet tool run emojigenerator --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
   </Target>
 
 </Project>
