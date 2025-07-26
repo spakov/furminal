@@ -50,7 +50,7 @@ jobs:
       matrix:
         platform: [ARM64, x64]
         configuration: [Release]
-    runs-on: windows-2025
+    runs-on: windows-latest
 
     env:
       Solution_Name: Furminal.sln
@@ -78,12 +78,15 @@ jobs:
     #  run: pwsh .\licensegen\Get-Licenses.ps1
 
     # Install vswhere
-    - name: Install vswhere
-      run: winget install vswhere --disable-interactivity --accept-source-agreements --accept-package-agreements
+    #- name: Install vswhere
+    #  run: winget install vswhere --disable-interactivity --accept-source-agreements --accept-package-agreements
     
     # Restore NuGet packages
     - name: Restore NuGet packages
-      run: msbuild $env:Solution_Name -t:restore
+      run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
+      env:
+        Platform: ${{ matrix.platform }}
+        Configuration: ${{ matrix.configuration }}
       
     # Build the application
     - name: Build the application
