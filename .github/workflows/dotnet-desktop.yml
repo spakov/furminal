@@ -79,7 +79,11 @@ jobs:
     # Install vswhere
     - name: Install vswhere
       run: winget install vswhere --disable-interactivity --accept-source-agreements --accept-package-agreements
-
+    
+    # Restore NuGet packages
+    - name: Restore NuGet packages
+      run: msbuild $env:Solution_Name /t restore
+      
     # Build the application
     - name: Build the application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
