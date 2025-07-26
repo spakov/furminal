@@ -16,13 +16,10 @@ namespace Spakov.Furminal.ViewModels
     internal partial class TerminalViewModel : ObservableObject
     {
         private readonly Views.Terminal _terminal;
-
         private readonly DispatcherQueue _dispatcherQueue;
-
         private readonly Pseudoconsole _pseudoconsole;
 
         private Palette _palette;
-
         private FileStream? _consoleOutput;
         private FileStream? _consoleInput;
         private int _rows;
@@ -69,8 +66,9 @@ namespace Spakov.Furminal.ViewModels
         /// The number of console rows.
         /// </summary>
         /// <remarks>It's important to make sure we invoke <see
-        /// cref="ObservableObject.SetProperty"/> before we tell the pseudoconsole
-        /// about the change to ensure scrollback is handled gracefully!</remarks>
+        /// cref="ObservableObject.SetProperty"/> before we tell the
+        /// pseudoconsole about the change to ensure scrollback is handled
+        /// gracefully!</remarks>
         public int Rows
         {
             get => _rows;
@@ -119,11 +117,9 @@ namespace Spakov.Furminal.ViewModels
         internal TerminalViewModel(Views.Terminal terminal, string? startDirectory, string command)
         {
             _terminal = terminal;
-
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             _palette = new();
-
             _rows = 24;
             _columns = 80;
 
