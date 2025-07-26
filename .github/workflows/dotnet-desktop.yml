@@ -82,7 +82,7 @@ jobs:
     
     # Restore NuGet packages
     - name: Restore NuGet packages
-      run: msbuild $env:Solution_Name /t restore
+      run: msbuild $env:Solution_Name -t:restore
       
     # Build the application
     - name: Build the application
