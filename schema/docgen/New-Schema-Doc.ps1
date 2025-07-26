@@ -1,6 +1,6 @@
 # Configuration
 $ConfigFile = "generate-schema-doc-config.json"
-$InputPattern = "w6t-*-schema.json"
+$InputPattern = "Furminal-*-schema.json"
 $OutputFile = "schema_doc.md"
 $DocgenDirectory = "docgen"
 
@@ -40,9 +40,9 @@ foreach ($file in $SchemaFiles) {
   }
 
   # Transform and rename output
-  if ($file.BaseName -match 'w6t-(?<version>.+)-schema') {
+  if ($file.BaseName -match 'Furminal-(?<version>.+)-schema') {
     $version = $matches.version
-    $destination = "w6t-$version-schema.md"
+    $destination = "Furminal-$version-schema.md"
     $doc = Get-Content $OutputFile -Raw
 
     # Replace Title/Description with Description

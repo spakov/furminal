@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Furminal (Package)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
+    },
+    "Furminal (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

@@ -5,13 +5,14 @@ param(
 # Configuration
 $DocfxDirectory = ".\docs\docgen"
 $DocfxJson = "docfx.json"
+$SiteRoot = "https://example.org/"
 
 # Build combined path
 $configPath = Join-Path -Path $DocfxDirectory -ChildPath $DocfxJson
 
 # Check for docfx JSON file
 if (-not (Test-Path -Path $configPath)) {
-  Write-Error "Error: Invoke me from w6t, please."
+  Write-Error "Error: Invoke me from Furminal, please."
   exit 1
 }
 
@@ -90,6 +91,34 @@ if (-not (Test-Path -Path $siteOutput)) {
 } else {
   Write-Host "✓ $siteOutput" -ForegroundColor Green
 }
+
+# Check for the xref map
+$xrefMapPath = Join-Path -Path $siteOutput -ChildPath "xrefmap.yml"
+
+if (-not (Test-Path -Path $xrefMapPath)) {
+  Write-Error "Error: Expected xrefmap.yml at $xrefMapPath, but it does not exist."
+  exit 1
+}
+
+# Keep only namespaces we care about in the xref map
+$inputXrefMap = Get-Content -Path $xrefMapPath -Raw | ConvertFrom-Yaml
+$xrefMap = New-Object -TypeName System.Collections.Hashtable
+
+$xrefMap.Add("sorted", $inputXrefMap.sorted)
+$xrefMap.Add("references", (New-Object -TypeName System.Collections.Generic.List[System.Object]))
+
+foreach ($reference in $inputXrefMap.references) {
+  if ($reference.uid -match "^Spakov\.") {
+    $reference.href = "${SiteRoot}$($reference.href)"
+    $xrefMap.references.Add($reference)
+  }
+}
+
+$outputXrefMap = $xrefMap | ConvertTo-Yaml
+$outputXrefMap = "### YamlMime:XRefMap`r`n${outputXrefMap}"
+
+Set-Content -Path $xrefMapPath -Value $outputXrefMap
+Write-Host "✓ $xrefMapPath" -ForegroundColor Green
 
 # Optionally serve the site
 if ($Serve) {

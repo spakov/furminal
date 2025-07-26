@@ -12,7 +12,8 @@ using System.Collections.Generic;
 namespace Spakov.WideCharacter
 {
     /// <summary>
-    /// Contains <see cref="HashSet"/>s containing emoji defined by Unicode.
+    /// Contains <see cref="HashSet{T}"/>s containing emoji defined by
+    /// Unicode.
     /// </summary>
     internal static class Emoji
     {

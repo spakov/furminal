@@ -1,5 +1,5 @@
 # Third Party Notices
-w6t uses licensed components from third parties. These are summarized below and license text is present in [LICENSES](LICENSES/).
+Furminal uses licensed components from third parties. These are summarized below and license text is present in [LICENSES](LICENSES/).
 
 - **[CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)** 8.4.0: [MIT](https://licenses.nuget.org/MIT)
 - **[Microsoft.Extensions.DependencyInjection](https://dot.net/)** 9.0.7: [MIT](https://licenses.nuget.org/MIT)

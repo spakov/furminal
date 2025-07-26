@@ -1,11 +1,11 @@
-# w6t
-w6t is a terminal emulator for Windows, based on the Terminal WinUI 3 control. It uses the Microsoft pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
+# Furminal
+Furminal is a terminal emulator for Windows, based on the Terminal WinUI 3 control. It uses the Microsoft pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
 
-Terminal is a C# WinUI 3 user control based on the Win2D CanvasControl. w6t is a WinUI 3 application for .NET 8.0 and is available as pre-built x64 and ARM64 packaged app releases, signed with a self-signed certificate. It runs on Windows 11 and should support Windows 10 as well, though I haven't tested it.
+Terminal is a C# WinUI 3 user control based on the Win2D CanvasControl. Furminal is a WinUI 3 application for .NET 8.0 and is available as pre-built x64 and ARM64 packaged app releases, signed with a self-signed certificate. It runs on Windows 11 and should support Windows 10 as well, though I haven't tested it.
 
-![A screenshot of w6t on the desktop, running [hyfetch](https://github.com/hykilpikonna/hyfetch).](screenshots/w6t.png)
+![A screenshot of Furminal on the desktop, running [hyfetch](https://github.com/hykilpikonna/hyfetch).](screenshots/Furminal.png)
 
-![A screenshot of w6t on the desktop, running the ncurses dots example program.](screenshots/w6t-ncurses-dots.png)
+![A screenshot of Furminal on the desktop, running the ncurses dots example program.](screenshots/Furminal-ncurses-dots.png)
 
 ## Features
 Terminal implements most commonly used terminal emulator features. It aims to be roughly compatible with Windows Terminal and implements a lot of xterm-like behavior. Modern terminal emulators are much more than VT100 emulators—it is difficult to definitively declare which standards are "fully" implemented, due to a lack of standardization and a lack of mass adoption of niche features across the board.
@@ -23,7 +23,7 @@ That being said, here's a smattering of features worth pointing out:
 - Pretty Good vttest pass rate (see link)
 - Pretty Good performance
 
-Additionally, w6t implements the following features:
+Additionally, Furminal implements the following features:
 - Several choices of window backdrop types to choose from, from solid colors to complete transparency
 - A minimalist appearance
 - Some basic command-line options
@@ -62,21 +62,21 @@ The other major players, but not for Windows/ConPTY:
 - [xterm.js](https://xtermjs.org/)
 
 ## License
-w6t is released under the MIT license. It utilizes third-party licensed components; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for details.
+Furminal is released under the MIT license. It utilizes third-party licensed components; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for details.
 
 ## Why?
 Why create another terminal emulator when there are already so many? Well, I needed a WinUI 3 terminal control to work with TermBar (link). At first, I thought Windows Terminal would work perfectly and I could just pop an instance of it in there. But then I started reading about Windows Terminal and the fact that the terminal emulator bits are actually written in C++ and are thoroughly native, and more importantly, the reasons those decisions were made. Could I have worked in a Windows Terminal instead of writing my own? Yes. Would it have been as much fun? Absolutely not.
 
 Microsoft has a great explanation about this in the [Windows Terminal GitHub repository](https://github.com/microsoft/terminal?tab=readme-ov-file#creating-the-new-windows-terminal). (Side note: I really like Microsoft's use of `CA5CAD1A` in their Windows Terminal project GUIDs.) I also highly recommended the five-part [Windows Command-Line blog post series](https://devblogs.microsoft.com/commandline/windows-command-line-backgrounder/) by Rich Turner for an explanation of the **immense** complexity of all the layers that come together and had to be updated to make terminal emulators possible on Windows.
 
-I'm not sure there are any other terminal emulators written in C#/.NET, and I was frankly concerned that I'd encounter insurmountable roadblocks, either through requiring too many native APIs or performance penalties. However, that's really not the case—obviously, Terminal/w6t can't match C++-based terminal emulators in terms of raw speed, but it is *thoroughly* competitive.
+I'm not sure there are any other terminal emulators written in C#/.NET, and I was frankly concerned that I'd encounter insurmountable roadblocks, either through requiring too many native APIs or performance penalties. However, that's really not the case—obviously, Terminal/Furminal can't match C++-based terminal emulators in terms of raw speed, but it is *thoroughly* competitive.
 
 If you've been toying with the idea of writing a terminal emulator, I say go for it. You'll learn about escape sequences. You'll learn why all those control characters exist. You'll learn about character encodings. You'll learn more about Unicode than you ever wanted to know. You'll learn why there are so many different keyboard input schemes and why none of them are perfect. You'll memorize DECSET/DECRST private mode numbers. You'll learn why scrollback is always configured in lines, not bytes. You'll learn that Thomas Dickey is perhaps one of the most influential individuals in the way power users interact with computers today.
 
 Anyway, long story short: drop-in WinUI 3 terminal emulator control.
 
 ## Configuration
-I'm going to break this into two subsections: one for Terminal, and one for w6t.
+I'm going to break this into two subsections: one for Terminal, and one for Furminal.
 
 ### Terminal
 Being a WinUI 3 control, Terminal leverages the humble [DependencyProperty](https://learn.microsoft.com/en-us/uwp/api/windows.ui.xaml.dependencyproperty?view=winrt-26100) for configuration. Long story short, if you're not a XAML expert, these are what you're interacting with behind the scenes when you have something like this:
@@ -90,7 +90,7 @@ Or, for Terminal:
 ```xml
 <terminal:TerminalControl
   x:Name="TerminalControl"
-  DefaultWindowTitle="w6t"
+  DefaultWindowTitle="Furminal"
   AnsiColors="{x:Bind ViewModel.AnsiColors}"
   ConsoleOutput="{x:Bind ViewModel.ConsoleOutput}"
   ConsoleInput="{x:Bind ViewModel.ConsoleInput}"
@@ -260,14 +260,14 @@ Whether to display the "Save as defaults" button in the settings window. This bu
 
 The default is false.
 
-### w6t
-w6t uses a JSON configuration file. It does not write the configuration file by default, though this can be accomplished in the settings window. If the context menu is enabled (which it is, by default), right click the terminal to open its settings and see the location of this file. w6t never writes to the configuration file unless you click "Save as defaults." It does, however, automatically load settings from the configuration file when it is saved, as long as the settings window is open.
+### Furminal
+Furminal uses a JSON configuration file. It does not write the configuration file by default, though this can be accomplished in the settings window. If the context menu is enabled (which it is, by default), right click the terminal to open its settings and see the location of this file. Furminal never writes to the configuration file unless you click "Save as defaults." It does, however, automatically load settings from the configuration file when it is saved, as long as the settings window is open.
 
-The vast majority of the w6t settings are simply bound directly to Terminal's dependency properties.
+The vast majority of the Furminal settings are simply bound directly to Terminal's dependency properties.
 
-![A screenshot of the w6t settings window.](screenshots/w6t-settings.png)
+![A screenshot of the Furminal settings window.](screenshots/Furminal-Settings.png)
 
-In the [schema](schema/) directory, the w6t configuration schema is available, including descriptions, defaults, and allowed ranges. A markdown file containing a human-readable description of the schema is also available.
+In the [schema](schema/) directory, the Furminal configuration schema is available, including descriptions, defaults, and allowed ranges. A markdown file containing a human-readable description of the schema is also available.
 
 ## Installing
 1. Install the latest code-signing certificate from
@@ -277,14 +277,14 @@ In the [schema](schema/) directory, the w6t configuration schema is available, i
 3. Double click the MSIX package and install it.
 
 ## Command-line Options
-w6t supports two command-line options and a command to run:
+Furminal supports two command-line options and a command to run:
 
 ```
 Description:
-  The w6t terminal emulator.
+  The Furminal terminal emulator.
 
 Usage:
-  w6t [<command> ...] [options]
+  Furminal [<command> ...] [options]
 
 Arguments:
   <command>   The command to run, usually a shell
@@ -297,7 +297,7 @@ Options:
 ```
 
 ## Architecture
-There are several major components of w6t:
+There are several major components of Furminal:
 - **Terminal**, which provides `TerminalControl`
   - **AnsiProcessor**, responsible for translating ANSI into events (and vice versa)
   - **ConPTY**, an interface with the Windows pseudoconsole API
@@ -339,24 +339,24 @@ WideCharacter uses the following NuGet packages:
 
 ## Building
 1. Clone this repository with `git clone --recurse-submodules URL`.
-2. Open `w6t.sln` in Visual Studio.
+2. Open `Furminal.sln` in Visual Studio.
 3. Build `utf8proc.dll` using Visual Studio's CMake for the target architecture.
-   [uft8proc](https://github.com/JuliaStrings/utf8proc/) is a w6t submodule.
-6. Build w6t.
+   [uft8proc](https://github.com/JuliaStrings/utf8proc/) is a Furminal submodule.
+6. Build Furminal.
 
 ### Packaging as MSIX
-Right click the w6t project in Visual Studio and select **Package and
+Right click the Furminal project in Visual Studio and select **Package and
 Publish** > **Create App Packages…**.
 
 ## Certificate Information
-Certificates that have been used by w6t are listed below. These are located
+Certificates that have been used by Furminal are listed below. These are located
 in [certificates](certificates/).
 
 These certificates are the public portion of certificates generated with the following command:
 `New-SelfSignedCertificate -Type Custom -KeyUsage DigitalSignature
 -KeyAlgorithm RSA -KeyLength 2048 -CertStoreLocation Cert:\CurrentUser\My
 -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
--Subject "CN=spakov" -FriendlyName "w6t"`
+-Subject "CN=spakov" -FriendlyName "Furminal"`
 
 ### `470C2ADC9D549C61B677423C83E60199F30C6C0A` (current)
 ```

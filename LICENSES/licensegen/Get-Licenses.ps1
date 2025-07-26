@@ -65,7 +65,7 @@ Copy-Item -Path $rawLicensePath -Destination ${id}__${version}.txt
 
 # Add utf8proc
 $id = "utf8proc"
-$version = (git -C ..\..\w6t\utf8proc log -n 1 --pretty=format:"%H")
+$version = (git -C ..\..\Furminal\utf8proc log -n 1 --pretty=format:"%H")
 $projectUrl = "https://github.com/JuliaStrings/utf8proc/"
 $license = "MIT"
 $licenseUrl = "https://github.com/JuliaStrings/utf8proc/raw/refs/heads/master/LICENSE.md"
@@ -105,7 +105,7 @@ foreach ($package in $json) {
 }
 
 $markdown.Insert(0, "# Third Party Notices")
-$markdown.Insert(1, "w6t uses licensed components from third parties. These are summarized below and license text is present in [LICENSES](LICENSES/).")
+$markdown.Insert(1, "Furminal uses licensed components from third parties. These are summarized below and license text is present in [LICENSES](LICENSES/).")
 $markdown.Insert(2, "")
 
 # Write file

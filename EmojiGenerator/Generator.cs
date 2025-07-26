@@ -39,7 +39,8 @@ namespace Spakov.EmojiGenerator
       namespace {namespace}
       {
           /// <summary>
-          /// Contains <see cref="HashSet"/>s containing emoji defined by Unicode.
+          /// Contains <see cref="HashSet{T}"/>s containing emoji defined by
+          /// Unicode.
           /// </summary>
           internal static class Emoji
           {
@@ -62,6 +63,9 @@ namespace Spakov.EmojiGenerator
       }
       """;
 
+        /// <summary>
+        /// The indent to apply to the beginning of lines in <c>Emoji.cs</c>.
+        /// </summary>
         private const string EmojiDotCsContentIndent = "            ";
 
         private readonly string? _outputPath;

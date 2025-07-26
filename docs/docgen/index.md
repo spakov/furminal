@@ -1,12 +1,12 @@
 # API Documentation Index
-This is the API documentation for **w6t** and **Terminal**.
+This is the API documentation for **Furminal** and **Terminal**.
 
 ## Quick links
 - [AnsiProcessor](xref:Spakov.AnsiProcessor)
 - [ConPTY](xref:Spakov.ConPTY)
 - [EmojiGenerator](xref:Spakov.EmojiGenerator)
 - [Terminal](xref:Spakov.Terminal)
-- [W6t](xref:Spakov.W6t)
+- [Furminal](xref:Spakov.Furminal)
 - [WideCharacter](xref:Spakov.WideCharacter)
 
 ## Getting started with **TerminalControl**
@@ -15,7 +15,7 @@ This is the API documentation for **w6t** and **Terminal**.
 If you're not familiar with WinUI 3, see [Create your first WinUI3 (Windows App SDK) project](https://learn.microsoft.com/en-us/windows/apps/winui/winui3/create-your-first-winui3-app) for a solid introduction.
 
 ### Creating a project
-This demo is a stripped-down version of [**W6t**](xref:Spakov.W6t), focusing on just the essential pieces you need to get started. Let's create a **WinUI Blank App (Packaged)** project in Visual Studio. We'll call it **TerminalDemo**. If we run the project at this point, we get a blank window that does nothing.
+This demo is a stripped-down version of [**Furminal**](xref:Spakov.Furminal), focusing on just the essential pieces you need to get started. Let's create a **WinUI Blank App (Packaged)** project in Visual Studio. We'll call it **TerminalDemo**. If we run the project at this point, we get a blank window that does nothing.
 
 ### Adding the Terminal project reference
 We'll need to make sure we have a reference to **Terminal**—by far the easiest way to do this is to add a project reference in Visual Studio. Right click **TerminalDemo** and select **Add** > **Project Reference…**, then browse to `Terminal.csproj`.
@@ -23,7 +23,7 @@ We'll need to make sure we have a reference to **Terminal**—by far the easiest
 **Terminal** appears in the **Solution Explorer**.
 
 ### Building `utf8proc.dll`
-`utf8proc.dll` does not get built automatically since it uses Visual Studio's CMake infrastructure and there's no apparent way to automate CMake builds. Open the `utf8proc` directory in Visual Studio with **File** > **Open** > **Folder…**. The **CMake in Visual Studio** overview page should be displayed. Click **Open CMake Settings Editor** and click **Edit JSON** near the top. Copy and paste the contents of `utf8proc.CMakePresets.json` from the w6t repository (link) and save the file. This creates the `arm64-Release` and `x64-Release` configurations. Build the project for the desired architectures. `utf8proc.dll` is produced in `out/build/$(Platform)-$(Configuration)/`.
+`utf8proc.dll` does not get built automatically since it uses Visual Studio's CMake infrastructure and there's no apparent way to automate CMake builds. Open the `utf8proc` directory in Visual Studio with **File** > **Open** > **Folder…**. The **CMake in Visual Studio** overview page should be displayed. Click **Open CMake Settings Editor** and click **Edit JSON** near the top. Copy and paste the contents of `utf8proc.CMakePresets.json` from the Furminal repository (link) and save the file. This creates the `arm64-Release` and `x64-Release` configurations. Build the project for the desired architectures. `utf8proc.dll` is produced in `out/build/$(Platform)-$(Configuration)/`.
 
 At this point, we can close the `utf8proc` folder and reopen **TerminalDemo**.
 
@@ -37,7 +37,7 @@ We'll need to ensure that `utf8proc.dll` is present in our package at runtime, s
   <Utf8ProcDll>utf8proc.dll</Utf8ProcDll>
   <Utf8ProcNativeArch Condition="'$(Platform)'=='x64'">x64</Utf8ProcNativeArch>
   <Utf8ProcNativeArch Condition="'$(Platform)'=='ARM64'">arm64</Utf8ProcNativeArch>
-  <Utf8ProcInputPath>$(ProjectDir)..\..\w6t\utf8proc\out\build\$(Utf8ProcNativeArch)-Release\$(Utf8ProcDll)</Utf8ProcInputPath>
+  <Utf8ProcInputPath>$(ProjectDir)..\..\Furminal\utf8proc\out\build\$(Utf8ProcNativeArch)-Release\$(Utf8ProcDll)</Utf8ProcInputPath>
   <Utf8ProcOutputPath>$(ProjectDir)$(Utf8ProcDll)</Utf8ProcOutputPath>
 </PropertyGroup>
 
@@ -59,7 +59,7 @@ We'll need to edit our `TerminalDemo.vsproj` to reference Terminal's resource fi
 
 ```xml
 <ItemGroup>
-  <PRIResource Include="..\..\w6t\Terminal\Strings\**\*.resw" />
+  <PRIResource Include="..\..\Furminal\Terminal\Strings\**\*.resw" />
 </ItemGroup>
 ```
 
@@ -308,7 +308,7 @@ Next, we'll create a view that presents the **TerminalControl** to the user. Let
         Grid.Column="1"/>
       <TextBlock
         x:Name="TitleTextBlock"
-        Text="w6t"
+        Text="Furminal"
         VerticalAlignment="Center"
         Grid.Column="2"/>
       <FontIcon
@@ -476,7 +476,7 @@ At this point, our project file is in its final state and should contain a refer
     <Utf8ProcDll>utf8proc.dll</Utf8ProcDll>
     <Utf8ProcNativeArch Condition="'$(Platform)'=='x64'">x64</Utf8ProcNativeArch>
     <Utf8ProcNativeArch Condition="'$(Platform)'=='ARM64'">arm64</Utf8ProcNativeArch>
-    <Utf8ProcInputPath>$(ProjectDir)..\..\w6t\utf8proc\out\build\$(Utf8ProcNativeArch)-Release\$(Utf8ProcDll)</Utf8ProcInputPath>
+    <Utf8ProcInputPath>$(ProjectDir)..\..\Furminal\utf8proc\out\build\$(Utf8ProcNativeArch)-Release\$(Utf8ProcDll)</Utf8ProcInputPath>
     <Utf8ProcOutputPath>$(ProjectDir)$(Utf8ProcDll)</Utf8ProcOutputPath>
   </PropertyGroup>
 
@@ -518,11 +518,11 @@ At this point, our project file is in its final state and should contain a refer
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\w6t\Terminal\Terminal.csproj" />
+    <ProjectReference Include="..\..\Furminal\Terminal\Terminal.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PRIResource Include="..\w6t\Terminal\Strings\**\*.resw" />
+    <PRIResource Include="..\Furminal\Terminal\Strings\**\*.resw" />
   </ItemGroup>
   
   <ItemGroup>
@@ -623,4 +623,4 @@ There are at least two major things you may want to do:
 1. Allow the user to interact with the terminal configuration (though the settings window should work fine at this point), and
 2. Improve the visuals and user experience
 
-Take a look at the source code of w6t (link) and TermBar (link) for two different approaches to both.
+Take a look at the source code of Furminal (link) and TermBar (link) for two different approaches to both.
