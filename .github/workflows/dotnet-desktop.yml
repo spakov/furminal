@@ -50,7 +50,7 @@ jobs:
       matrix:
         platform: [ARM64, x64]
         configuration: [Release]
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     env:
       Solution_Name: Furminal.sln
