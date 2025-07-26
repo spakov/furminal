@@ -15,12 +15,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" />
 
   <PropertyGroup>
-    <HostRid Condition="'$(PROCESSOR_ARCHITECTURE)'=='AMD64'">win-x64</HostRid>
-    <HostRid Condition="'$(PROCESSOR_ARCHITECTURE)'=='ARM64'">win-arm64</HostRid>
+    <HostArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">x64</HostArchitecture>
+    <HostArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'ARM64'">arm64</HostArchitecture>
+    <HostPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'x64'">x64</HostPlatform>
+    <HostPlatform Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'arm64'">arm64</HostPlatform>
   </PropertyGroup>
 
   <Target Name="GenerateEmoji" BeforeTargets="BeforeCompile">
-    <Exec Command="dotnet run --arch $(HostRid) --project ..\EmojiGenerator\EmojiGenerator.csproj -- --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
+    <Exec Command="dotnet build -c $(Configuration) -a $(HostArchitecture) --no-self-contained" />
+    <Exec Command="dotnet exec ..\EmojiGenerator\bin\$(Configuration)\$(Platform)\EmojiGenerator.dll -- --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
   </Target>
 
 </Project>
