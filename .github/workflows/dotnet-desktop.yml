@@ -84,6 +84,7 @@ jobs:
     - name: Build the application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
+        Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
