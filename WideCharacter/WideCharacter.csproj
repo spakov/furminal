@@ -22,8 +22,8 @@
   </PropertyGroup>
 
   <Target Name="GenerateEmoji" BeforeTargets="BeforeCompile">
-    <Exec Command="dotnet build -c $(Configuration) -a $(HostArchitecture) --no-self-contained" />
-    <Exec Command="dotnet exec ..\EmojiGenerator\bin\$(Configuration)\$(Platform)\EmojiGenerator.dll -- --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
+    <Exec Command="cd ..\EmojiGenerator &amp;&amp; dotnet build -c $(Configuration) -a $(HostArchitecture)" />
+    <Exec Command="dotnet exec ..\EmojiGenerator\bin\$(Configuration)\net8.0\win-$(HostPlatform)\EmojiGenerator.dll --outputPath $(MSBuildProjectDirectory) --namespace Spakov.WideCharacter" />
   </Target>
 
 </Project>
