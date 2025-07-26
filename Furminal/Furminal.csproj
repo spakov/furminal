@@ -17,11 +17,18 @@
 
   <PropertyGroup>
     <Utf8ProcDll>utf8proc.dll</Utf8ProcDll>
-    <Utf8ProcNativeArch Condition="'$(Platform)'=='x64'">x64</Utf8ProcNativeArch>
-    <Utf8ProcNativeArch Condition="'$(Platform)'=='ARM64'">arm64</Utf8ProcNativeArch>
-    <Utf8ProcInputPath>$(ProjectDir)..\utf8proc\out\build\$(Utf8ProcNativeArch)-Release\$(Utf8ProcDll)</Utf8ProcInputPath>
+    <Utf8ProcNativePlatform Condition="'$(Platform)'=='x64'">x64</Utf8ProcNativePlatform>
+    <Utf8ProcNativePlatform Condition="'$(Platform)'=='ARM64'">arm64</Utf8ProcNativePlatform>
+    <Utf8ProcNativeConfiguration Condition="'$(Configuration)'=='Debug'">debug</Utf8ProcNativeConfiguration>
+    <Utf8ProcNativeConfiguration Condition="'$(Configuration)'=='Release'">release</Utf8ProcNativeConfiguration>
+    <Utf8ProcBuildPath>$(ProjectDir)..\utf8proc-build</Utf8ProcBuildPath>
+    <Utf8ProcInputPath>$(Utf8ProcBuildPath)\out\build\$(Utf8ProcNativePlatform)-$(Utf8ProcNativeConfiguration)\$(Utf8ProcDll)</Utf8ProcInputPath>
     <Utf8ProcOutputPath>$(ProjectDir)$(Utf8ProcDll)</Utf8ProcOutputPath>
   </PropertyGroup>
+
+  <Target Name="BuildUtf8proc" BeforeTargets="BeforeBuild" Outputs="$(Utf8ProcInputPath)">
+    <Exec Command="cd &quot;$(Utf8ProcBuildPath)&quot; &amp;&amp; pwsh .\Build-utf8proc.ps1 -Platform $(Utf8ProcNativePlatform) -Configuration $(Utf8ProcNativeConfiguration)"/>
+  </Target>
 
   <ItemGroup>
     <None Include="$(Utf8ProcInputPath)">

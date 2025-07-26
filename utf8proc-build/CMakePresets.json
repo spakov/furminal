@@ -1,0 +1,92 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "out/build/${presetName}",
+      "installDir": "out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "BUILD_SHARED_LIBS": true
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "arm64-debug",
+      "displayName": "ARM64 Debug",
+      "description": "Target Windows (ARM64) with the Visual Studio development environment. (Debug)",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "arm64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "arm64-release",
+      "displayName": "ARM64 Release",
+      "description": "Target Windows (ARM64) with the Visual Studio development environment. (RelWithDebInfo)",
+      "inherits": "arm64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "description": "Target Windows (x64) with the Visual Studio development environment. (Debug)",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "description": "Target Windows (x64) with the Visual Studio development environment. (RelWithDebInfo)",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "arm64-debug",
+      "displayName": "ARM64 Debug",
+      "configurePreset": "arm64-debug",
+      "description": "Target Windows (ARM64) with the Visual Studio development environment. (Debug)"
+    },
+    {
+      "name": "arm64-release",
+      "displayName": "ARM64 Release",
+      "configurePreset": "arm64-release",
+      "description": "Target Windows (ARM64) with the Visual Studio development environment. (RelWithDebInfo)"
+    },
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-debug",
+      "description": "Target Windows (x64) with the Visual Studio development environment. (Debug)"
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "configurePreset": "x64-release",
+      "description": "Target Windows (x64) with the Visual Studio development environment. (RelWithDebInfo)"
+    }
+  ]
+}
