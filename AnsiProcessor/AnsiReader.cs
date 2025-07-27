@@ -1,4 +1,5 @@
-﻿using Spakov.AnsiProcessor.Ansi;
+﻿using Microsoft.Extensions.Logging;
+using Spakov.AnsiProcessor.Ansi;
 using Spakov.AnsiProcessor.AnsiColors;
 using Spakov.AnsiProcessor.Output.EscapeSequences;
 using Spakov.AnsiProcessor.Output.EscapeSequences.Fe;
@@ -6,6 +7,7 @@ using Spakov.AnsiProcessor.Output.EscapeSequences.Fp;
 using Spakov.AnsiProcessor.Output.EscapeSequences.Fs;
 using Spakov.AnsiProcessor.Output.EscapeSequences.NF;
 using Spakov.AnsiProcessor.TermCap;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,6 +78,8 @@ namespace Spakov.AnsiProcessor
             /// </summary>
             nF
         }
+
+        private readonly ILogger? _logger;
 
         private readonly FileStream _consoleOutStream;
         private readonly Decoder _decoder;
@@ -155,6 +159,8 @@ namespace Spakov.AnsiProcessor
         /// ANSI colors.</param>
         public AnsiReader(FileStream consoleOutStream, TerminalCapabilities terminalCapabilities, Palette? palette)
         {
+            _logger = LoggerHelper.CreateLogger<AnsiReader>();
+
             _consoleOutStream = consoleOutStream;
             _decoder = Encoding.UTF8.GetDecoder();
             _terminalCapabilities = terminalCapabilities;
@@ -179,15 +185,31 @@ namespace Spakov.AnsiProcessor
             while (true)
             {
                 int bytesRead = await _consoleOutStream.ReadAsync(_buffer);
+
+#if DEBUG
+                List<byte> rawBytes = [];
+
+                for (int i = 0; i < bytesRead; i++)
+                {
+                    rawBytes.Add(_buffer[i]);
+                }
+
+                _logger?.LogTrace("ReadAsync({buffer})", Helpers.PrintableHelper.MakePrintable(string.Join(", ", rawBytes)));
+#endif
+
                 if (bytesRead == 0)
                 {
+                    _logger?.LogWarning("Read no bytes");
                     return;
                 }
 
                 int charsDecoded = _decoder.GetChars(_buffer, 0, bytesRead, _charBuffer, 0, false);
                 for (int i = 0; i < charsDecoded; i++)
                 {
+                    _logger?.LogDebug("Received '{character}'", Helpers.PrintableHelper.MakePrintable(_charBuffer[i]));
+                    _logger?.LogTrace("State: {state}", _state);
                     HandleCharacter(_charBuffer[i]);
+                    _logger?.LogTrace("Handled character '{character}' ({i}/{charsDecoded})", Helpers.PrintableHelper.MakePrintable(_charBuffer[i]), i + 1, charsDecoded);
                 }
 
                 FlushText();
@@ -242,6 +264,7 @@ namespace Spakov.AnsiProcessor
                     {
                         FlushText();
                         OnControlCharacter?.Invoke(character);
+                        _logger?.LogInformation("OnControlCharacter({character})", Helpers.PrintableHelper.MakePrintable(character));
 
                         return;
                     }
@@ -255,6 +278,7 @@ namespace Spakov.AnsiProcessor
                         {
                             FlushText();
                             OnControlCharacter?.Invoke(character);
+                            _logger?.LogInformation("OnControlCharacter({character})", Helpers.PrintableHelper.MakePrintable(character));
 
                             return;
                         }
@@ -277,10 +301,11 @@ namespace Spakov.AnsiProcessor
         private void HandleEscapeSequenceStart(char character)
         {
             EscapeSequenceState? escapeSequenceState = EscapeSequence.DetermineEscapeSequenceType(_terminalCapabilities, character);
+            _logger?.LogDebug("Escape sequence state at '{character}': {escapeSequenceState}", Helpers.PrintableHelper.MakePrintable(character), escapeSequenceState);
 
             if (escapeSequenceState is not null)
             {
-                this._escapeSequenceState = (EscapeSequenceState)escapeSequenceState;
+                _escapeSequenceState = (EscapeSequenceState)escapeSequenceState;
 
                 _escapeSequenceBuilder.Append(character);
                 _state = State.EscapeSequence;
@@ -288,6 +313,10 @@ namespace Spakov.AnsiProcessor
             else
             {
                 _state = State.Text;
+
+                // In this case, we must resume reading, since we're not
+                // actually handling this escape sequence
+                Resume();
             }
         }
 
@@ -336,6 +365,7 @@ namespace Spakov.AnsiProcessor
                     )
                 );
 
+                _logger?.LogInformation("OnEscapeSequence({escapeSequence})", Helpers.PrintableHelper.MakePrintable(_escapeSequenceBuilder.ToString()));
                 _state = State.Text;
             }
         }
@@ -349,6 +379,7 @@ namespace Spakov.AnsiProcessor
             {
                 OnText?.Invoke(_textBuffer.ToString());
                 _textBuffer.Clear();
+                _logger?.LogInformation("OnText({text})", Helpers.PrintableHelper.MakePrintable(_textBuffer.ToString()));
             }
         }
 

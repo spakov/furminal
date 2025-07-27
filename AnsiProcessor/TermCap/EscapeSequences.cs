@@ -29,7 +29,7 @@ namespace Spakov.AnsiProcessor.TermCap
         public List<char> Fp { get; } =
         [
             Ansi.EscapeSequences.Fp.DECSC,
-            Ansi.EscapeSequences.Fp.DECRC,
+            Ansi.EscapeSequences.Fp.DECRC
         ];
 
         /// <summary>
