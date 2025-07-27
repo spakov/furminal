@@ -89,6 +89,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: MSIX Package
-        path: $env:Package
-      env:
-        Package: ${{ steps.locate_msix_package.outputs.package }}
+        path: ${{ steps.locate_msix_package.outputs.package }}
