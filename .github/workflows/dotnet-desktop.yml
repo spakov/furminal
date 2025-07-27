@@ -34,14 +34,16 @@ jobs:
     - name: Set up MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # Get license information
-    #- name: Get licenses
-    #  working-directory: ./LICENSES
-    #  run: pwsh .\licensegen\Get-Licenses.ps1
+    # Get NuGetLicenseFramework
+    - name: Get NuGetLicenseFramework
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/sensslen/nuget-license/releases/download/v3.1.6/release.zip" -OutFile NuGetLicense.zip
+        Expand-Archive -Path NuGetLicense.zip -DestinationPath NuGetLicense
 
-    # Install vswhere
-    #- name: Install vswhere
-    #  run: winget install vswhere --disable-interactivity --accept-source-agreements --accept-package-agreements
+    # Get license information
+    - name: Get licenses
+      working-directory: ./LICENSES
+      run: pwsh .\licensegen\Get-Licenses.ps1
     
     # Restore NuGet packages
     - name: Restore NuGet packages
