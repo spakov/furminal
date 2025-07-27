@@ -1,4 +1,6 @@
+GetDpiForWindow
 LoadCursor
 MessageBox
 SetCursor
 IDC_ARROW
+USER_DEFAULT_SCREEN_DPI
