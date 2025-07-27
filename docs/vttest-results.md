@@ -70,6 +70,7 @@ Items annotated with * are very likely due to being handled by ConPTY.
 - **1** Test of cursor movements (132-column mode not implemented)
 - **2** Test of screen features (132-column mode not implemented)
 - **5.4** Keyboard Tests -&gt; Cursor Keys (&lt;ANSI / Cursor key mode RESET&gt;, &lt;ANSI / Cursor key mode SET&gt; pass, &lt;VT52 Mode&gt; not implemented)
+- **5.5** Keyboard Tests -&gt; Numeric Keypad (&lt;ANSI Application mode&gt;, &lt;VT52 Application mode&gt; not implemented)
 - **7** Test of VT52 mode (partially handled by ConPTY, not implemented)
 - **8** Test of VT102 features (Insert/Delete Char/Line) (double-width mode not implemented, 132-column mode not implemented)
 - **11.1.3** VT220 Tests -&gt; Test 8-bit controls (S7C1T/S8C1T) (8-bit control support not implemented, 7-bit control support pass)
@@ -119,7 +120,6 @@ Items annotated with * are very likely due to being handled by ConPTY.
 ### Fail
 - **4** Test of double-sized characters (not implemented)
 - **5.1** Keyboard Tests -&gt; LED Lights (not implemented)
-- **5.5** Keyboard Tests -&gt; Numeric Keypad (hangs the terminal)
 - **5.8** Keyboard Tests -&gt; AnswerBack (not implemented)
 - **6.1** Terminal Reports/Responses -&gt; &lt;ENQ&gt; (AnswerBack Message) (not implemented)
 - **11.1.1.1.4** VT220 Device Status Reports -&gt; Test UDK Status (not implemented)
