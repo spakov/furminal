@@ -1,5 +1,6 @@
 # Configuration
 $NGLF = "\opt\NuGetLicenseFramework-3.1.6\NuGetLicenseFramework.exe"
+$NGLFGitHubActions = "..\NuGetLicense\artifacts\net472\NuGetLicenseFramework.exe"
 $LicenseGenDirectory = "licensegen"
 $JsonInput = "$LicenseGenDirectory\json-input.json"
 $OutputType = "Json"
@@ -17,8 +18,13 @@ if (-not (Test-Path -Path $LicenseGenDirectory)) {
 
 # Check for NGLF
 if (-not (Test-Path -Path $NGLF)) {
-  Write-Error "Error: '$NGLF' not found. Obtain NuGetLicenseFramework.exe from https://github.com/sensslen/nuget-license and point me to it via $$NGLF."
-  exit 1
+  # Check for GitHub Actions workflow location
+  if (Test-Path -Path $NGLFGitHubActions) {
+    $NGLF = $NGLFGitHubActions
+  } else {
+    Write-Error "Error: '$NGLF' not found. Obtain NuGetLicenseFramework.exe from https://github.com/sensslen/nuget-license and point me to it via $$NGLF."
+    exit 1
+  }
 }
 
 # Check for jq
