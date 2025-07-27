@@ -18,6 +18,7 @@ Furminal uses licensed components from third parties. These are summarized below
 - **[Microsoft.Extensions.Options.ConfigurationExtensions](https://dot.net/)** 8.0.0: [MIT](https://licenses.nuget.org/MIT)
 - **[Microsoft.Extensions.Primitives](https://dot.net/)** 9.0.7: [MIT](https://licenses.nuget.org/MIT)
 - **[Microsoft.Graphics.Win2D](http://go.microsoft.com/fwlink/?LinkID=519078)** 1.3.2: [MIT](https://github.com/microsoft/Win2D/raw/refs/heads/winappsdk/main/LICENSE.txt)
+- **[Microsoft.NET.ILLink.Tasks](https://dot.net/)** 8.0.18: [MIT](https://licenses.nuget.org/MIT)
 - **[Microsoft.Web.WebView2](https://aka.ms/webview)** 1.0.2903.40: [WebView2](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.2903.40/License)
 - **[Microsoft.Windows.CsWin32](https://github.com/Microsoft/CsWin32)** 0.3.183: [MIT](https://licenses.nuget.org/MIT)
 - **[Microsoft.Windows.SDK.BuildTools](https://aka.ms/WinSDKProjectURL)** 10.0.26100.4654: [https://aka.ms/WinSDKLicenseURL](https://aka.ms/WinSDKLicenseURL)
