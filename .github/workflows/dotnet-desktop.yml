@@ -100,11 +100,10 @@ jobs:
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
         [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
-        Get-Item GitHubActionsWorkflow.pfx
 
     # Create the app package
     - name: Create the app package
-      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword="${{ secrets.FURMINAL_CERTIFICATE_PASSWORD }}"
+      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx /p:PackageCertificatePassword="${{ secrets.FURMINAL_CERTIFICATE_PASSWORD }}"
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
