@@ -89,27 +89,27 @@ jobs:
         Configuration: ${{ matrix.configuration }}
       
     # Build the application
-    - name: Build the application
+    - name: Build application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Decode the certificate
+    - name: Decode certificate
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
         [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
 
     # Create the app package
-    - name: Create the app package
+    - name: Create app package
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
     # Remove the pfx
-    - name: Remove the certificate
+    - name: Remove certificate
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
 
     # Locate the MSIX package
@@ -119,7 +119,7 @@ jobs:
         $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
                 Where-Object { $_.FullName -like "*AppPackages*" } |
                 Select-Object -First 1 -ExpandProperty FullName
-        echo "package=$($msix.FullName) >> $env:GITHUB_OUTPUT
+        echo "package=$($msix.FullName)" >> $env:GITHUB_OUTPUT
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
