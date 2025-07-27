@@ -112,9 +112,18 @@ jobs:
     - name: Remove the certificate
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
 
+    # Locate the MSIX package
+    - name: Locate MSIX package
+      id: locate_msix_package
+      run: |
+        $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
+                Where-Object { $_.FullName -like "*AppPackages*" } |
+                Select-Object -First 1 -ExpandProperty FullName
+        echo "package=$($msix.FullName) >> $env:GITHUB_OUTPUT
+
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
-    #- name: Upload build artifacts
-    #  uses: actions/upload-artifact@v4
-    #  with:
-    #    name: MSIX Package
-    #    path: ${{ env.Wap_Project_Directory }}\AppPackages
+    - name: Upload MSIX package
+      uses: actions/upload-artifact@v4
+      with:
+        name: MSIX Package
+        path: ${{ steps.locate_msix_package.outputs.package }}
