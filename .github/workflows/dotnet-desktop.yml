@@ -100,6 +100,7 @@ jobs:
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
         [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+        Get-Item GitHubActionsWorkflow.pfx
 
     # Create the app package
     - name: Create the app package
