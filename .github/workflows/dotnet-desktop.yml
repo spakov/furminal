@@ -10,9 +10,14 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ARM64]
+        platform: [x64, ARM64]
         configuration: [Release]
-    runs-on: windows-latest
+        include:
+          - platform: x64
+            runs-on: windows-latest
+          - platform: ARM64
+            runs-on: windows-11-arm
+    runs-on: ${{ matrix.runs_on }}
 
     env:
       Solution_Name: Furminal.sln
