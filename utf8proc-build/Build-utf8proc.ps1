@@ -62,7 +62,7 @@ Import-Module $vsDevShellPath
 
 $vsInstallPath = $(Join-Path -Path $vsDirectory -ChildPath "..\..")
 $machineArch = $Env:Processor_Architecture
-Enter-VsDevShell -VsInstallPath "$vsInstallPath" -Arch $machineArch -HostArch $machineArch -StartInPath $(Get-Location)
+Enter-VsDevShell -VsInstallPath "$vsInstallPath" -Arch $machineArch -StartInPath $(Get-Location)
 
 # Check for CMakePresets.json
 if (-not (Test-Path -Path $CMakePresets)) {
