@@ -82,11 +82,13 @@ jobs:
                 Where-Object { $_.FullName -like "*AppPackages*" } |
                 Select-Object -First 1 -ExpandProperty FullName
         Write-Host "Located package: $msix"
-        echo "package=$($msix.FullName)" >> "$GITHUB_ENV"
+        echo "package=$($msix.FullName)" >> "$GITHUB_OUTPUT"
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload MSIX package
       uses: actions/upload-artifact@v4
       with:
         name: MSIX Package
-        path: $package
+        path: $env:Package
+      env:
+        Package: ${{ steps.locate_msix_package.outputs.package }}
