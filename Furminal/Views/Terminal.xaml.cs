@@ -38,15 +38,14 @@ namespace Spakov.Furminal.Views
         private readonly ResourceLoader _resources;
 
         private readonly DependencyProperties _dependencyProperties;
-
         private readonly DispatcherQueueTimer _visualBellTimer;
-
         private TerminalViewModel? _viewModel;
 
         private readonly string? _startCommand;
         private readonly int? _startRows;
         private readonly int? _startColumns;
 
+        private Dpi _dpi;
         private int? _clientAreaOffset;
         private bool _resizeLock;
 
@@ -137,6 +136,8 @@ namespace Spakov.Furminal.Views
             ViewModel.PseudoconsoleDied += ViewModel_PseudoconsoleDied;
             InitializeComponent();
             _resources = ResourceLoader.GetForViewIndependentUse();
+
+            AppWindow.Changed += AppWindow_Changed;
 
             // Our Win32 window's cursor, at this point, is (probably)
             // IDC_WAIT. It "bleeds through" when we do things like display
@@ -254,10 +255,28 @@ namespace Spakov.Furminal.Views
 
             AppWindow.ResizeClient(
                 new(
-                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Width),
-                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Height) + MysteryOffset
+                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Width * (_dpi.X / (float)PInvoke.USER_DEFAULT_SCREEN_DPI)),
+                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Height * (_dpi.Y / (float)PInvoke.USER_DEFAULT_SCREEN_DPI)) + MysteryOffset
                 )
             );
+        }
+
+        /// <summary>
+        /// Invoked when the window changes, which includes scenarios during
+        /// which we'd want to obtain new DPI values.
+        /// </summary>
+        /// <param name="sender"><inheritdoc
+        /// cref="TypedEventHandler{TSender, TResult}"
+        /// path="/param[@name='sender']"/></param>
+        /// <param name="args"><inheritdoc
+        /// cref="TypedEventHandler{TSender, TResult}"
+        /// path="/param[@name='args']"/></param>
+        private void AppWindow_Changed(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowChangedEventArgs args)
+        {
+            uint dpi = PInvoke.GetDpiForWindow(new(WinRT.Interop.WindowNative.GetWindowHandle(this)));
+
+            _dpi.X = dpi;
+            _dpi.Y = dpi;
         }
 
         /// <summary>
