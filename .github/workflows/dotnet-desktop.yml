@@ -2,7 +2,7 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "release/v*" ]
     tags: [ "v*" ]
 
 permissions:
@@ -102,7 +102,10 @@ jobs:
     # Publish a release
     - name: Publish release
       uses: softprops/action-gh-release@v2
-      if: github.ref_type == 'tag'
+      if: |
+        github.ref_type == 'tag' &&
+        startsWith(github.ref, 'refs/tags/v') &&
+        (github.base_ref == '' || startsWith(github.base_ref, 'release/v'))
       with:
         files: ${{ steps.locate_msix_package.outputs.package }}
         generate_release_notes: true
