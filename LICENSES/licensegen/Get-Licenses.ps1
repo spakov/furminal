@@ -1,6 +1,6 @@
 # Configuration
 $NGLF = "\opt\NuGetLicenseFramework-3.1.6\NuGetLicenseFramework.exe"
-$NGLFGitHubActions = ".\NuGetLicense\artifacts\net472\NuGetLicenseFramework.exe"
+$NGLFGitHubActions = "..\NuGetLicense\artifacts\net472\NuGetLicenseFramework.exe"
 $LicenseGenDirectory = "licensegen"
 $JsonInput = "$LicenseGenDirectory\json-input.json"
 $OutputType = "Json"
