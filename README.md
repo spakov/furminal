@@ -1,5 +1,5 @@
 # Furminal
-**Furminal** is a terminal emulator for Windows, based on **Terminal**'s' WinUI 3 **TerminalControl**. It uses the Windows pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
+**Furminal** is a terminal emulator for Windows, based on **Terminal**'s WinUI 3 **TerminalControl**. It uses the Windows pseudoconsole API behind the scenes. It is fully featured, supporting a combination of 1970s-era bleeding-edge features and today's popular features.
 
 **Furminal** is a WinUI 3 application for .NET 8.0 and is available as pre-built x64 and ARM64 packaged app releases, signed with a self-signed certificate. It runs on Windows 11 and should support Windows 10 as well, though I haven't tested it. **Terminal** provides **TerminalControl**, a C# WinUI 3 user control based on the Win2D CanvasControl.
 

@@ -1,0 +1,99 @@
+name: .NET Core Desktop
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        platform: [x64, ARM64]
+        configuration: [Release]
+        include:
+          - platform: x64
+            runs_on: windows-latest
+          - platform: ARM64
+            runs_on: windows-11-arm
+    runs-on: ${{ matrix.runs_on }}
+
+    env:
+      Solution_Name: Furminal.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Add MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    # Get NuGetLicenseFramework
+    - name: Get NuGetLicenseFramework
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/sensslen/nuget-license/releases/download/v3.1.6/release.zip" -OutFile NuGetLicense.zip
+        Expand-Archive -Path NuGetLicense.zip -DestinationPath NuGetLicense
+
+    # Restore NuGet packages
+    - name: Restore NuGet packages
+      run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
+      env:
+        Platform: ${{ matrix.platform }}
+        Configuration: ${{ matrix.configuration }}
+
+    # Build the application
+    - name: Build application
+      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
+      env:
+        Platform: ${{ matrix.platform }}
+        Configuration: ${{ matrix.configuration }}
+
+    # Get license information
+    - name: Get licenses
+      working-directory: ./LICENSES
+      run: pwsh .\licensegen\Get-Licenses.ps1
+
+    # Decode the base 64 encoded pfx and save the Signing_Certificate
+    - name: Decode certificate
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
+        [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+
+    # Create the app package
+    - name: Create app package
+      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx
+      env:
+        Platform: ${{ matrix.platform }}
+        Configuration: ${{ matrix.configuration }}
+
+    # Remove the pfx
+    - name: Remove certificate
+      run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
+
+    # Locate the MSIX package
+    - name: Locate MSIX package
+      id: locate_msix_package
+      run: |
+        $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
+                Where-Object { $_.FullName -like "*AppPackages*" } |
+                Select-Object -First 1 -ExpandProperty FullName
+        Write-Host "Located package: $msix"
+        "package=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+    - name: Upload MSIX package
+      uses: actions/upload-artifact@v4
+      with:
+        name: MSIX Package (${{ matrix.platform }})
+        path: ${{ steps.locate_msix_package.outputs.package }}
