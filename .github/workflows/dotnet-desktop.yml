@@ -3,11 +3,16 @@ name: .NET Core Desktop
 on:
   push:
     branches: [ "main" ]
+    tags: [ "v*" ]
   pull_request:
 
 jobs:
 
   build:
+    if: |
+      github.event_name != 'push' ||
+      contains(github.event.head_commit.modified, 'version.json')
+
     strategy:
       matrix:
         platform: [x64, ARM64]
@@ -17,6 +22,7 @@ jobs:
             runs_on: windows-latest
           - platform: ARM64
             runs_on: windows-11-arm
+
     runs-on: ${{ matrix.runs_on }}
 
     env:
@@ -88,12 +94,15 @@ jobs:
         $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
                 Where-Object { $_.FullName -like "*AppPackages*" } |
                 Select-Object -First 1 -ExpandProperty FullName
+        $msix = $msix -replace '\\','/'
         Write-Host "Located package: $msix"
         "package=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
-    - name: Upload MSIX package
-      uses: actions/upload-artifact@v4
+    # Publish a release
+    - name: Publish release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
       with:
-        name: MSIX Package (${{ matrix.platform }})
-        path: ${{ steps.locate_msix_package.outputs.package }}
+        files: ${{ steps.locate_msix_package.outputs.package }}
+        generate_release_notes: true
+        make_latest: "true"
