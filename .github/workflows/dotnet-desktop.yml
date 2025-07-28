@@ -11,8 +11,7 @@ jobs:
   build:
     if: |
       github.event_name != 'push' ||
-      github.event.head_commit.added != ['version.json'] &&
-      github.event.head_commit.modified != ['version.json']
+      contains(github.event.head_commit.modified, 'version.json')
 
     strategy:
       matrix:
