@@ -44,14 +44,14 @@ jobs:
       run: |
         Invoke-WebRequest -Uri "https://github.com/sensslen/nuget-license/releases/download/v3.1.6/release.zip" -OutFile NuGetLicense.zip
         Expand-Archive -Path NuGetLicense.zip -DestinationPath NuGetLicense
-    
+
     # Restore NuGet packages
     - name: Restore NuGet packages
       run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
-      
+
     # Build the application
     - name: Build application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
@@ -78,7 +78,7 @@ jobs:
         Configuration: ${{ matrix.configuration }}
 
     # Remove the pfx
-    - name: Remove certificate 
+    - name: Remove certificate
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
 
     # Locate the MSIX package
