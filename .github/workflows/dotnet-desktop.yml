@@ -78,7 +78,7 @@ jobs:
         Configuration: ${{ matrix.configuration }}
 
     # Remove the pfx
-    - name: Remove certificate
+    - name: Remove certificate 
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
 
     # Locate the MSIX package
