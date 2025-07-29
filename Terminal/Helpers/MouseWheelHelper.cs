@@ -16,6 +16,8 @@ namespace Spakov.Terminal.Helpers
         /// </summary>
         internal const int MouseWheelDelta = 120;
 
+        private static int s_scrollRemainder = 0;
+
         /// <summary>
         /// Invoked when the user scrolls on the terminal.
         /// </summary>
@@ -25,7 +27,19 @@ namespace Spakov.Terminal.Helpers
         /// cref="TerminalControl.Canvas_PointerWheelChanged"/>.</param>
         internal static void HandleMouseWheel(TerminalControl terminalControl, PointerPoint pointerPoint)
         {
-            int delta = pointerPoint.Properties.MouseWheelDelta / MouseWheelDelta;
+            if (pointerPoint.Properties.IsHorizontalMouseWheel)
+            {
+                return;
+            }
+
+            int delta = 0;
+            s_scrollRemainder += pointerPoint.Properties.MouseWheelDelta;
+
+            if (Math.Abs(s_scrollRemainder) >= 120)
+            {
+                delta = s_scrollRemainder / 120;
+                s_scrollRemainder -= delta * 120;
+            }
 
             if (delta > 0)
             {
@@ -68,12 +82,12 @@ namespace Spakov.Terminal.Helpers
                     // For mouse tracking
                     byte cb = 0x20;
 
-                    if (delta < 0)
+                    if (delta > 0)
                     {
                         cb += 0x00;
                     }
 
-                    if (delta > 0)
+                    if (delta < 0)
                     {
                         cb += 0x01;
                     }
@@ -104,12 +118,12 @@ namespace Spakov.Terminal.Helpers
                     // For mouse tracking
                     uint cb = 0x00;
 
-                    if (delta < 0)
+                    if (delta > 0)
                     {
                         cb += 0x00;
                     }
 
-                    if (delta > 0)
+                    if (delta < 0)
                     {
                         cb += 0x01;
                     }
