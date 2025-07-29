@@ -1,4 +1,4 @@
-name: .NET Core Desktop
+name: Furminal CI/CD
 
 on:
   push:
@@ -11,10 +11,32 @@ permissions:
 
 jobs:
 
+  version_only:
+    runs-on: ubuntu-latest
+
+    outputs:
+      skip_build: ${{ steps.check.outputs.skip_build }}
+      skip_reason: ${{ steps.check.outputs.skip_reason }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: check
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "version.json"; then
+            echo "skip_build=false" >> $GITHUB_OUTPUT
+            echo "Proceeding with build."
+          else
+            echo "skip_build=true" >> $GITHUB_OUTPUT
+            echo "skip_reason=Only version.json changed" >> $GITHUB_OUTPUT
+            echo "Skipping build."
+          fi
+
   build:
-    if: |
-      github.event_name != 'push' ||
-      contains(github.event.head_commit.modified, 'version.json')
+    needs: version_only
+
+    if: needs.version_only.output.skip_build == 'false'
 
     strategy:
       matrix:
@@ -38,77 +60,98 @@ jobs:
         fetch-depth: 0
         submodules: true
 
-    # Install the .NET Core workload
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    # Add MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Set up MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    # Get NuGetLicenseFramework
     - name: Get NuGetLicenseFramework
       run: |
         Invoke-WebRequest -Uri "https://github.com/sensslen/nuget-license/releases/download/v3.1.6/release.zip" -OutFile NuGetLicense.zip
         Expand-Archive -Path NuGetLicense.zip -DestinationPath NuGetLicense
 
-    # Restore NuGet packages
     - name: Restore NuGet packages
       run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
-    # Build the application
     - name: Build application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
-    # Get license information
     - name: Get licenses
       working-directory: ./LICENSES
       run: pwsh .\licensegen\Get-Licenses.ps1
 
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode certificate
       run: |
         $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
         [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
 
-    # Create the app package
     - name: Create app package
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx
       env:
         Platform: ${{ matrix.platform }}
         Configuration: ${{ matrix.configuration }}
 
-    # Remove the pfx
     - name: Remove certificate
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
 
-    # Locate the MSIX package
     - name: Locate MSIX package
       id: locate_msix_package
       run: |
         $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
                 Where-Object { $_.FullName -like "*AppPackages*" } |
                 Select-Object -First 1 -ExpandProperty FullName
-        $msix = $msix -replace '\\','/'
         Write-Host "Located package: $msix"
         "package=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
-    # Publish a release
+    - name: Upload MSIX packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: msix-packages
+        path: ${{ steps.locate_msix_package.outputs.package }}
+        retention-days: 1
+
+  release:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    if: |
+      github.ref_type == 'tag' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      (github.base_ref == '' || startsWith(github.base_ref, 'release/v'))
+
+    steps:
+    - name: Download MSIX packages
+      uses: actions/download-artifact@v4
+      with:
+        name: msix-packages
+
     - name: Publish release
       uses: softprops/action-gh-release@v2
-      if: |
-        github.ref_type == 'tag' &&
-        startsWith(github.ref, 'refs/tags/v') &&
-        (github.base_ref == '' || startsWith(github.base_ref, 'release/v'))
       with:
-        files: ${{ steps.locate_msix_package.outputs.package }}
+        tag_name: ${{ github.ref_name }}
+        name: "Furminal ${{ github.ref_name }}"
+        files: "**/*.msix"
         generate_release_notes: true
         make_latest: "true"
+
+  report:
+    needs: version_only
+
+    runs-on: ubuntu-latest
+
+    if: needs.changes.outputs.skip_build == 'true'
+
+    steps:
+      - name: Report skip reason
+        run: |
+          echo "⚡ Build skipped: ${{ needs.changes.outputs.skip_reason }}"
