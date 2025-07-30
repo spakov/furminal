@@ -4,7 +4,9 @@ on:
   push:
     branches: [ "main", "release/v*" ]
     tags: [ "v*" ]
-  pull_request:
+
+permissions:
+  contents: write
 
 permissions:
   contents: write
@@ -38,8 +40,6 @@ jobs:
         fi
 
   build:
-    needs: version_only
-
     if: needs.version_only.outputs.skip_build == 'false'
 
     strategy:
