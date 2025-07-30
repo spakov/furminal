@@ -2,9 +2,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using Spakov.Terminal;
 using Spakov.Furminal.Settings;
 using Spakov.Furminal.ViewModels;
+using Spakov.Terminal;
 using System;
 using System.IO;
 using System.Text;
@@ -13,6 +13,7 @@ using Windows.Foundation;
 using Windows.Storage;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 using WinUIEx;
 
 namespace Spakov.Furminal.Views
@@ -27,13 +28,6 @@ namespace Spakov.Furminal.Views
     public sealed partial class Terminal : Window
     {
         private readonly ILogger? _logger;
-
-        /// <summary>
-        /// A mystery offset of three pixels.
-        /// </summary>
-        /// <remarks>I have no idea why we're off by 3 pixels, but it seems to
-        /// be consistent, at least.</remarks>
-        private const int MysteryOffset = 3;
 
         private readonly ResourceLoader _resources;
 
@@ -256,7 +250,7 @@ namespace Spakov.Furminal.Views
             AppWindow.ResizeClient(
                 new(
                     (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Width * (_dpi.X / (float)PInvoke.USER_DEFAULT_SCREEN_DPI)),
-                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Height * (_dpi.Y / (float)PInvoke.USER_DEFAULT_SCREEN_DPI)) + MysteryOffset
+                    (int)Math.Ceiling(TerminalControl.NominalSizeInPixels.Height * (_dpi.Y / (float)PInvoke.USER_DEFAULT_SCREEN_DPI)) + PInvoke.GetSystemMetrics(SYSTEM_METRICS_INDEX.SM_CYFIXEDFRAME)
                 )
             );
         }
@@ -343,7 +337,7 @@ namespace Spakov.Furminal.Views
             _logger?.LogDebug("  NominalSizeInPixels: {width}, {height}", TerminalControl.NominalSizeInPixels.Width, TerminalControl.NominalSizeInPixels.Height);
 
             ApplicationData.Current.LocalSettings.Values["WindowWidth"] = requestedWidth;
-            ApplicationData.Current.LocalSettings.Values["WindowHeight"] = requestedHeight + MysteryOffset;
+            ApplicationData.Current.LocalSettings.Values["WindowHeight"] = requestedHeight + PInvoke.GetSystemMetrics(SYSTEM_METRICS_INDEX.SM_CYFIXEDFRAME);
 
             args.Handled = true;
         }
