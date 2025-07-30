@@ -9,36 +9,7 @@ permissions:
   contents: write
 
 jobs:
-
-  version_only:
-    runs-on: ubuntu-latest
-
-    outputs:
-      skip_build: ${{ steps.check_for_version.outputs.skip_build }}
-      skip_reason: ${{ steps.check_for_version.outputs.skip_reason }}
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        submodules: true
-
-    - name: Check for version.json only
-      id: check_for_version
-      run: |
-        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "^version\.json$"; then
-          echo "skip_build=false" >> $GITHUB_OUTPUT
-          echo "Proceeding with build."
-        else
-          echo "skip_build=true" >> $GITHUB_OUTPUT
-          echo "skip_reason=Only version.json changed" >> $GITHUB_OUTPUT
-          echo "Skipping build."
-        fi
-
   build:
-    if: needs.version_only.outputs.skip_build == 'false'
-
     strategy:
       matrix:
         platform: [x64, ARM64]
@@ -144,15 +115,3 @@ jobs:
         files: "**/*.msix"
         generate_release_notes: true
         make_latest: "true"
-
-  skip_report:
-    needs: version_only
-
-    runs-on: ubuntu-latest
-
-    if: needs.version_only.outputs.skip_build == 'true'
-
-    steps:
-      - name: Report skip reason
-        run: |
-          echo "⚡ Build skipped: ${{ needs.version_only.outputs.skip_reason }}"
