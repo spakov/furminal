@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      skip_build: ${{ steps.check.outputs.skip_build }}
-      skip_reason: ${{ steps.check.outputs.skip_reason }}
+      skip_build: ${{ steps.version_only.outputs.skip_build }}
+      skip_reason: ${{ steps.version_only.outputs.skip_reason }}
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
       - id: check
         run: |
           git diff --name-only ${{ github.event.before }} ${{ github.sha }}
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "version.json"; then
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "^version\.json$"; then
             echo "skip_build=false" >> $GITHUB_OUTPUT
             echo "Proceeding with build."
           else
