@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
@@ -572,11 +573,13 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// Intended to be invoked by <see
-        /// cref="TerminalControl.Canvas_PointerPressed"/> to handle the event.
+        /// cref="TerminalEngine.Canvas_PointerPressed"/> to handle the event.
         /// </remarks>
         /// <param name="pointerPoint">The <see cref="PointerPoint"/> from <see
         /// cref="TerminalControl.Canvas_PointerPressed"/>.</param>
-        internal void PointerPressed(PointerPoint pointerPoint)
+        /// <param name="leftClickCount">The number of multi-click left clicks
+        /// in this multi-click operation.</param>
+        internal void PointerPressed(PointerPoint pointerPoint, int leftClickCount)
         {
             (int row, int column) = PointToCellIndices(pointerPoint.Position);
             if (row < 0 || column < 0)
@@ -719,6 +722,58 @@ namespace Spakov.Terminal
             // Handle selection changes
             if (!UseAlternateScreenBuffer && pointerPoint.Properties.IsLeftButtonPressed)
             {
+                if (leftClickCount == 2)
+                {
+                    _screenBuffer[row][column].Selected = true;
+
+                    StringBuilder selection = new(_screenBuffer[row][column].GraphemeCluster);
+
+                    for (int j = column; j >= 0; j--)
+                    {
+                        selection.Insert(0, _screenBuffer[row][j].GraphemeCluster);
+
+                        if (_screenBuffer[row][j].GraphemeCluster is null || !Word().IsMatch(selection.ToString()))
+                        {
+                            if (_screenBuffer[row][j].GraphemeCluster is not null)
+                            {
+                                selection.Remove(0, _screenBuffer[row][j].GraphemeCluster!.Length);
+                            }
+
+                            break;
+                        }
+                        else
+                        {
+                            _screenBuffer[row][j].Selected = true;
+                        }
+                    }
+
+                    for (int j = column; j < _screenBuffer[row].Length; j++)
+                    {
+                        selection.Append(_screenBuffer[row][j].GraphemeCluster);
+
+                        if (_screenBuffer[row][j].GraphemeCluster is null || !Word().IsMatch(selection.ToString()))
+                        {
+                            if (_screenBuffer[row][j].GraphemeCluster is not null)
+                            {
+                                selection.Remove(selection.Length - _screenBuffer[row][j].GraphemeCluster!.Length - 1, _screenBuffer[row][j].GraphemeCluster!.Length);
+                            }
+
+                            break;
+                        }
+                        else
+                        {
+                            _screenBuffer[row][j].Selected = true;
+                        }
+                    }
+                }
+                else if (leftClickCount == 3)
+                {
+                    for (int j = 0; j < _screenBuffer[row].Length; j++)
+                    {
+                        _screenBuffer[row][j].Selected = true;
+                    }
+                }
+
                 _lastSelection.Column = column;
                 _lastSelection.Row = row;
 
@@ -731,7 +786,7 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// Intended to be invoked by <see
-        /// cref="TerminalControl.Canvas_PointerMoved"/> to handle the event.
+        /// cref="TerminalEngine.Canvas_PointerMoved"/> to handle the event.
         /// </remarks>
         /// <param name="pointerPoint">The <see cref="PointerPoint"/> from <see
         /// cref="TerminalControl.Canvas_PointerMoved"/>.</param>
@@ -903,7 +958,7 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// <para>Intended to be invoked by <see
-        /// cref="TerminalControl.Canvas_PointerReleased"/> to handle the
+        /// cref="TerminalEngine.Canvas_PointerReleased"/> to handle the
         /// event.</para>
         /// <para><c>SelectionMode = false</c> is handled by the caller.</para>
         /// </remarks>
@@ -2071,6 +2126,9 @@ namespace Spakov.Terminal
                 Encoding.ASCII.GetBytes(themeResponse.ToString())
             );
         }
+
+        [GeneratedRegex(@"^\w+$")]
+        private static partial Regex Word();
 
         /// <summary>
         /// The cursor state, as in DECSC/DECRC.
