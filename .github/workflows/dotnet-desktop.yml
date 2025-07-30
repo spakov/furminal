@@ -40,7 +40,7 @@ jobs:
   build:
     needs: version_only
 
-    if: ${{ needs.version_only.output.skip_build == 'false' }}
+    if: needs.version_only.outputs.skip_build == 'false'
 
     strategy:
       matrix:
@@ -148,25 +148,14 @@ jobs:
         generate_release_notes: true
         make_latest: "true"
 
-  report:
+  skip_report:
     needs: version_only
 
     runs-on: ubuntu-latest
 
-    if: ${{ needs.version_only.output.skip_build == 'true' }}
+    if: needs.version_only.outputs.skip_build == 'true'
 
     steps:
       - name: Report skip reason
         run: |
           echo "⚡ Build skipped: ${{ needs.version_only.outputs.skip_reason }}"
-
-  test_report:
-    needs: version_only
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Test report
-        run: |
-          echo "⚡ Build skipped: ${{ needs.version_only.outputs.skip_build }}"
-          echo "⚡ Skip reason: ${{ needs.version_only.outputs.skip_reason }}"
