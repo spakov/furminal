@@ -3,8 +3,10 @@ DefWindowProc
 DwmSetWindowAttribute
 EnumDisplaySettings
 GetClientRect
+GetDoubleClickTime
 GetModuleHandle
 GetMonitorInfo
+GetSystemMetrics
 GetWindowRect
 IsWindowVisible
 LoadCursor

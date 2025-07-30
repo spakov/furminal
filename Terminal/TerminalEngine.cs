@@ -11,6 +11,7 @@ using Spakov.AnsiProcessor.TermCap;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Threading;
+using Windows.Foundation;
 
 namespace Spakov.Terminal
 {
@@ -612,15 +613,26 @@ namespace Spakov.Terminal
         /// name="pointerPoint"/> to <see
         /// cref="VideoTerminal.PointerPressed"/>.
         /// </summary>
+        /// <remarks>
+        /// Intended to be invoked by <see
+        /// cref="TerminalControl.Canvas_PointerPressed"/> to handle the event.
+        /// </remarks>
         /// <param name="pointerPoint"><inheritdoc
         /// cref="VideoTerminal.PointerPressed"
         /// path="/param[@name='pointerPoint']"/></param>
-        internal void PointerPressed(PointerPoint pointerPoint) => _videoTerminal.PointerPressed(pointerPoint);
+        /// <param name="pointerPoint"><inheritdoc
+        /// cref="VideoTerminal.PointerPressed"
+        /// path="/param[@name='leftClickCount']"/></param>
+        internal void PointerPressed(PointerPoint pointerPoint, int leftClickCount) => _videoTerminal.PointerPressed(pointerPoint, leftClickCount);
 
         /// <summary>
         /// Process a pointer move event by passing <paramref
         /// name="pointerPoint"/> to <see cref="VideoTerminal.PointerMoved"/>.
         /// </summary>
+        /// <remarks>
+        /// Intended to be invoked by <see
+        /// cref="TerminalControl.Canvas_PointerMoved"/> to handle the event.
+        /// </remarks>
         /// <param name="pointerPoint"><inheritdoc
         /// cref="VideoTerminal.PointerMoved"
         /// path="/param[@name='pointerPoint']"/></param>
@@ -631,6 +643,11 @@ namespace Spakov.Terminal
         /// name="pointerPoint"/> to <see
         /// cref="VideoTerminal.PointerReleased"/>.
         /// </summary>
+        /// <remarks>
+        /// Intended to be invoked by <see
+        /// cref="TerminalControl.Canvas_PointerReleased"/> to handle the
+        /// event.
+        /// </remarks>
         /// <param name="pointerPoint"><inheritdoc
         /// cref="VideoTerminal.PointerReleased"
         /// path="/param[@name='pointerPoint']"/></param>

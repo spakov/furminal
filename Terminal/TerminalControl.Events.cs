@@ -13,6 +13,9 @@ using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI.SGR;
 using Spakov.Terminal.Helpers;
 using Spakov.Terminal.Settings;
 using System;
+using Windows.Foundation;
+using Windows.Win32;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Spakov.Terminal
 {
@@ -344,8 +347,44 @@ namespace Spakov.Terminal
         {
             PointerPoint pointerPoint = e.GetCurrentPoint(Canvas);
 
+            if (pointerPoint.Properties.IsLeftButtonPressed)
+            {
+                DateTime now = DateTime.Now;
+
+                if (
+                    (now - _lastLeftClickTime).TotalMilliseconds <= PInvoke.GetDoubleClickTime()
+                    && LastMouseButton == MouseButton.Left
+                )
+                {
+                    _leftClickCount++;
+                }
+                else
+                {
+                    _leftClickCount = 1;
+                }
+
+                Point thisTapPoint = pointerPoint.Position;
+
+                if (Math.Abs(thisTapPoint.X - _lastLeftClickPosition.X) > PInvoke.GetSystemMetrics(SYSTEM_METRICS_INDEX.SM_CXDOUBLECLK))
+                {
+                    _leftClickCount = 1;
+                }
+
+                if (Math.Abs(thisTapPoint.Y - _lastLeftClickPosition.Y) > PInvoke.GetSystemMetrics(SYSTEM_METRICS_INDEX.SM_CYDOUBLECLK))
+                {
+                    _leftClickCount = 1;
+                }
+
+                _lastLeftClickPosition = thisTapPoint;
+                _lastLeftClickTime = now;
+            }
+            else
+            {
+                _leftClickCount = 0;
+            }
+
             Canvas.Focus(FocusState.Pointer);
-            _terminalEngine.PointerPressed(pointerPoint);
+            _terminalEngine.PointerPressed(pointerPoint, _leftClickCount);
 
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
@@ -360,15 +399,6 @@ namespace Spakov.Terminal
                 LastMouseButton = MouseButton.Right;
             }
         }
-
-        /// <summary>
-        /// Handles mouse wheel scrolls.
-        /// </summary>
-        /// <param name="sender"><inheritdoc cref="RoutedEventHandler"
-        /// path="/param[@name='sender']"/></param>
-        /// <param name="e"><inheritdoc cref="RoutedEventHandler"
-        /// path="/param[@name='e']"/></param>
-        private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e) => MouseWheelHelper.HandleMouseWheel(this, e.GetCurrentPoint(Canvas));
 
         /// <summary>
         /// Handles mouse movements.
@@ -417,6 +447,15 @@ namespace Spakov.Terminal
 
             e.Handled = true;
         }
+
+        /// <summary>
+        /// Handles mouse wheel scrolls.
+        /// </summary>
+        /// <param name="sender"><inheritdoc cref="RoutedEventHandler"
+        /// path="/param[@name='sender']"/></param>
+        /// <param name="e"><inheritdoc cref="RoutedEventHandler"
+        /// path="/param[@name='e']"/></param>
+        private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e) => MouseWheelHelper.HandleMouseWheel(this, e.GetCurrentPoint(Canvas));
 
         /// <summary>
         /// Handles focuses.

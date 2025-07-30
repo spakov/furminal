@@ -44,6 +44,10 @@ namespace Spakov.Terminal
         private InputKeyboardSource? _inputKeyboardSource;
         private MouseButton _lastMouseButton;
 
+        private DateTime _lastLeftClickTime = DateTime.MinValue;
+        private Point _lastLeftClickPosition = new(double.MinValue, double.MinValue);
+        private int _leftClickCount = 0;
+
         private MenuFlyout? _contextMenu;
 
         private MenuFlyoutItem? _copyMenuItem;
