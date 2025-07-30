@@ -19,20 +19,23 @@ jobs:
       skip_reason: ${{ steps.check_for_version.outputs.skip_reason }}
 
     steps:
-      - name: Check for version.json only
-        id: check_for_version
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "^version\.json$"; then
-            echo "skip_build=false" >> $GITHUB_OUTPUT
-            echo "Proceeding with build."
-          else
-            echo "skip_build=true" >> $GITHUB_OUTPUT
-            echo "skip_reason=Only version.json changed" >> $GITHUB_OUTPUT
-            echo "Skipping build."
-          fi
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Check for version.json only
+      id: check_for_version
+      run: |
+        if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qv "^version\.json$"; then
+          echo "skip_build=false" >> $GITHUB_OUTPUT
+          echo "Proceeding with build."
+        else
+          echo "skip_build=true" >> $GITHUB_OUTPUT
+          echo "skip_reason=Only version.json changed" >> $GITHUB_OUTPUT
+          echo "Skipping build."
+        fi
 
   build:
     needs: version_only
