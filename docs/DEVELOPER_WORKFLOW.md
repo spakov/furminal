@@ -1,7 +1,9 @@
 # 🚀 Developer Workflow — Git + Nerdbank.GitVersioning (NBGV)
 This project uses **Nerdbank.GitVersioning** to handle build version numbers automatically from Git commit history and tags.
 
-We maintain a single active release branch (e.g. release/v1.0). All day‑to‑day development happens off this branch. `main`` exists primarily for historical merges and version bumps—it is not deployed from directly.
+We maintain a single active release branch (e.g., `release/v1.0`). All day‑to‑day development happens off this branch. `main` exists primarily for historical merges and version bumps—it is not deployed from directly.
+
+**Resist the urge to merge release branches into `main` until we're ready to move to the next version.**
 
 ## 🔹 Branch Naming
 - `release/vX.Y` → **the release branch** (only one active at a time).
