@@ -5,6 +5,5 @@
 **/nupkg/
 **/obj/
 **/out/
-Furminal/Properties/launchSettings.json
 docs/docgen/_site
 docs/docgen/api
