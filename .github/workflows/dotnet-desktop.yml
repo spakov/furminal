@@ -115,6 +115,10 @@ jobs:
       run: |
         dotnet tool update -g docfx
 
+    - name: Install powershell-yaml
+      run: |
+        Install-Module powershell-yaml
+
     - name: Build documentation
       run: |
         pwsh .\docs\docgen\New-Docfx-Site.ps1
