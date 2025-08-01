@@ -111,6 +111,10 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
+    - name: Install docfx
+      run: |
+        dotnet tool update -g docfx
+
     - name: Build documentation
       run: |
         pwsh .\docs\docgen\New-Docfx-Site.ps1
