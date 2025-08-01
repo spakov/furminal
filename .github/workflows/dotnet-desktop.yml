@@ -5,9 +5,6 @@ on:
     branches: [ "main", "release/v*" ]
     tags: [ "v*" ]
 
-permissions:
-  contents: write
-
 jobs:
   build:
     strategy:
@@ -87,11 +84,53 @@ jobs:
     - name: Upload MSIX packages
       uses: actions/upload-artifact@v4
       with:
-        name: msix-package-${{ matrix.platform }}-${{ matrix.configuration }}
+        name: furminal-msix-package-${{ matrix.platform }}-${{ matrix.configuration }}
         path: ${{ steps.locate_msix_package.outputs.package }}
         retention-days: 1
 
+  doc:
+    permissions:
+      id-token: write
+      pages: write
+
+    runs-on: windows-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Build documentation
+      run: |
+        pwsh .\docs\docgen\New-Docfx-Site.ps1
+
+    - name: Upload documentation
+      uses: actions/upload-pages-artifact@v3
+      with:
+        name: furminal-documentation
+        path: ./docs/_site
+        retention-days: 1
+
+    - name: Publish documentation
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: furminal-documentation
+
   release:
+    permissions:
+      contents: write
+
     needs: build
 
     runs-on: ubuntu-latest

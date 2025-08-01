@@ -620,7 +620,7 @@ namespace Spakov.Terminal
         /// <param name="pointerPoint"><inheritdoc
         /// cref="VideoTerminal.PointerPressed"
         /// path="/param[@name='pointerPoint']"/></param>
-        /// <param name="pointerPoint"><inheritdoc
+        /// <param name="leftClickCount"><inheritdoc
         /// cref="VideoTerminal.PointerPressed"
         /// path="/param[@name='leftClickCount']"/></param>
         internal void PointerPressed(PointerPoint pointerPoint, int leftClickCount) => _videoTerminal.PointerPressed(pointerPoint, leftClickCount);
