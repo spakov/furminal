@@ -104,7 +104,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        submodules: true
 
     - name: Install .NET Core
       uses: actions/setup-dotnet@v4
@@ -117,7 +116,7 @@ jobs:
 
     - name: Install powershell-yaml
       run: |
-        Install-Module powershell-yaml
+        Install-Module -AcceptLicense powershell-yaml
 
     - name: Build documentation
       run: |
