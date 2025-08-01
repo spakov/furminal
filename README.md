@@ -302,7 +302,7 @@ There are several major components of **Furminal**:
   - **WideCharacter**, a Unicode character width calculation library
     - **utf8proc**, a Windows build of [utf8proc](https://github.com/JuliaStrings/utf8proc)
 
-API documentation, plus a guide for getting started with **Terminal**, is available (link).
+[API documentation](https://spakov.github.io/furminal/), plus a guide for getting started with **Terminal**, is available.
 
 ### Terminal
 **Terminal** provides a WinUI 3 user control called **TerminalControl**, written in C#, targeting .NET 8.0 and Windows 10 10.0.19041.0 ("20H1") or newer, supporting the x64 and ARM64 architectures. It uses the following NuGet packages:
