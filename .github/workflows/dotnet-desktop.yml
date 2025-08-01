@@ -116,14 +116,14 @@ jobs:
         pwsh .\docs\docgen\New-Docfx-Site.ps1
 
     - name: Upload documentation
-      uses: actions/upload-pages-artifact@v4
+      uses: actions/upload-pages-artifact@v3
       with:
         name: furminal-documentation
         path: ./docs/_site
         retention-days: 1
 
     - name: Publish documentation
-      uses: actions/upload-pages-artifact@v4
+      uses: actions/deploy-pages@v4
       with:
         artifact_name: furminal-documentation
 
