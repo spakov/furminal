@@ -5,7 +5,7 @@ param(
 # Configuration
 $DocfxDirectory = ".\docs\docgen"
 $DocfxJson = "docfx.json"
-$SiteRoot = "https://example.org/"
+$SiteRoot = "https://spakov.github.io/furminal/"
 
 # Build combined path
 $configPath = Join-Path -Path $DocfxDirectory -ChildPath $DocfxJson
