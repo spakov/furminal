@@ -75,9 +75,12 @@ namespace Spakov.Terminal
                                     }
                                     else
                                     {
+                                        _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
                                         _screenBuffer[row][col] = new()
                                         {
-                                            GraphicRendition = _graphicRendition
+                                            GraphicRendition = _graphicRendition,
+                                            TransparentEligible = _transparentEligible
                                         };
 
                                         if (_terminalEngine.UseBackgroundColorErase)
@@ -121,9 +124,12 @@ namespace Spakov.Terminal
                                     }
                                     else
                                     {
+                                        _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
                                         _screenBuffer[row][col] = new()
                                         {
-                                            GraphicRendition = _graphicRendition
+                                            GraphicRendition = _graphicRendition,
+                                            TransparentEligible = _transparentEligible
                                         };
 
                                         if (_terminalEngine.UseBackgroundColorErase)
@@ -351,6 +357,8 @@ namespace Spakov.Terminal
 
                     // Delete character (P)
                     case CSI.DCH:
+                        _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
                         if (_autoWrapMode)
                         {
                             WrapPending = false;
@@ -360,7 +368,8 @@ namespace Spakov.Terminal
                         {
                             _screenBuffer[Row][Column] = new()
                             {
-                                GraphicRendition = _graphicRendition
+                                GraphicRendition = _graphicRendition,
+                                TransparentEligible = _transparentEligible
                             };
 
                             if (_terminalEngine.UseBackgroundColorErase)
@@ -405,12 +414,14 @@ namespace Spakov.Terminal
                                     }
 
                                     _screenBuffer.Add(new Cell[_terminalEngine.Columns]);
+                                    _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                                     for (int col = 0; col < _terminalEngine.Columns; col++)
                                     {
                                         _screenBuffer[_terminalEngine.Rows - 1][col] = new()
                                         {
-                                            GraphicRendition = _graphicRendition
+                                            GraphicRendition = _graphicRendition,
+                                            TransparentEligible = _transparentEligible
                                         };
 
                                         if (_terminalEngine.UseBackgroundColorErase)
@@ -442,12 +453,14 @@ namespace Spakov.Terminal
                                 }
 
                                 _screenBuffer.Insert(0, new Cell[_terminalEngine.Columns]);
+                                _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                                 for (int col = 0; col < _terminalEngine.Columns; col++)
                                 {
                                     _screenBuffer[_terminalEngine.Rows - 1][col] = new()
                                     {
-                                        GraphicRendition = _graphicRendition
+                                        GraphicRendition = _graphicRendition,
+                                        TransparentEligible = _transparentEligible
                                     };
 
                                     if (_terminalEngine.UseBackgroundColorErase)
@@ -473,6 +486,8 @@ namespace Spakov.Terminal
                             WrapPending = false;
                         }
 
+                        _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
                         if (csiEscapeSequence.Ps![0] < 1)
                         {
                             csiEscapeSequence.Ps![0] = 1;
@@ -482,7 +497,8 @@ namespace Spakov.Terminal
                         {
                             _screenBuffer[Row][j] = new()
                             {
-                                GraphicRendition = _graphicRendition
+                                GraphicRendition = _graphicRendition,
+                                TransparentEligible = _transparentEligible
                             };
 
                             if (_terminalEngine.UseBackgroundColorErase)
@@ -683,6 +699,7 @@ namespace Spakov.Terminal
                             _originMode = false;
 
                             _graphicRendition.InitializeFromPalette(_palette);
+                            _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                             if (_terminalEngine.UseBackgroundColorErase)
                             {
@@ -2042,6 +2059,7 @@ namespace Spakov.Terminal
                     _savedCursorPosition = null;
 
                     _graphicRendition.InitializeFromPalette(_palette);
+                    _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                     if (_terminalEngine.UseBackgroundColorErase)
                     {

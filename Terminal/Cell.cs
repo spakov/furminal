@@ -21,6 +21,12 @@ namespace Spakov.Terminal
         public GraphicRendition GraphicRendition;
 
         /// <summary>
+        /// Whether this <see cref="Cell"/> is eligible to be rendered with a
+        /// transparent background.
+        /// </summary>
+        public bool TransparentEligible;
+
+        /// <summary>
         /// Whether this <see cref="Cell"/> is selected.
         /// </summary>
         public bool Selected;
@@ -38,6 +44,11 @@ namespace Spakov.Terminal
                 return false;
             }
 
+            if (a.TransparentEligible != b.TransparentEligible)
+            {
+                return false;
+            }
+
             if (a.Selected != b.Selected)
             {
                 return false;
@@ -50,6 +61,6 @@ namespace Spakov.Terminal
 
         public override readonly bool Equals([NotNullWhen(true)] object? obj) => obj is Cell other && this == other;
 
-        public override readonly int GetHashCode() => HashCode.Combine(GraphemeCluster, GraphicRendition, Selected);
+        public override readonly int GetHashCode() => HashCode.Combine(GraphemeCluster, GraphicRendition, TransparentEligible, Selected);
     }
 }

@@ -45,6 +45,7 @@ namespace Spakov.Terminal
 
         private GraphicRendition _graphicRendition;
         private Palette _palette;
+        private bool _transparentEligible;
         private System.Drawing.Color _backgroundColorErase;
 
         private readonly List<Cell[]> _alternateScreenBuffer;
@@ -266,6 +267,7 @@ namespace Spakov.Terminal
             _graphicRendition = new();
             _palette = terminalEngine.Palette!;
             _graphicRendition.InitializeFromPalette(_palette);
+            _transparentEligible = true;
 
             if (terminalEngine.UseBackgroundColorErase)
             {
@@ -528,6 +530,7 @@ namespace Spakov.Terminal
             {
                 GraphemeCluster = graphemeCluster,
                 GraphicRendition = _graphicRendition,
+                TransparentEligible = _transparentEligible
             };
 
             if (graphemeClusterWidth > 1)
@@ -553,6 +556,7 @@ namespace Spakov.Terminal
                 {
                     GraphemeCluster = null,
                     GraphicRendition = _graphicRendition,
+                    TransparentEligible = _transparentEligible
                 };
             }
 
@@ -1531,12 +1535,14 @@ namespace Spakov.Terminal
                 else
                 {
                     _screenBuffer.Add(new Cell[_terminalEngine.Columns]);
+                    _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                     for (int col = 0; col < _terminalEngine.Columns; col++)
                     {
                         _screenBuffer[_terminalEngine.Rows - 1][col] = new()
                         {
-                            GraphicRendition = _graphicRendition
+                            GraphicRendition = _graphicRendition,
+                            TransparentEligible = _transparentEligible
                         };
 
                         if (_terminalEngine.UseBackgroundColorErase)
@@ -1607,12 +1613,14 @@ namespace Spakov.Terminal
                 else
                 {
                     _screenBuffer.Insert(0, new Cell[_terminalEngine.Columns]);
+                    _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                     for (int col = 0; col < _terminalEngine.Columns; col++)
                     {
                         _screenBuffer[0][col] = new()
                         {
-                            GraphicRendition = _graphicRendition
+                            GraphicRendition = _graphicRendition,
+                            TransparentEligible = _transparentEligible
                         };
 
                         if (_terminalEngine.UseBackgroundColorErase)
@@ -1673,6 +1681,7 @@ namespace Spakov.Terminal
             for (int row = 0; row < buffer.Count; row++)
             {
                 Cell[] newRow = new Cell[_terminalEngine.Columns];
+                _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
 
                 for (int col = 0; col < Math.Min(buffer[row].Length, _terminalEngine.Columns); col++)
                 {
@@ -1683,7 +1692,8 @@ namespace Spakov.Terminal
                 {
                     newRow[col] = new()
                     {
-                        GraphicRendition = _graphicRendition
+                        GraphicRendition = _graphicRendition,
+                        TransparentEligible = _transparentEligible
                     };
 
                     if (_terminalEngine.UseBackgroundColorErase)
@@ -1704,6 +1714,9 @@ namespace Spakov.Terminal
 
                     for (int col = 0; col < _terminalEngine.Columns; col++)
                     {
+                        // Note that we do *not* adjust the new cell's graphic
+                        // rendition here; these appeared out of nowhere in a
+                        // place that doesn't match "now"
                         buffer[row][col] = new();
 
                         if (_terminalEngine.UseBackgroundColorErase)
@@ -1766,6 +1779,8 @@ namespace Spakov.Terminal
         /// <param name="screenClearType">The type of screen clear.</param>
         private void ClearScreen(ScreenClearType screenClearType)
         {
+            _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
             switch (screenClearType)
             {
                 case ScreenClearType.Before:
@@ -1777,7 +1792,8 @@ namespace Spakov.Terminal
                             {
                                 _screenBuffer[i][j] = new()
                                 {
-                                    GraphicRendition = _graphicRendition
+                                    GraphicRendition = _graphicRendition,
+                                    TransparentEligible = _transparentEligible
                                 };
 
                                 if (_terminalEngine.UseBackgroundColorErase)
@@ -1792,7 +1808,8 @@ namespace Spakov.Terminal
                             {
                                 _screenBuffer[i][j] = new()
                                 {
-                                    GraphicRendition = _graphicRendition
+                                    GraphicRendition = _graphicRendition,
+                                    TransparentEligible = _transparentEligible
                                 };
 
                                 if (_terminalEngine.UseBackgroundColorErase)
@@ -1814,7 +1831,8 @@ namespace Spakov.Terminal
                             {
                                 _screenBuffer[i][j] = new()
                                 {
-                                    GraphicRendition = _graphicRendition
+                                    GraphicRendition = _graphicRendition,
+                                    TransparentEligible = _transparentEligible
                                 };
 
                                 if (_terminalEngine.UseBackgroundColorErase)
@@ -1829,7 +1847,8 @@ namespace Spakov.Terminal
                             {
                                 _screenBuffer[i][j] = new()
                                 {
-                                    GraphicRendition = _graphicRendition
+                                    GraphicRendition = _graphicRendition,
+                                    TransparentEligible = _transparentEligible
                                 };
 
                                 if (_terminalEngine.UseBackgroundColorErase)
@@ -1850,7 +1869,8 @@ namespace Spakov.Terminal
                         {
                             _screenBuffer[i][j] = new()
                             {
-                                GraphicRendition = _graphicRendition
+                                GraphicRendition = _graphicRendition,
+                                TransparentEligible = _transparentEligible
                             };
 
                             if (_terminalEngine.UseBackgroundColorErase)
@@ -1876,6 +1896,8 @@ namespace Spakov.Terminal
         /// <param name="lineClearType">The type of line clear.</param>
         private void ClearLine(LineClearType lineClearType)
         {
+            _transparentEligible = _graphicRendition.BackgroundColor == Palette.DefaultBackgroundColor;
+
             switch (lineClearType)
             {
                 case LineClearType.Before:
@@ -1883,7 +1905,8 @@ namespace Spakov.Terminal
                     {
                         _screenBuffer[Row][j] = new()
                         {
-                            GraphicRendition = _graphicRendition
+                            GraphicRendition = _graphicRendition,
+                            TransparentEligible = _transparentEligible
                         };
 
                         if (_terminalEngine.UseBackgroundColorErase)
@@ -1899,7 +1922,8 @@ namespace Spakov.Terminal
                     {
                         _screenBuffer[Row][j] = new()
                         {
-                            GraphicRendition = _graphicRendition
+                            GraphicRendition = _graphicRendition,
+                            TransparentEligible = _transparentEligible
                         };
 
                         if (_terminalEngine.UseBackgroundColorErase)
@@ -1915,7 +1939,8 @@ namespace Spakov.Terminal
                     {
                         _screenBuffer[Row][j] = new()
                         {
-                            GraphicRendition = _graphicRendition
+                            GraphicRendition = _graphicRendition,
+                            TransparentEligible = _transparentEligible
                         };
 
                         if (_terminalEngine.UseBackgroundColorErase)
