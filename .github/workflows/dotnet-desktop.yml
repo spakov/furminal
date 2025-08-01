@@ -126,7 +126,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         name: furminal-documentation
-        path: ./docs/_site
+        path: ./docs/docgen/_site
         retention-days: 1
 
     - name: Publish documentation
