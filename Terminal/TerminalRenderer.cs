@@ -1214,7 +1214,7 @@ namespace Spakov.Terminal
                 : drawableCell.Cell.GraphicRendition.CalculatedBackgroundColor(
                     defaultBackgroundColor,
                     backgroundIsInvisible,
-                    honorBackgroundIsInvisible: !_terminalEngine.UseAlternateScreenBuffer
+                    honorBackgroundIsInvisible: drawableCell.Cell.TransparentEligible
                 );
 
             drawingSession.Blend = CanvasBlend.Copy;
