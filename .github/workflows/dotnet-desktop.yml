@@ -116,7 +116,7 @@ jobs:
 
     - name: Install powershell-yaml
       run: |
-        Install-Module -AcceptLicense powershell-yaml
+        Install-Module -AcceptLicense -Force powershell-yaml
 
     - name: Build documentation
       run: |
