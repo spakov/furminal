@@ -573,7 +573,7 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// Intended to be invoked by <see
-        /// cref="TerminalEngine.Canvas_PointerPressed"/> to handle the event.
+        /// cref="TerminalEngine.PointerPressed"/> to handle the event.
         /// </remarks>
         /// <param name="pointerPoint">The <see cref="PointerPoint"/> from <see
         /// cref="TerminalControl.Canvas_PointerPressed"/>.</param>
@@ -786,7 +786,7 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// Intended to be invoked by <see
-        /// cref="TerminalEngine.Canvas_PointerMoved"/> to handle the event.
+        /// cref="TerminalEngine.PointerMoved"/> to handle the event.
         /// </remarks>
         /// <param name="pointerPoint">The <see cref="PointerPoint"/> from <see
         /// cref="TerminalControl.Canvas_PointerMoved"/>.</param>
@@ -958,7 +958,7 @@ namespace Spakov.Terminal
         /// </summary>
         /// <remarks>
         /// <para>Intended to be invoked by <see
-        /// cref="TerminalEngine.Canvas_PointerReleased"/> to handle the
+        /// cref="TerminalEngine.PointerReleased"/> to handle the
         /// event.</para>
         /// <para><c>SelectionMode = false</c> is handled by the caller.</para>
         /// </remarks>
