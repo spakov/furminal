@@ -1,23 +1,25 @@
-name: Furminal CI/CD
+name: Furminal Build
 
 on:
-  push:
-    branches: [ "main", "release/v*" ]
-    tags: [ "v*" ]
+  workflow_call:
+    inputs:
+      runs-on:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      configuration:
+        required: true
+        type: string
+
+    secrets:
+      FURMINAL_CERTIFICATE:
+        required: true
 
 jobs:
   build:
-    strategy:
-      matrix:
-        platform: [x64, ARM64]
-        configuration: [Release]
-        include:
-          - platform: x64
-            runs_on: windows-latest
-          - platform: ARM64
-            runs_on: windows-11-arm
-
-    runs-on: ${{ matrix.runs_on }}
+    runs-on: ${{ inputs.runs_on }}
 
     env:
       Solution_Name: Furminal.sln
@@ -45,14 +47,14 @@ jobs:
     - name: Restore NuGet packages
       run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
-        Platform: ${{ matrix.platform }}
-        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
 
     - name: Build application
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
       env:
-        Platform: ${{ matrix.platform }}
-        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
 
     - name: Get licenses
       working-directory: ./LICENSES
@@ -66,8 +68,8 @@ jobs:
     - name: Create app package
       run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx
       env:
-        Platform: ${{ matrix.platform }}
-        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
 
     - name: Remove certificate
       run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
@@ -87,75 +89,3 @@ jobs:
         name: furminal-msix-package-${{ matrix.platform }}-${{ matrix.configuration }}
         path: ${{ steps.locate_msix_package.outputs.package }}
         retention-days: 1
-
-  doc:
-    permissions:
-      id-token: write
-      pages: write
-
-    runs-on: windows-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-
-    - name: Install docfx
-      run: |
-        dotnet tool update -g docfx
-
-    - name: Install powershell-yaml
-      run: |
-        Install-Module -AcceptLicense -Force powershell-yaml
-
-    - name: Build documentation
-      run: |
-        pwsh .\docs\docgen\New-Docfx-Site.ps1
-
-    - name: Upload documentation
-      uses: actions/upload-pages-artifact@v3
-      with:
-        name: furminal-documentation
-        path: ./docs/docgen/_site
-        retention-days: 1
-
-    - name: Publish documentation
-      uses: actions/deploy-pages@v4
-      with:
-        artifact_name: furminal-documentation
-
-  release:
-    permissions:
-      contents: write
-
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    if: |
-      github.ref_type == 'tag' &&
-      startsWith(github.ref, 'refs/tags/v') &&
-      (github.base_ref == '' || startsWith(github.base_ref, 'release/v'))
-
-    steps:
-    - name: Download MSIX packages
-      uses: actions/download-artifact@v4
-
-    - name: Publish release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref_name }}
-        name: "Furminal ${{ github.ref_name }}"
-        files: "**/*.msix"
-        generate_release_notes: true
-        make_latest: "true"
