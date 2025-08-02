@@ -1,0 +1,91 @@
+name: Furminal Build
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      configuration:
+        required: true
+        type: string
+
+    secrets:
+      FURMINAL_CERTIFICATE:
+        required: true
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+
+    env:
+      Solution_Name: Furminal.sln
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Get NuGetLicenseFramework
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/sensslen/nuget-license/releases/download/v3.1.6/release.zip" -OutFile NuGetLicense.zip
+        Expand-Archive -Path NuGetLicense.zip -DestinationPath NuGetLicense
+
+    - name: Restore NuGet packages
+      run: msbuild $env:Solution_Name -t:restore /p:Platform=$env:Platform /p:Configuration=$env:Configuration
+      env:
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
+
+    - name: Build application
+      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration
+      env:
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
+
+    - name: Get licenses
+      working-directory: ./LICENSES
+      run: pwsh .\licensegen\Get-Licenses.ps1
+
+    - name: Decode certificate
+      run: |
+        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.FURMINAL_CERTIFICATE }}")
+        [IO.File]::WriteAllBytes("GitHubActionsWorkflow.pfx", $pfx_cert_byte)
+
+    - name: Create app package
+      run: msbuild $env:Solution_Name /p:Platform=$env:Platform /p:Configuration=$env:Configuration /p:GenerateAppxPackageOnBuild=true /p:PackageCertificateKeyFile=..\GitHubActionsWorkflow.pfx
+      env:
+        Platform: ${{ inputs.platform }}
+        Configuration: ${{ inputs.configuration }}
+
+    - name: Remove certificate
+      run: Remove-Item -Force -Path GitHubActionsWorkflow.pfx
+
+    - name: Locate MSIX package
+      id: locate_msix_package
+      run: |
+        $msix = Get-ChildItem -Recurse -Path . -Filter "*.msix" |
+                Where-Object { $_.FullName -like "*AppPackages*" } |
+                Select-Object -First 1 -ExpandProperty FullName
+        Write-Host "Located package: $msix"
+        "package=$msix" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    - name: Upload MSIX packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: furminal-msix-package-${{ inputs.platform }}-${{ inputs.configuration }}
+        path: ${{ steps.locate_msix_package.outputs.package }}
+        retention-days: 1

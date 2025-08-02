@@ -1,0 +1,54 @@
+name: Furminal Delivery
+
+on:
+  push:
+    branches: [ "main", "release/v*" ]
+    tags: [ "v*" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [x64, ARM64]
+        configuration: [Release]
+        include:
+          - platform: x64
+            runs-on: windows-latest
+          - platform: ARM64
+            runs-on: windows-11-arm
+
+    uses: ./.github/workflows/build.yml
+
+    with:
+      runs-on: ${{ matrix.runs-on }}
+      platform: ${{ matrix.platform }}
+      configuration: ${{ matrix.configuration }}
+
+    secrets:
+      FURMINAL_CERTIFICATE: ${{ secrets.FURMINAL_CERTIFICATE }}
+
+  release:
+    permissions:
+      contents: write
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    if: |
+      github.ref_type == 'tag' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      (github.base_ref == '' || startsWith(github.base_ref, 'release/v'))
+
+    steps:
+    - name: Download MSIX packages
+      uses: actions/download-artifact@v4
+
+    - name: Publish release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: "Furminal ${{ github.ref_name }}"
+        files: "**/*.msix"
+        generate_release_notes: true
+        make_latest: "true"
