@@ -1,10 +1,14 @@
 ﻿using Spakov.Furminal.Settings.Json.SchemaAttributes;
+using System.Text.Json.Serialization;
 
 namespace Spakov.Furminal.Settings.Json
 {
     [Description("The Furminal settings.")]
     internal class Settings
     {
+        [JsonPropertyName("$schema")]
+        public string? Schema { get; set; }
+
         [Description("Basic settings.")]
         public Basics? Basics { get; set; }
 
