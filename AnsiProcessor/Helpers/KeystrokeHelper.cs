@@ -1,4 +1,5 @@
-﻿using Spakov.AnsiProcessor.Input;
+﻿using Spakov.AnsiProcessor.Ansi;
+using Spakov.AnsiProcessor.Input;
 using Spakov.AnsiProcessor.TermCap;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,36 @@ namespace Spakov.AnsiProcessor.Helpers
                 return null;
             }
 
-            KeystrokeType? keyType = keystroke.Key switch
+            KeystrokeType? keyType = null;
+
+            if (keystroke.Key is Key.Home or Key.End)
+            {
+                keyType = KeystrokeType.ComplexKeystroke;
+            }
+
+            if (keystroke.Key is >= Key.F1 and <= Key.F12)
+            {
+                keyType = KeystrokeType.ComplexKeystroke;
+            }
+
+            if (
+                keystroke.XTMODKEYS.ModifyKeypadKeysValue != ModifyKeypadKeysValue.Disabled
+                && keystroke.Key is >= Key.NumPad0 and <= Key.NumPad9
+            )
+            {
+                keyType = KeystrokeType.ComplexKeystroke;
+            }
+
+            if (keystroke.XTMODKEYS.ModifyOtherKeysValue != ModifyOtherKeysValue.Disabled)
+            {
+                keyType = keystroke.XTMODKEYS.ModifyOtherKeysValue == ModifyOtherKeysValue.All
+                    ? KeystrokeType.ComplexKeystroke
+                    : keystroke.ModifierKeys == ModifierKeys.None
+                        ? null
+                        : KeystrokeType.ComplexKeystroke;
+            }
+
+            keyType ??= keystroke.Key switch
             {
                 Key.Up => KeystrokeType.ComplexKeystroke,
                 Key.Down => KeystrokeType.ComplexKeystroke,
@@ -80,14 +110,15 @@ namespace Spakov.AnsiProcessor.Helpers
                 _ => null
             };
 
-            keyType ??= (keystroke.ModifierKeys & ModifierKeys.LeftAlt) != 0
-              || (keystroke.ModifierKeys & ModifierKeys.RightAlt) != 0
-              || (keystroke.ModifierKeys & ModifierKeys.LeftControl) != 0
-              || (keystroke.ModifierKeys & ModifierKeys.RightControl) != 0
-              || (keystroke.ModifierKeys & ModifierKeys.LeftMeta) != 0
-              || (keystroke.ModifierKeys & ModifierKeys.RightMeta) != 0
-              ? KeystrokeType.ControlCharacter
-              : KeystrokeType.Text;
+            keyType ??=
+                (keystroke.ModifierKeys & ModifierKeys.LeftAlt) != 0
+                || (keystroke.ModifierKeys & ModifierKeys.RightAlt) != 0
+                || (keystroke.ModifierKeys & ModifierKeys.LeftControl) != 0
+                || (keystroke.ModifierKeys & ModifierKeys.RightControl) != 0
+                || (keystroke.ModifierKeys & ModifierKeys.LeftMeta) != 0
+                || (keystroke.ModifierKeys & ModifierKeys.RightMeta) != 0
+                ? KeystrokeType.ControlCharacter
+                : KeystrokeType.Text;
 
             if (keyType == KeystrokeType.Text && (int)keystroke.Key < 0x20)
             {
@@ -98,7 +129,7 @@ namespace Spakov.AnsiProcessor.Helpers
             {
                 KeystrokeType.Text => keystroke.ToStringRepresentation(),
                 KeystrokeType.ControlCharacter => ControlCharacterKeystrokeToAnsi(keystroke, terminalCapabilities),
-                KeystrokeType.ComplexKeystroke => ComplexKeystrokeToAnsiEscapeSequence(keystroke, terminalCapabilities),
+                KeystrokeType.ComplexKeystroke => ComplexKeystrokeToAnsiEscapeSequence(keystroke),
                 _ => throw new InvalidOperationException(),
             };
         }
@@ -106,8 +137,13 @@ namespace Spakov.AnsiProcessor.Helpers
         /// <summary>
         /// Converts <paramref name="keystroke"/> to an ANSI escape sequence.
         /// </summary>
-        /// <remarks>Assumes Alt, Control, and/or Meta are high in <paramref
-        /// name="keystroke"/>'s <see cref="ModifierKeys"/>.</remarks>
+        /// <remarks>
+        /// <para>This method does not consider <see
+        /// cref="Keystroke.XTMODKEYS"/> and is truly only suited for control
+        /// characters.</para>
+        /// <para>Assumes Alt, Control, and/or Meta are high in <paramref
+        /// name="keystroke"/>'s <see cref="ModifierKeys"/>.</para>
+        /// </remarks>
         /// <param name="keystroke"><inheritdoc cref="KeystrokeToAnsi"
         /// path="/param[@name='keystroke']"/></param>
         /// <param name="terminalCapabilities"><inheritdoc cref="KeystrokeToAnsi"
@@ -139,14 +175,14 @@ namespace Spakov.AnsiProcessor.Helpers
             )
             {
                 escapeSequenceBuilder = new();
-                escapeSequenceBuilder.Append(Ansi.C0.ESC);
+                escapeSequenceBuilder.Append(C0.ESC);
                 escapeSequenceBuilder.Append((char)keystrokeToSend);
 
                 return escapeSequenceBuilder.ToString();
             }
 
             // Special case: backspace
-            if (keystrokeToSend == Ansi.C0.BS && terminalCapabilities.Input.BackspaceIsDel)
+            if (keystrokeToSend == C0.BS && terminalCapabilities.Input.BackspaceIsDel)
             {
                 keystrokeToSend = 0x7f; // DEL
             }
@@ -161,163 +197,181 @@ namespace Spakov.AnsiProcessor.Helpers
         /// <remarks>Used in the case of non-printable keys.</remarks>
         /// <param name="keystroke"><inheritdoc cref="KeystrokeToAnsi"
         /// path="/param[@name='keystroke']"/></param>
-        /// <param name="terminalCapabilities"><inheritdoc cref="KeystrokeToAnsi"
-        /// path="/param[@name='terminalCapabilities']"/></param>
-        /// <returns>The generated ANSI escape sequence.</returns>
-        /// <exception cref="ArgumentException"><paramref name="keystroke"/> is
-        /// not representable as an escape sequence.</exception>
-        private static string ComplexKeystrokeToAnsiEscapeSequence(Keystroke keystroke, TerminalCapabilities terminalCapabilities)
+        private static string ComplexKeystrokeToAnsiEscapeSequence(Keystroke keystroke)
         {
             StringBuilder escapeSequenceBuilder = new();
 
-            escapeSequenceBuilder.Append(Ansi.C0.ESC);
-
-            char escapeSequenceType = keystroke.Key switch
-            {
-                Key.Up => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-                Key.Down => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-                Key.Right => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-                Key.Left => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-
-                Key.Home => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-                Key.Insert => Ansi.EscapeSequences.Fe.CSI,
-                Key.Delete => Ansi.EscapeSequences.Fe.CSI,
-                Key.End => keystroke.ApplicationCursorKeys
-                    ? Ansi.EscapeSequences.Fe.SS3
-                    : Ansi.EscapeSequences.Fe.CSI,
-                Key.PageUp => Ansi.EscapeSequences.Fe.CSI,
-                Key.PageDown => Ansi.EscapeSequences.Fe.CSI,
-
-                // See https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#:~:text=the%20SS3%20%20sent%20before%20F1%20through%20F4%20is%20altered%20to%20CSI
-                Key.F1 => keystroke.ModifierKeys != 0
-                    ? Ansi.EscapeSequences.Fe.CSI
-                    : terminalCapabilities.Input.F1ThroughF4KeysEscapeSequence,
-                Key.F2 => keystroke.ModifierKeys != 0
-                    ? Ansi.EscapeSequences.Fe.CSI
-                    : terminalCapabilities.Input.F1ThroughF4KeysEscapeSequence,
-                Key.F3 => keystroke.ModifierKeys != 0
-                    ? Ansi.EscapeSequences.Fe.CSI
-                    : terminalCapabilities.Input.F1ThroughF4KeysEscapeSequence,
-                Key.F4 => keystroke.ModifierKeys != 0
-                    ? Ansi.EscapeSequences.Fe.CSI
-                    : terminalCapabilities.Input.F1ThroughF4KeysEscapeSequence,
-
-                Key.F5 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F6 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F7 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F8 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F9 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F10 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F11 => Ansi.EscapeSequences.Fe.CSI,
-                Key.F12 => Ansi.EscapeSequences.Fe.CSI,
-
-                Key.Tab => Ansi.C0.HT,
-
-                _ => throw new ArgumentException("Keystroke not representable as an escape sequence.", nameof(keystroke))
-            };
-
-            if (escapeSequenceType == Ansi.EscapeSequences.Fe.CSI)
-            {
-                if (keystroke.ModifierKeys != 0)
-                {
-                    byte modifier = keystroke.ToCSIModifier();
-
-                    escapeSequenceBuilder.Append(modifier);
-                    escapeSequenceBuilder.Append(Ansi.EscapeSequences.CSI.KEYCODE_PARAMETER_SEPARATOR);
-                }
-            }
-
             // Special case: tab is different than the other keys
-            if (escapeSequenceType == Ansi.C0.HT)
+            if (keystroke.Key == Key.Tab)
             {
                 if (keystroke.ToCSIModifier() == 1)
                 {
-                    return escapeSequenceType.ToString();
-                    // The only other supported case for Tab is Shift-Tab
-                }
+                    return C0.HT.ToString();
+
+                } // The only other supported case for Tab is Shift-Tab
                 else
                 {
-                    escapeSequenceBuilder.Clear();
-                    escapeSequenceBuilder.Append(Ansi.C0.ESC);
+                    escapeSequenceBuilder.Append(C0.ESC);
                     escapeSequenceBuilder.Append(Ansi.EscapeSequences.Fe.CSI);
                     escapeSequenceBuilder.Append(Ansi.EscapeSequences.CSI.CBT);
                     return escapeSequenceBuilder.ToString();
                 }
             }
 
-            escapeSequenceBuilder.Append(escapeSequenceType);
+            char escapeSequenceType = keystroke.Key
+                is Key.Home
+                or Key.End
+                ? Ansi.EscapeSequences.Fe.CSI
+                : keystroke.Key
+                    is Key.Up
+                    or Key.Down
+                    or Key.Right
+                    or Key.Left
+                    or Key.F1
+                    or Key.F2
+                    or Key.F3
+                    or Key.F4
+                    ? keystroke.ApplicationCursorKeys
+                        ? Ansi.EscapeSequences.Fe.SS3
+                        : Ansi.EscapeSequences.Fe.CSI
+                    : Ansi.EscapeSequences.Fe.CSI;
 
-            escapeSequenceBuilder.Append(keystroke.Key switch
+            bool useModifiers = keystroke.Key switch
             {
-                Key.Up => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.CUU
-                    : Ansi.EscapeSequences.SS3.CUU,
-                Key.Down => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.CUD
-                    : Ansi.EscapeSequences.SS3.CUD,
-                Key.Right => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.CUF
-                    : Ansi.EscapeSequences.SS3.CUF,
-                Key.Left => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.CUB
-                    : Ansi.EscapeSequences.SS3.CUB,
+                Key.Up
+                or Key.Down
+                or Key.Right
+                or Key.Left
+                or Key.Home
+                or Key.End
+                or Key.PageUp
+                or Key.PageDown =>
+                    keystroke.XTMODKEYS.ModifyCursorKeysValue == ModifyCursorKeysValue.All
+                    || keystroke.ModifierKeys != ModifierKeys.None,
 
-                Key.Home => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_HOME
-                    : Ansi.EscapeSequences.SS3.KEYCODE_HOME,
-                Key.Insert => Ansi.EscapeSequences.CSI.KEYCODE_INSERT,
-                Key.Delete => Ansi.EscapeSequences.CSI.KEYCODE_DELETE,
-                Key.End => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_END
-                    : Ansi.EscapeSequences.SS3.KEYCODE_END,
-                Key.PageUp => Ansi.EscapeSequences.CSI.KEYCODE_PAGE_UP,
-                Key.PageDown => Ansi.EscapeSequences.CSI.KEYCODE_PAGE_DOWN,
+                >= Key.NumPad0
+                and <= Key.NumPad9 =>
+                    keystroke.XTMODKEYS.ModifyKeypadKeysValue == ModifyKeypadKeysValue.All
+                    || keystroke.ModifierKeys != ModifierKeys.None,
 
-                Key.F1 => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_F1
-                    : Ansi.EscapeSequences.SS3.KEYCODE_F1,
-                Key.F2 => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_F2
-                    : Ansi.EscapeSequences.SS3.KEYCODE_F2,
-                Key.F3 => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_F3
-                    : Ansi.EscapeSequences.SS3.KEYCODE_F3,
-                Key.F4 => escapeSequenceType == Ansi.EscapeSequences.Fe.CSI
-                    ? Ansi.EscapeSequences.CSI.KEYCODE_F4
-                    : Ansi.EscapeSequences.SS3.KEYCODE_F4,
+                >= Key.F1
+                and <= Key.F12 =>
+                    keystroke.XTMODKEYS.ModifyFunctionKeysValue == ModifyFunctionKeysValue.All
+                    || keystroke.ModifierKeys != ModifierKeys.None,
 
-                Key.F5 => Ansi.EscapeSequences.CSI.KEYCODE_F5,
-                Key.F6 => Ansi.EscapeSequences.CSI.KEYCODE_F6,
-                Key.F7 => Ansi.EscapeSequences.CSI.KEYCODE_F7,
-                Key.F8 => Ansi.EscapeSequences.CSI.KEYCODE_F8,
-                Key.F9 => Ansi.EscapeSequences.CSI.KEYCODE_F9,
-                Key.F10 => Ansi.EscapeSequences.CSI.KEYCODE_F10,
-                Key.F11 => Ansi.EscapeSequences.CSI.KEYCODE_F11,
-                Key.F12 => Ansi.EscapeSequences.CSI.KEYCODE_F12,
+                _ =>
+                    keystroke.XTMODKEYS.ModifyOtherKeysValue == ModifyOtherKeysValue.All
+                    || keystroke.ModifierKeys != ModifierKeys.None
+            };
 
-                _ => throw new ArgumentException("Keystroke not representable as an escape sequence.", nameof(keystroke))
-            });
+            object keycode = keystroke.Key switch
+            {
+                Key.Up => Keycodes.UP,
+                Key.Down => Keycodes.DOWN,
+                Key.Right => Keycodes.RIGHT,
+                Key.Left => Keycodes.LEFT,
 
-            if (escapeSequenceType == Ansi.EscapeSequences.Fe.CSI)
+                Key.Home => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_HOME
+                    : useModifiers
+                        ? Keycodes.OTHER
+                        : Keycodes.HOME,
+                Key.Insert => Keycodes.INSERT,
+                Key.Delete => Keycodes.DELETE,
+                Key.End => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_END
+                    : useModifiers
+                        ? Keycodes.OTHER
+                        : Keycodes.END,
+                Key.PageUp => Keycodes.PAGE_UP,
+                Key.PageDown => Keycodes.PAGE_DOWN,
+
+                Key.F1 => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_F1
+                    : Keycodes.F1,
+                Key.F2 => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_F2
+                    : Keycodes.F2,
+                Key.F3 => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_F3
+                    : Keycodes.F3,
+                Key.F4 => keystroke.ApplicationCursorKeys
+                    ? Keycodes.DECCKM_F4
+                    : Keycodes.F4,
+
+                Key.F5 => Keycodes.F5,
+                Key.F6 => Keycodes.F6,
+                Key.F7 => Keycodes.F7,
+                Key.F8 => Keycodes.F8,
+                Key.F9 => Keycodes.F9,
+                Key.F10 => Keycodes.F10,
+                Key.F11 => Keycodes.F11,
+                Key.F12 => Keycodes.F12,
+
+                _ => Keycodes.OTHER
+            };
+
+            escapeSequenceBuilder.Append(C0.ESC);
+            escapeSequenceBuilder.Append(escapeSequenceType);
+            escapeSequenceBuilder.Append(keycode);
+
+            if (useModifiers)
+            {
+                byte modifier = keystroke.ToCSIModifier();
+
+                escapeSequenceBuilder.Append(Keycodes.PARAMETER_SEPARATOR);
+                escapeSequenceBuilder.Append(modifier);
+
+                if (Equals(keycode, Keycodes.OTHER))
+                {
+                    escapeSequenceBuilder.Append(Keycodes.PARAMETER_SEPARATOR);
+
+                    if (keystroke.Key == Key.Home)
+                    {
+                        escapeSequenceBuilder.Append(Keycodes.HOME);
+                    }
+                    else if (keystroke.Key == Key.End)
+                    {
+                        escapeSequenceBuilder.Append(Keycodes.END);
+                    }
+                    else
+                    {
+                        string? stringRepresentation = keystroke.ToStringRepresentation();
+
+                        if (
+                            stringRepresentation is not null
+                            && stringRepresentation.Length == 1
+                            && stringRepresentation[0] < 0x100
+                        )
+                        {
+                            escapeSequenceBuilder.Append((int)stringRepresentation[0]);
+                        }
+                        else
+                        {
+                            escapeSequenceBuilder.Append((int)keystroke.Key);
+                        }
+                    }
+                }
+            }
+
+            if (
+                (
+                    keystroke.Key
+                    is Key.Insert
+                    or Key.Delete
+                    or Key.PageUp
+                    or Key.PageDown
+                )
+                || Equals(keycode, Keycodes.OTHER)
+            )
             {
                 if (
-                    keystroke.Key is not Key.Up
-                    and not Key.Down
-                    and not Key.Right
-                    and not Key.Left
+                    keystroke.Key
+                    is not Key.Home
+                    and not Key.End
                 )
                 {
-                    escapeSequenceBuilder.Append(Ansi.EscapeSequences.CSI.KEYCODE_TERMINATOR);
+                    escapeSequenceBuilder.Append(Keycodes.TERMINATOR);
                 }
             }
 

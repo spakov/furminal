@@ -27,39 +27,39 @@
         public const char XTQMODKEYS = '?';
 
         /// <summary>
-        /// The XTMODKEYS modify keyboard character.
+        /// The XTMODKEYS modify keyboard value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_KEYBOARD = '0';
+        public const int XTMODKEYS_MODIFY_KEYBOARD = 0;
 
         /// <summary>
-        /// The XTMODKEYS modify cursor keys character.
+        /// The XTMODKEYS modify cursor keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_CURSOR_KEYS = '1';
+        public const int XTMODKEYS_MODIFY_CURSOR_KEYS = 1;
 
         /// <summary>
-        /// The XTMODKEYS modify function keys character.
+        /// The XTMODKEYS modify function keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_FUNCTION_KEYS = '2';
+        public const int XTMODKEYS_MODIFY_FUNCTION_KEYS = 2;
 
         /// <summary>
-        /// The XTMODKEYS modify keypad keys character.
+        /// The XTMODKEYS modify keypad keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_KEYPAD_KEYS = '3';
+        public const int XTMODKEYS_MODIFY_KEYPAD_KEYS = 3;
 
         /// <summary>
-        /// The XTMODKEYS modify other keys character.
+        /// The XTMODKEYS modify other keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_OTHER_KEYS = '4';
+        public const int XTMODKEYS_MODIFY_OTHER_KEYS = 4;
 
         /// <summary>
-        /// The XTMODKEYS modify modifier keys character.
+        /// The XTMODKEYS modify modifier keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_MODIFIER_KEYS = '6';
+        public const int XTMODKEYS_MODIFY_MODIFIER_KEYS = 6;
 
         /// <summary>
-        /// The XTMODKEYS modify special keys character.
+        /// The XTMODKEYS modify special keys value.
         /// </summary>
-        public const char XTMODKEYS_MODIFY_SPECIAL_KEYS = '7';
+        public const int XTMODKEYS_MODIFY_SPECIAL_KEYS = 7;
 
         /// <summary>
         /// The XTMODKEYS separator character.

@@ -12,8 +12,7 @@
 ## Test Results
 
 ### Pass
-Items annotated with * are very likely due to being handled by ConPTY. Items
-annotated with † pass with the broken mode workaround (see below).
+Items annotated with * are very likely due to being handled by ConPTY. Items annotated with † pass with the broken mode workaround (see below).
 
 - **3** Test of character sets ("Character set 2 (DEC Alternate character ROM special graphics)" contains the same as "Character set 0 (DEC Special graphics and line drawing)")
 - **5.2** Keyboard Tests -&gt; Auto Repeat
@@ -65,11 +64,11 @@ annotated with † pass with the broken mode workaround (see below).
 - **11.8.7.5** XTERM Alternate-Screen features -&gt; Better alternate screen (XFree86 xterm mode 1049)
 
 ### Partial Pass
-Items annotated with * are very likely due to being handled by ConPTY.
+Items annotated with * are very likely due to being handled by ConPTY. Items annotated with † pass with the broken mode workaround (see below).
 
 - **1** Test of cursor movements (132-column mode not implemented)
 - **2** Test of screen features (132-column mode not implemented)
-- **5.4** Keyboard Tests -&gt; Cursor Keys (&lt;ANSI / Cursor key mode RESET&gt;, &lt;ANSI / Cursor key mode SET&gt; pass, &lt;VT52 Mode&gt; not implemented)
+- **5.4** Keyboard Tests -&gt; Cursor Keys (&lt;ANSI / Cursor key mode RESET&gt;, &lt;ANSI / Cursor key mode SET&gt; pass†, &lt;VT52 Mode&gt; not implemented)
 - **5.5** Keyboard Tests -&gt; Numeric Keypad (&lt;ANSI Application mode&gt;, &lt;VT52 Application mode&gt; not implemented)
 - **7** Test of VT52 mode (partially handled by ConPTY, not implemented)
 - **8** Test of VT102 features (Insert/Delete Char/Line) (double-width mode not implemented, 132-column mode not implemented)
@@ -157,8 +156,8 @@ This code, which has been removed going forward, allows vttest to interpret thes
 /// sequence to be sent; this enables that functionality.</param>
 public void SendEscapeSequence(byte[] escapeSequence, bool brokenMode = false)
 {
-    byte esc = (byte) Ansi.C0.ESC;
-    byte[] brokenEsc = [esc, (byte) Ansi.C0.NUL];
+    byte esc = (byte)Ansi.C0.ESC;
+    byte[] brokenEsc = [esc, (byte)Ansi.C0.NUL];
     byte[] toSend;
 
     if (!brokenMode)
