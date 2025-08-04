@@ -1,4 +1,5 @@
-﻿using Spakov.AnsiProcessor.Helpers;
+﻿using Microsoft.Extensions.Logging;
+using Spakov.AnsiProcessor.Helpers;
 using Spakov.AnsiProcessor.Input;
 using Spakov.AnsiProcessor.TermCap;
 using System.IO;
@@ -21,6 +22,8 @@ namespace Spakov.AnsiProcessor
     /// configuration.</param>
     public class AnsiWriter(FileStream consoleInStream, TerminalCapabilities terminalCapabilities)
     {
+        private readonly ILogger? _logger = LoggerHelper.CreateLogger<AnsiWriter>();
+
         /// <summary>
         /// Sends <paramref name="text"/> to the console input stream.
         /// </summary>
@@ -65,6 +68,7 @@ namespace Spakov.AnsiProcessor
         {
             string? toSend = KeystrokeHelper.KeystrokeToAnsi(keystroke, terminalCapabilities);
             SendText(toSend);
+            _logger?.LogTrace("Sent keystroke: {keystroke}", PrintableHelper.MakePrintable(toSend));
         }
     }
 }

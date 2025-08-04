@@ -47,9 +47,6 @@ namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI
     /// <item><c>CSI Ps i</c></item>
     /// <item><c>CSI ? Ps i</c></item>
     /// <item><c>CSI Pm l</c></item>
-    /// <item><c>CSI &gt; Pp ; Pv m</c>, <c>CSI &gt; Pp m</c>,
-    /// <c>XTMODKEYS</c></item>
-    /// <item><c>CSI ? Pp m</c>, <c>XTQMODKEYS</c></item>
     /// <item><c>CSI &gt; Ps n</c></item>
     /// <item><c>CSI ? Ps n</c></item>
     /// <item><c>CSI &gt; Ps p</c>, <c>XTSMPOINTER</c></item>
@@ -270,6 +267,12 @@ namespace Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI
                         if (type == Ansi.EscapeSequences.CSI.XTMODKEYS)
                         {
                             variant = rawCSIEscapeSequence[1];
+
+                            // Remove > from Pp
+                            if (stringPs.Length > 0 && stringPs[0].Length > 1)
+                            {
+                                stringPs[0] = stringPs[0][1..];
+                            }
                         }
 
                         defaultFirst = null;

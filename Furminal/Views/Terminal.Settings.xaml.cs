@@ -13,11 +13,18 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Timers;
 using Windows.UI;
+using System.Reflection;
+using System.Text;
 
 namespace Spakov.Furminal.Views
 {
     public sealed partial class Terminal : Window
     {
+        /// <summary>
+        /// The path to the Furminal JSON schema.
+        /// </summary>
+        private const string Schema = "https://github.com/spakov/furminal/raw/refs/heads/release/v{0}/schema/Furminal-{0}-schema.json";
+
         /// <summary>
         /// The delay (in milliseconds) after being notified the settings file
         /// was written to wait before attempting to read it.
@@ -891,8 +898,15 @@ namespace Spakov.Furminal.Views
 #pragma warning restore IDE0079 // Remove unnecessary suppression
         private void TerminalControl_SaveSettingsAsDefaults()
         {
+            StringBuilder furminalVersion = new();
+            furminalVersion.Append(Assembly.GetExecutingAssembly().GetName().Version!.Major);
+            furminalVersion.Append('.');
+            furminalVersion.Append(Assembly.GetExecutingAssembly().GetName().Version!.Minor);
+
             Settings.Json.Settings settings = new()
             {
+                Schema = string.Format(Schema, furminalVersion),
+
                 Basics = new()
                 {
                     Command = _dependencyProperties.Command,

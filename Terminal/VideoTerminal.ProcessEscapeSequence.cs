@@ -2,6 +2,7 @@
 using Spakov.AnsiProcessor.Ansi.EscapeSequences;
 using Spakov.AnsiProcessor.Ansi.EscapeSequences.Extensions;
 using Spakov.AnsiProcessor.Helpers;
+using Spakov.AnsiProcessor.Input;
 using Spakov.AnsiProcessor.Output.EscapeSequences;
 using Spakov.AnsiProcessor.Output.EscapeSequences.Fe;
 using Spakov.AnsiProcessor.Output.EscapeSequences.Fe.CSI;
@@ -651,13 +652,85 @@ namespace Spakov.Terminal
                         // XTMODKEYS
                         if (csiEscapeSequence.Variant == CSI_XTMODKEYS.XTMODKEYS)
                         {
-                            // This mode is always enabled. Do nothing.
-                            handled = true;
+                            XTMODKEYS xtmodkeys = _terminalEngine.XTMODKEYS;
 
+                            if (csiEscapeSequence.Ps![0] == CSI_XTMODKEYS.XTMODKEYS_MODIFY_CURSOR_KEYS)
+                            {
+                                if (csiEscapeSequence.Ps!.Count == 2)
+                                {
+                                    if (csiEscapeSequence.Ps![1] is 2 or 4)
+                                    {
+                                        xtmodkeys.ModifyCursorKeysValue = (ModifyCursorKeysValue)csiEscapeSequence.Ps![1];
+                                        handled = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xtmodkeys.ModifyCursorKeysValue = ModifyCursorKeysValue.Enabled;
+                                    handled = true;
+                                }
+                            }
+                            else if (csiEscapeSequence.Ps![0] == CSI_XTMODKEYS.XTMODKEYS_MODIFY_FUNCTION_KEYS)
+                            {
+                                if (csiEscapeSequence.Ps!.Count == 2)
+                                {
+                                    if (csiEscapeSequence.Ps![1] is 2 or 4)
+                                    {
+                                        xtmodkeys.ModifyFunctionKeysValue = (ModifyFunctionKeysValue)csiEscapeSequence.Ps![1];
+                                        handled = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xtmodkeys.ModifyFunctionKeysValue = ModifyFunctionKeysValue.Enabled;
+                                    handled = true;
+                                }
+                            }
+                            else if (csiEscapeSequence.Ps![0] == CSI_XTMODKEYS.XTMODKEYS_MODIFY_KEYPAD_KEYS)
+                            {
+                                if (csiEscapeSequence.Ps!.Count == 2)
+                                {
+                                    if (csiEscapeSequence.Ps![1] is 0 or 4)
+                                    {
+                                        xtmodkeys.ModifyKeypadKeysValue = (ModifyKeypadKeysValue)csiEscapeSequence.Ps![1];
+                                        handled = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xtmodkeys.ModifyKeypadKeysValue = ModifyKeypadKeysValue.Disabled;
+                                    handled = true;
+                                }
+                            }
+                            else if (csiEscapeSequence.Ps![0] == CSI_XTMODKEYS.XTMODKEYS_MODIFY_OTHER_KEYS)
+                            {
+                                if (csiEscapeSequence.Ps!.Count == 2)
+                                {
+                                    if (csiEscapeSequence.Ps![1] is 0 or 2 or 3)
+                                    {
+                                        xtmodkeys.ModifyOtherKeysValue = (ModifyOtherKeysValue)csiEscapeSequence.Ps![1];
+                                        handled = true;
+                                    }
+                                }
+                                else
+                                {
+                                    xtmodkeys.ModifyOtherKeysValue = ModifyOtherKeysValue.Disabled;
+                                    handled = true;
+                                }
+                            }
+
+                            if (handled)
+                            {
+                                _terminalEngine.XTMODKEYS = xtmodkeys;
+                            }
                         } // XTQMODKEYS
-                        else if (csiEscapeSequence.Variant == CSI_XTMODKEYS.XTMODKEYS)
+                        else if (csiEscapeSequence.Variant == CSI_XTMODKEYS.XTQMODKEYS)
                         {
-                            // This mode is always enabled. Do nothing.
+                            if (csiEscapeSequence.Ps![0] is >= 1 and <= 4)
+                            {
+                                XTMODKEYSQueryResponse(csiEscapeSequence.Ps![0]);
+                            }
+
                             handled = true;
                         }
 

@@ -17,6 +17,11 @@
         public ModifierKeys ModifierKeys;
 
         /// <summary>
+        /// The <see cref="Input.XTMODKEYS"/> in effect.
+        /// </summary>
+        public XTMODKEYS XTMODKEYS;
+
+        /// <summary>
         /// Whether the key is a repeated key press (i.e., holding down a key).
         /// </summary>
         public bool IsRepeat;

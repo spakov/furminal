@@ -2126,6 +2126,38 @@ namespace Spakov.Terminal
         }
 
         /// <summary>
+        /// Responds to a <see cref="CSI_XTMODKEYS.XTQMODKEYS"/>.
+        /// </summary>
+        /// <param name="pp">The <c>modify*Keys</c> resource to query.</param>
+        private void XTMODKEYSQueryResponse(int pp)
+        {
+            int? value = pp switch
+            {
+                1 => (int)_terminalEngine.XTMODKEYS.ModifyCursorKeysValue,
+                2 => (int)_terminalEngine.XTMODKEYS.ModifyFunctionKeysValue,
+                3 => (int)_terminalEngine.XTMODKEYS.ModifyKeypadKeysValue,
+                4 => (int)_terminalEngine.XTMODKEYS.ModifyOtherKeysValue,
+                _ => null
+            };
+
+            if (value is null)
+            {
+                return;
+            }
+
+            StringBuilder themeResponse = new();
+
+            themeResponse.Append(Fe.CSI);
+            themeResponse.Append(CSI_XTMODKEYS.XTMODKEYS);
+            themeResponse.Append(value);
+            themeResponse.Append(CSI.XTMODKEYS);
+
+            _terminalEngine.AnsiWriter?.SendEscapeSequence(
+                Encoding.ASCII.GetBytes(themeResponse.ToString())
+            );
+        }
+
+        /// <summary>
         /// Responds to a <see cref="CSI_DSR.DSR_THEME_QUERY"/>.
         /// </summary>
         private void DSRThemeQueryResponse()

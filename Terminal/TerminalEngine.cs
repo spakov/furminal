@@ -49,6 +49,7 @@ namespace Spakov.Terminal
         private bool _copyOnMouseUp;
         private string _copyNewline;
 
+        private XTMODKEYS _xtmodkeys;
         private bool _autoRepeatKeys;
         private bool _applicationCursorKeys;
         private bool _bracketedPasteMode;
@@ -315,6 +316,15 @@ namespace Spakov.Terminal
         {
             get => _terminalControl.WindowTitle;
             set => _terminalControl.DispatcherQueue.TryEnqueue(() => _terminalControl.WindowTitle = value);
+        }
+
+        /// <summary>
+        /// The <see cref="AnsiProcessor.Input.XTMODKEYS"/> in effect.
+        /// </summary>
+        internal XTMODKEYS XTMODKEYS
+        {
+            get => _xtmodkeys;
+            set => _xtmodkeys = value;
         }
 
         /// <summary>

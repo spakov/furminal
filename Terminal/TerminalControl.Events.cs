@@ -566,6 +566,7 @@ namespace Spakov.Terminal
                     Keystroke keystroke = new()
                     {
                         Key = (Key)virtualKey,
+                        XTMODKEYS = _terminalEngine.XTMODKEYS,
                         IsRepeat = args.KeyStatus.WasKeyDown,
                         AutoRepeatKeys = _terminalEngine.AutoRepeatKeys,
                         ApplicationCursorKeys = _terminalEngine.ApplicationCursorKeys
