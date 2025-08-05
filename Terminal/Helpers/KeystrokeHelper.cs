@@ -18,8 +18,13 @@ namespace Spakov.Terminal.Helpers
         /// langword="false"/> otherwise.</returns>
         internal static bool HandleKeystroke(TerminalControl terminalControl, Keystroke keystroke)
         {
-            // Shift + Page Up => scroll back a screen
-            if (keystroke.Is(Key.PageUp, ExtendedModifierKeys.Shift))
+            // Menu => show the menu
+            if (keystroke.Key == Key.Menu)
+            {
+                terminalControl.ContextMenu?.ShowAt(terminalControl);
+                return true;
+            } // Shift + Page Up => scroll back a screen
+            else if (keystroke.Is(Key.PageUp, ExtendedModifierKeys.Shift))
             {
                 lock (terminalControl.TerminalEngine.ScreenBufferLock)
                 {
@@ -67,12 +72,9 @@ namespace Spakov.Terminal.Helpers
             } // Ctrl + Shift + V => paste
             else if (keystroke.Is(Key.V, ExtendedModifierKeys.Control | ExtendedModifierKeys.Shift))
             {
-                if (terminalControl.TerminalEngine.VideoTerminal.TextIsSelected)
-                {
-                    terminalControl.PasteFromClipboard();
+                terminalControl.PasteFromClipboard();
 
-                    return true;
-                }
+                return true;
             } // Ctrl + Space => NUL
             else if (keystroke.Is(Key.Space, ExtendedModifierKeys.Control))
             {
